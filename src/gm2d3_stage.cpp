@@ -5,7 +5,6 @@ StageController::StageController( Axis _axis, double _min_bound, double _max_bou
     axis(_axis),
     min_bound(_min_bound),
     max_bound(_max_bound),
-    abs_enc(_abs_enc),
     abs_code_bits(_abs_code_bits),
     encoder_state(EMPTY_ENCODER_STATE),
     cur_pos(0.0),

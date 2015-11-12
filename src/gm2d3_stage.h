@@ -16,6 +16,11 @@ enum class Encoder {
     D  // absolute position bit-wise encoding
 };
 
+enum class ControllerType {
+    RaspberryPi,
+    Galil
+};
+
 const std::map<Encoder,bool> EMPTY_ENCODER_STATE =
     { {Encoder::A, false}, {Encoder::B, false}, {Encoder::C, false}, {Encoder::D, false} };
 
@@ -36,10 +41,10 @@ class StageController {
 
     private:
         const int abs_code_bits;
+        bool *abs_code_accum;
+        std::map<Encoder, bool> encoder_state;
         double cur_pos;
         bool calibrated;
-        std::map<Encoder, bool> encoder_state;
-        bool *abs_code_accum;
 
 };
 
