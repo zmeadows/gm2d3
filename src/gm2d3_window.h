@@ -5,7 +5,7 @@
 
 #include "gm2d3_manual_controller.h"
 #include "gm2d3_auto_controller.h"
-#include "gm2d3_stage_plot.h"
+#include "gm2d3_stage_diagnostics.h"
 
 class GM2D3Window : public Fl_Double_Window {
     public:

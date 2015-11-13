@@ -28,7 +28,7 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	$(CC) $(OPTS) -c $< -o $@
 
 clean:
-	rm $(PROJECT) $(OBJDIR) -Rf
+	rm -Rf $(PROJECT) $(OBJDIR)
 
 buildrepo:
 	@$(call make-repo)

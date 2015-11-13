@@ -1,9 +1,30 @@
-#include "gm2d3_stage_plot.h"
+#include "gm2d3_stage_diagnostics.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 GM2D3StageHistoryPlot::GM2D3StageHistoryPlot(int x, int y, int w, int h) :
     Fl_Chart(x,y,w,h)
 {
-    line_color = FL_BLACK;
+    type(FL_LINE_CHART);
+}
+
+void GM2D3StageHistoryPlot::set_line_color(Fl_Color color) { line_color = color; }
+
+void
+GM2D3StageHistoryPlot::plot_random_points(double min, double max, int N)
+{
+    int i;
+    double x;
+    char s[32];
+
+    for (i = 0; i < N; i++)
+    {
+        x = min + rand() / double(RAND_MAX) * (max - min);
+        sprintf(s, "%.3f", x);
+        add(x, s, line_color);
+    }
 }
 
 GM2D3StageHistoryPlot::~GM2D3StageHistoryPlot() {}
@@ -31,6 +52,7 @@ GM2D3StageIndicators::GM2D3StageIndicators(int x, int y, int w, int h) :
         a = new Fl_Dial(0.15 * w,0,0.2 * w, 0.2 * w);
         a->type(FL_FILL_DIAL);
         a->color(off_color);
+        a->color2(off_color);
         a->align(FL_ALIGN_CENTER);
 
         b = new Fl_Dial(0.65 * w,0,0.2 * w, 0.2 * w);

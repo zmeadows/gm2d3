@@ -17,8 +17,14 @@ GM2D3Window::GM2D3Window(int w, int h, const char* t) :
         }
 
         ad = new GM2D3StageDiagnostics(0,100,w-60,150,"Azimuthal Stage History");
+        ad->history_plot->set_line_color(FL_RED);
+        ad->history_plot->plot_random_points(0.0,5.0,20);
         vd = new GM2D3StageDiagnostics(0,300,w-60,150,"Vertical Stage History");
+        vd->history_plot->set_line_color(FL_BLUE);
+        vd->history_plot->plot_random_points(0.0,11.0,20);
         rd = new GM2D3StageDiagnostics(0,500,w-60,150,"Radial Stage History");
+        rd->history_plot->set_line_color(FL_GREEN);
+        rd->history_plot->plot_random_points(0.0,25.0,20);
         vertical_pack->end();
     }
     end();
