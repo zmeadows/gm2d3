@@ -2,6 +2,7 @@
 #define GM2D3_STAGE_H
 
 #include <map>
+#include <iostream>
 
 enum class Axis {
     AZIMUTHAL,
@@ -33,19 +34,38 @@ class StageController {
         const double min_bound, max_bound;
         const std::map<int,double> abs_code_to_position;
 
-        virtual void stop() = 0;
+        // virtual void stop() = 0;
         virtual void move_forward() = 0;
         virtual void move_backward() = 0;
 
         double get_current_position() { return cur_pos; }
+        bool is_calibrated() { return calibrated; }
 
-    private:
+    protected:
         const int abs_code_bits;
         bool *abs_code_accum;
         std::map<Encoder, bool> encoder_state;
         double cur_pos;
         bool calibrated;
 
+};
+
+class RaspberryPiController : public StageController
+{
+    public:
+        RaspberryPiController(Axis _axis, double _min_bound, double _max_bound,
+                std::map<int,double> _abs_enc, int _abs_code_bits, int _cw_gpio, int _ccw_gpio);
+        static const ControllerType controller_type = ControllerType::RaspberryPi;
+
+        void move_forward() {
+            std::cout << cw_gpio;
+        };
+        void move_backward() {
+            std::cout << ccw_gpio;
+        };
+
+    private:
+        const int cw_gpio, ccw_gpio;
 };
 
 #endif
