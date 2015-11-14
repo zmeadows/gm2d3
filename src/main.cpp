@@ -12,7 +12,7 @@ main(int argc, char** args)
     // seed the RNG
     srand(time(NULL));
 
-    std::unique_ptr<GM2D3> gm2d3(new GM2D3(1000,660));
+    std::unique_ptr<GM2D3> gm2d3(new GM2D3(1100,660));
 
     Fl::run();
 

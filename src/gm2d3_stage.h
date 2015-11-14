@@ -38,11 +38,13 @@ class StageController {
         virtual void controller_type() = 0;
 
         double get_current_position() { return current_position; }
+        std::pair<bool, MotorDirection> get_motor_state() { return motor_state; }
         bool is_calibrated() { return calibrated; }
 
     protected:
         std::array<bool, ABS_CODE_BITS> abs_code_accumulator;
         std::map<Encoder, bool> encoder_state;
+        std::pair<bool, MotorDirection> motor_state;
         double current_position;
         bool calibrated;
 

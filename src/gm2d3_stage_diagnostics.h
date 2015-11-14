@@ -43,9 +43,9 @@ class GM2D3StageDiagnostics
     public:
         GM2D3StageDiagnostics(int x, int y, int w, int h, const char *label);
         virtual ~GM2D3StageDiagnostics();
-        std::unique_ptr<Fl_Box> diagnostics_box;
 
     private:
+        std::unique_ptr<Fl_Box> diagnostics_box;
         std::unique_ptr<GM2D3StageHistoryPlot> history_plot;
         std::unique_ptr<Fl_Multiline_Output> info;
         std::unique_ptr<GM2D3StageIndicators> indicators;

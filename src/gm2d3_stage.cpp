@@ -6,6 +6,7 @@ StageController::StageController(Axis _axis, double _min_bound, double _max_boun
     bounds(std::make_pair(_min_bound, _max_bound)),
     abs_code_cypher(_abs_code_cypher),
     encoder_state(EMPTY_ENCODER_STATE),
+    motor_state(std::make_pair(false,MotorDirection::CW)),
     current_position(0.0),
     calibrated(false)
 {

@@ -81,7 +81,7 @@ GM2D3StageDiagnostics::GM2D3StageDiagnostics(int x, int y, int w, int h, const c
     const int x_0 = x + BOX_EDGE_GAP;
     const int y_0 = y + BOX_EDGE_GAP;
 
-    const int info_width = h2 * 1.3;
+    const int info_width = h2 * 1.8;
     const int plot_width = w2 - info_width - h2 - 2*ADJACENT_SPACING;
 
     history_plot = std::unique_ptr<GM2D3StageHistoryPlot>

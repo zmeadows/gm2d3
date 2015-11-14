@@ -8,6 +8,7 @@
 class GM2D3 {
     public:
         GM2D3(int window_width, int window_height);
+        virtual ~GM2D3() {};
         void attach_controller(std::unique_ptr<StageController> c);
 
     private:
