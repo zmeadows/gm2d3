@@ -19,7 +19,7 @@ GM2D3StageIndicators::GM2D3StageIndicators(int x, int y, int w) :
     on_color(FL_GREEN),
     off_color(FL_WHITE)
 {
-    std::cout << on_color << off_color << std::endl;
+    std::cout << on_color << std::endl << off_color << std::endl;
     indicator_box = std::unique_ptr<Fl_Box>(new Fl_Box(x,y,w,w));
     indicator_box->box(FL_FLAT_BOX);
     indicator_box->color(fl_rgb_color(210,210,210));

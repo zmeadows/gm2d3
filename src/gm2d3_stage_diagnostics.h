@@ -1,5 +1,4 @@
-#ifndef GM2D3_STAGE_DIAGNOSTICS
-#define GM2D3_STAGE_DIAGNOSTICS
+#pragma once
 
 #include <Fl/Fl_Chart.H>
 #include <Fl/Fl_Dial.H>
@@ -51,5 +50,3 @@ class GM2D3StageDiagnostics
         std::unique_ptr<Fl_Multiline_Output> info;
         std::unique_ptr<GM2D3StageIndicators> indicators;
 };
-
-#endif

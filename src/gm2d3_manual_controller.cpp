@@ -28,15 +28,15 @@ GM2D3ManualControlGUI::GM2D3ManualControlGUI(int x, int y, int w, int h)
     azimuthal_button_pack->align(FL_ALIGN_LEFT);
     azimuthal_button_pack->label("AZIMUTHAL: ");
 
-    cw_buttons[Axis::AZIMUTHAL] = std::unique_ptr<Fl_Button>(new Fl_Button(0, 0,
-                button_width, button_height, "CW"));
-    cw_buttons[Axis::AZIMUTHAL]->type(FL_TOGGLE_BUTTON);
-    cw_buttons[Axis::AZIMUTHAL]->down_color(DARK_RED());
+    buttons[Axis::AZIMUTHAL][MotorDirection::CW] =
+        std::unique_ptr<Fl_Button>(new Fl_Button(0, 0, button_width, button_height, "CW"));
+    buttons[Axis::AZIMUTHAL][MotorDirection::CW]->type(FL_TOGGLE_BUTTON);
+    buttons[Axis::AZIMUTHAL][MotorDirection::CW]->down_color(DARK_RED());
 
-    ccw_buttons[Axis::AZIMUTHAL] = std::unique_ptr<Fl_Button>(new Fl_Button(
+    buttons[Axis::AZIMUTHAL][MotorDirection::CCW] = std::unique_ptr<Fl_Button>(new Fl_Button(
                 button_width + ADJACENT_SPACING, 0, button_width, button_height, "CCW"));
-    ccw_buttons[Axis::AZIMUTHAL]->type(FL_TOGGLE_BUTTON);
-    ccw_buttons[Axis::AZIMUTHAL]->down_color(DARK_RED());
+    buttons[Axis::AZIMUTHAL][MotorDirection::CCW]->type(FL_TOGGLE_BUTTON);
+    buttons[Axis::AZIMUTHAL][MotorDirection::CCW]->down_color(DARK_RED());
 
     azimuthal_button_pack->end();
     }
@@ -49,36 +49,36 @@ GM2D3ManualControlGUI::GM2D3ManualControlGUI(int x, int y, int w, int h)
     vertical_button_pack->align(FL_ALIGN_LEFT);
     vertical_button_pack->label("VERTICAL: ");
 
-    cw_buttons[Axis::VERTICAL] = std::unique_ptr<Fl_Button>(new Fl_Button(0, 0,
-                button_width, button_height, "CW"));
-    cw_buttons[Axis::VERTICAL]->type(FL_TOGGLE_BUTTON);
-    cw_buttons[Axis::VERTICAL]->down_color(DARK_GREEN());
+    buttons[Axis::VERTICAL][MotorDirection::CW] = std::unique_ptr<Fl_Button>
+        (new Fl_Button(0, 0, button_width, button_height, "CW"));
+    buttons[Axis::VERTICAL][MotorDirection::CW]->type(FL_TOGGLE_BUTTON);
+    buttons[Axis::VERTICAL][MotorDirection::CW]->down_color(DARK_GREEN());
 
-    ccw_buttons[Axis::VERTICAL] = std::unique_ptr<Fl_Button>(new Fl_Button(
-                button_width + ADJACENT_SPACING, 0, button_width, button_height, "CCW"));
-    ccw_buttons[Axis::VERTICAL]->type(FL_TOGGLE_BUTTON);
-    ccw_buttons[Axis::VERTICAL]->down_color(DARK_GREEN());
+    buttons[Axis::VERTICAL][MotorDirection::CCW] = std::unique_ptr<Fl_Button>
+        (new Fl_Button( button_width + ADJACENT_SPACING, 0, button_width, button_height, "CCW"));
+    buttons[Axis::VERTICAL][MotorDirection::CCW]->type(FL_TOGGLE_BUTTON);
+    buttons[Axis::VERTICAL][MotorDirection::CCW]->down_color(DARK_GREEN());
 
     vertical_button_pack->end();
     }
 
-    {radial_button_pack = std::unique_ptr<Fl_Pack>(new Fl_Pack(0,
-                2*button_height + 2*ADJACENT_SPACING,
-                2*button_width + ADJACENT_SPACING, button_height));
+    {radial_button_pack = std::unique_ptr<Fl_Pack>
+        (new Fl_Pack(0, 2*button_height + 2*ADJACENT_SPACING,
+                     2*button_width + ADJACENT_SPACING, button_height));
     radial_button_pack->type(Fl_Pack::HORIZONTAL);
     radial_button_pack->spacing(ADJACENT_SPACING);
     radial_button_pack->align(FL_ALIGN_LEFT);
     radial_button_pack->label("RADIAL: ");
 
-    cw_buttons[Axis::RADIAL] = std::unique_ptr<Fl_Button>(new Fl_Button(0, 0,
+    buttons[Axis::RADIAL][MotorDirection::CW] = std::unique_ptr<Fl_Button>(new Fl_Button(0, 0,
                 button_width, button_height, "CW"));
-    cw_buttons[Axis::RADIAL]->type(FL_TOGGLE_BUTTON);
-    cw_buttons[Axis::RADIAL]->down_color(DARK_BLUE());
+    buttons[Axis::RADIAL][MotorDirection::CW]->type(FL_TOGGLE_BUTTON);
+    buttons[Axis::RADIAL][MotorDirection::CW]->down_color(DARK_BLUE());
 
-    ccw_buttons[Axis::RADIAL] = std::unique_ptr<Fl_Button>(new Fl_Button(
+    buttons[Axis::RADIAL][MotorDirection::CCW] = std::unique_ptr<Fl_Button>(new Fl_Button(
                 button_width + ADJACENT_SPACING, 0, button_width, button_height,"CCW"));
-    ccw_buttons[Axis::RADIAL]->type(FL_TOGGLE_BUTTON);
-    ccw_buttons[Axis::RADIAL]->down_color(DARK_BLUE());
+    buttons[Axis::RADIAL][MotorDirection::CCW]->type(FL_TOGGLE_BUTTON);
+    buttons[Axis::RADIAL][MotorDirection::CCW]->down_color(DARK_BLUE());
 
     radial_button_pack->end();
     }

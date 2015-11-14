@@ -22,6 +22,5 @@ class GM2D3ManualControlGUI {
         std::unique_ptr<Fl_Pack> vertical_button_pack;
         std::unique_ptr<Fl_Pack> radial_button_pack;
 
-        std::map<Axis, std::unique_ptr<Fl_Button>> cw_buttons;
-        std::map<Axis, std::unique_ptr<Fl_Button>> ccw_buttons;
+        std::map<Axis, std::map<MotorDirection, std::unique_ptr<Fl_Button>>> buttons;
 };
