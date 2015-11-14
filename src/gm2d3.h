@@ -8,9 +8,9 @@
 class GM2D3 {
     public:
         GM2D3(int window_width, int window_height);
-        void attach_controller(StageController *controller);
+        void attach_controller(std::unique_ptr<StageController> c);
 
     private:
-        GM2D3Window *window;
-        std::map<Axis, StageController*> controllers;
+        std::unique_ptr<GM2D3Window> window;
+        std::map<Axis, std::unique_ptr<StageController>> controllers;
 };

@@ -5,26 +5,24 @@
 GM2D3Window::GM2D3Window(int w, int h, const char* t) :
     Fl_Double_Window(w, h, t)
 {
-    {Fl_Pack *vertical_pack = new Fl_Pack(45,30,750,870);
-        vertical_pack->type(Fl_Pack::VERTICAL);
-        vertical_pack->spacing(40);
-        {Fl_Pack *top_row = new Fl_Pack(0,0,500,4*40);
-            top_row->type(Fl_Pack::HORIZONTAL);
-            top_row->spacing(200);
-            manual_controller = new GM2D3ManualControllerGroup(0,0,250, 3*40, "MANUAL CONTROL:");
-            auto_controller = new GM2D3AutoControllerGroup(10,0,250, 3*40, "AUTO CONTROL:");
-            top_row->end();
-        }
+    manual_control = std::unique_ptr<GM2D3ManualControlGUI>
+        (new GM2D3ManualControlGUI(WINDOW_EDGE_GAP, WINDOW_EDGE_GAP, 400, 130));
 
-        ad = new GM2D3StageDiagnostics(0,100,w-60,150,"Azimuthal Stage History");
-        ad->history_plot->set_line_color(FL_RED);
-        vd = new GM2D3StageDiagnostics(0,300,w-60,150,"Vertical Stage History");
-        vd->history_plot->set_line_color(FL_BLUE);
-        rd = new GM2D3StageDiagnostics(0,500,w-60,150,"Radial Stage History");
-        rd->history_plot->set_line_color(FL_GREEN);
-        vertical_pack->end();
-    }
-    end();
+    auto_control = std::unique_ptr<GM2D3AutoControlGUI>
+        (new GM2D3AutoControlGUI(580, WINDOW_EDGE_GAP, 400, 130));
+
+    diagnostics[Axis::AZIMUTHAL] = std::unique_ptr<GM2D3StageDiagnostics>
+        (new GM2D3StageDiagnostics(WINDOW_EDGE_GAP,180, w-2*WINDOW_EDGE_GAP,150, "AZIMUTHAL"));
+
+    diagnostics[Axis::AZIMUTHAL]->diagnostics_box->align(FL_ALIGN_TOP_LEFT);
+    diagnostics[Axis::AZIMUTHAL]->diagnostics_box->labelfont(FL_BOLD);
+    diagnostics[Axis::AZIMUTHAL]->diagnostics_box->label("DIAGNOSTICS:");
+
+    diagnostics[Axis::VERTICAL] = std::unique_ptr<GM2D3StageDiagnostics>
+        (new GM2D3StageDiagnostics(WINDOW_EDGE_GAP,340, w-2*WINDOW_EDGE_GAP,150, "VERTICAL"));
+
+    diagnostics[Axis::RADIAL] = std::unique_ptr<GM2D3StageDiagnostics>
+        (new GM2D3StageDiagnostics(WINDOW_EDGE_GAP,500, w-2*WINDOW_EDGE_GAP,150, "RADIAL"));
 }
 
 GM2D3Window::~GM2D3Window() {}

@@ -5,14 +5,17 @@
 
 GM2D3::GM2D3(int window_width, int window_height)
 {
-    window = new GM2D3Window(window_width,window_height,"GM2D3");
+    window = std::unique_ptr<GM2D3Window>(new GM2D3Window(window_width,window_height,"GM2D3"));
+    window->end();
+    window->show();
 
-    controllers[Axis::AZIMUTHAL] = NULL;
-    controllers[Axis::VERTICAL]  = NULL;
-    controllers[Axis::RADIAL]    = NULL;
+    controllers[Axis::AZIMUTHAL] = nullptr;
+    controllers[Axis::VERTICAL]  = nullptr;
+    controllers[Axis::RADIAL]    = nullptr;
+
 }
 
-void GM2D3::attach_controller(StageController *controller)
+void GM2D3::attach_controller(std::unique_ptr<StageController> c)
 {
-    controllers[controller->axis] = controller;
+    controllers[c->axis] = std::move(c);
 }

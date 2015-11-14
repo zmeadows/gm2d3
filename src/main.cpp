@@ -1,8 +1,9 @@
 #include <Fl/Fl.H>
-#include "gm2d3_window.h"
+#include "gm2d3.h"
 
 #include <stdlib.h>
 #include <time.h>
+#include <iostream>
 
 int
 main(int argc, char** args)
@@ -10,11 +11,10 @@ main(int argc, char** args)
     // seed the RNG
     srand(time(NULL));
 
-    GM2D3Window gm2d3Window(800,800,"GM2D3");
-    gm2d3Window.show();
+    GM2D3 *gm2d3 = new GM2D3(1000,660);
 
+    std::cout << gm2d3 << "\n";
     Fl::run();
-    gm2d3Window.end();
 
     return 0;
 }

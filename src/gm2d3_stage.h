@@ -1,14 +1,9 @@
-#ifndef GM2D3_STAGE_H
-#define GM2D3_STAGE_H
+#pragma once
+
+#include "gm2d3_const.h"
 
 #include <map>
 #include <iostream>
-
-enum class Axis {
-    AZIMUTHAL,
-    VERTICAL,
-    RADIAL
-};
 
 enum class Encoder {
     A, // evenly spaced clock
@@ -67,5 +62,3 @@ class RaspberryPiController : public StageController
     private:
         const int cw_gpio, ccw_gpio;
 };
-
-#endif

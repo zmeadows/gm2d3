@@ -1,29 +1,27 @@
-#ifndef GM2D3_MANUAL_CONTROLLER
-#define GM2D3_MANUAL_CONTROLLER
+#pragma once
 
 #include <Fl/Enumerations.H>
 #include <Fl/Fl_Pack.H>
+#include <Fl/Fl_Box.H>
 #include <Fl/Fl_Light_Button.H>
 
-#include "gm2d3_stage.h"
+#include <map>
 
-class GM2D3ManualController : public Fl_Pack {
+#include "gm2d3_const.h"
+
+class GM2D3ManualControlGUI {
     public:
-        GM2D3ManualController(int x, int y, int w, int h, const char* label);
-        virtual ~GM2D3ManualController();
+        GM2D3ManualControlGUI(int x, int y, int w, int h);
+        virtual ~GM2D3ManualControlGUI();
 
     private:
-        Fl_Light_Button *cw, *ccw;
+        std::unique_ptr<Fl_Box> manual_control_box;
+
+        std::unique_ptr<Fl_Pack> vertical_pack;
+        std::unique_ptr<Fl_Pack> azimuthal_button_pack;
+        std::unique_ptr<Fl_Pack> vertical_button_pack;
+        std::unique_ptr<Fl_Pack> radial_button_pack;
+
+        std::map<Axis, std::unique_ptr<Fl_Button>> cw_buttons;
+        std::map<Axis, std::unique_ptr<Fl_Button>> ccw_buttons;
 };
-
-class GM2D3ManualControllerGroup : public Fl_Pack {
-    public:
-        GM2D3ManualControllerGroup(int x, int y, int w, int h, const char* label);
-        virtual ~GM2D3ManualControllerGroup();
-
-    private:
-        GM2D3ManualController *acm, *vcm, *rcm;
-
-};
-
-#endif

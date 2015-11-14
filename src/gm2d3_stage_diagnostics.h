@@ -5,6 +5,13 @@
 #include <Fl/Fl_Dial.H>
 #include <Fl/Fl_Pack.H>
 #include <Fl/Fl_Multiline_Output.H>
+#include <Fl/Fl_Box.H>
+
+#include <map>
+#include <iostream>
+#include <memory.h>
+
+#include "gm2d3_stage.h"
 
 
 class GM2D3StageHistoryPlot : public Fl_Chart
@@ -20,33 +27,29 @@ class GM2D3StageHistoryPlot : public Fl_Chart
         Fl_Color line_color;
 };
 
-class GM2D3StageIndicators : public Fl_Pack
+class GM2D3StageIndicators
 {
     public:
-        GM2D3StageIndicators(int x, int y, int w, int h);
+        GM2D3StageIndicators(int x, int y, int w);
         virtual ~GM2D3StageIndicators();
 
     private:
+        std::unique_ptr<Fl_Box> indicator_box;
+        std::map<Encoder, std::unique_ptr<Fl_Dial>> dials;
         Fl_Color on_color, off_color;
-        Fl_Dial *a, *b, *c, *d;
 };
 
-class GM2D3StageInfo : public Fl_Multiline_Output
+class GM2D3StageDiagnostics
 {
     public:
-        GM2D3StageInfo(int x, int y, int w, int h);
-        virtual ~GM2D3StageInfo();
-};
-
-class GM2D3StageDiagnostics : public Fl_Pack
-{
-    public:
-        GM2D3StageDiagnostics(int x, int y, int w, int h, const char* label);
+        GM2D3StageDiagnostics(int x, int y, int w, int h, const char *label);
         virtual ~GM2D3StageDiagnostics();
+        std::unique_ptr<Fl_Box> diagnostics_box;
 
-        GM2D3StageHistoryPlot *history_plot;
-        GM2D3StageInfo *info;
-        GM2D3StageIndicators *indicators;
+    private:
+        std::unique_ptr<GM2D3StageHistoryPlot> history_plot;
+        std::unique_ptr<Fl_Multiline_Output> info;
+        std::unique_ptr<GM2D3StageIndicators> indicators;
 };
 
 #endif
