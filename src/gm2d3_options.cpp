@@ -2,18 +2,6 @@
 
 #include "gm2d3_const.h"
 
-void
-GM2D3ConfigLoader::static_open_button_pushed(Fl_Widget *_open_button, void *config_loader)
-{
-    ((GM2D3ConfigLoader *) config_loader)->open_button_pushed(_open_button);
-}
-
-
-void
-GM2D3ConfigLoader::open_button_pushed(Fl_Widget *_open_button)
-{
-    config_file_chooser->show();
-}
 
 GM2D3ConfigLoader::GM2D3ConfigLoader(int x, int y, int w, int h)
 {
@@ -25,8 +13,6 @@ GM2D3ConfigLoader::GM2D3ConfigLoader(int x, int y, int w, int h)
     open_button->label("...");
 
     config_file_chooser = std::unique_ptr<Fl_Native_File_Chooser>(new Fl_Native_File_Chooser());
-
-    open_button->callback(static_open_button_pushed, (void *) this);
 }
 
 GM2D3ConfigLoader::~GM2D3ConfigLoader(void) {};

@@ -14,6 +14,10 @@ class GM2D3ManualControlGUI {
         GM2D3ManualControlGUI(int x, int y, int w, int h);
         virtual ~GM2D3ManualControlGUI();
 
+        void callback(Axis axis, MotorDirection dir, Fl_Callback_p cb, void *p) {
+            buttons[axis][dir]->callback(cb,p);
+        }
+
     private:
         std::unique_ptr<Fl_Box> manual_control_box;
 

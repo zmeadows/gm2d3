@@ -34,7 +34,6 @@ class StageController {
 
         virtual void stop() = 0;
         virtual void start(MotorDirection dir) = 0;
-        virtual void controller_type() = 0;
 
         double get_current_position() { return current_position; }
         std::pair<bool, MotorDirection> get_motor_state() { return motor_state; }
