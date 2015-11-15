@@ -24,6 +24,8 @@ GM2D3Window::GM2D3Window(int w, int h, const char* t) :
     diagnostics[Axis::RADIAL] = std::unique_ptr<GM2D3StageDiagnostics>
         (new GM2D3StageDiagnostics(WINDOW_EDGE_GAP,500, w-2*WINDOW_EDGE_GAP,150, "RADIAL"));
 
+    color(fl_rgb_color(160,160,160));
+
     this->callback(static_exit_window_callback, (void *) this);
 }
 
