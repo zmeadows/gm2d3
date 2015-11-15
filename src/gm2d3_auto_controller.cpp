@@ -5,7 +5,7 @@
 GM2D3AutoControlGUI::GM2D3AutoControlGUI(int x, int y, int w, int h)
 {
     const int input_label_gap = 90;
-    const int input_spacing = int( (h - 90 - 2*BOX_EDGE_GAP) / 2.0 );
+    const int input_height = int( (h - 5*BOX_EDGE_GAP) / 4.0 );
     const int input_width = int( (w - input_label_gap - 2*BOX_EDGE_GAP - ADJACENT_SPACING) / 2.0);
     const int button_height = int( (h - 2*ADJACENT_SPACING - 2*BOX_EDGE_GAP) / 3.0 );
 
@@ -23,14 +23,18 @@ GM2D3AutoControlGUI::GM2D3AutoControlGUI(int x, int y, int w, int h)
 
         {input_box_pack = std::unique_ptr<Fl_Pack>(new Fl_Pack(0,0,input_width,h));
             input_box_pack->type(Fl_Pack::VERTICAL);
-            input_box_pack->spacing(input_spacing);
+            input_box_pack->spacing(BOX_EDGE_GAP);
+
+            preset_positions_menu = std::unique_ptr<Fl_Menu_Button>
+                (new Fl_Menu_Button(0,30,input_width,input_height, "PRESETS: "));
+            preset_positions_menu->align(FL_ALIGN_LEFT);
 
             user_position_inputs[Axis::AZIMUTHAL] = std::unique_ptr<Fl_Input>
-                (new Fl_Input(0,0,input_width,30, "AZIMUTHAL: "));
+                (new Fl_Input(0,0,input_width,input_height, "AZIMUTHAL: "));
             user_position_inputs[Axis::VERTICAL]  = std::unique_ptr<Fl_Input>
-                (new Fl_Input(0,10,input_width,30, "VERTICAL: "));
+                (new Fl_Input(0,10,input_width,input_height, "VERTICAL: "));
             user_position_inputs[Axis::RADIAL]    = std::unique_ptr<Fl_Input>
-                (new Fl_Input(0,20,input_width,30, "RADIAL: "));
+                (new Fl_Input(0,20,input_width,input_height, "RADIAL: "));
 
             user_position_inputs[Axis::AZIMUTHAL]->align(FL_ALIGN_LEFT);
             user_position_inputs[Axis::VERTICAL]->align(FL_ALIGN_LEFT);

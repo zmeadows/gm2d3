@@ -5,8 +5,8 @@
 #include <Fl/Fl_Input.H>
 #include <Fl/Fl_Pack.H>
 #include <Fl/Fl_Button.H>
-#include <Fl/Fl_Light_Button.H>
 #include <Fl/Fl_Box.H>
+#include <Fl/Fl_Menu_Button.H>
 
 #include <map>
 
@@ -23,6 +23,8 @@ class GM2D3AutoControlGUI {
         std::unique_ptr<Fl_Pack> auto_button_pack;
 
         std::map<Axis, std::unique_ptr<Fl_Input>> user_position_inputs;
+
+        std::unique_ptr<Fl_Menu_Button> preset_positions_menu;
 
         std::unique_ptr<Fl_Button> calibrate_button;
         std::unique_ptr<Fl_Button> go_button;
