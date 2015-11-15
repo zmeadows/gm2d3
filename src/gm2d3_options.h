@@ -6,8 +6,12 @@
 #include <Fl/Fl_Output.H>
 #include <FL/Fl_Native_File_Chooser.H>
 
+#include <libconfig.h++>
+
 #include <memory>
 #include <iostream>
+
+using namespace libconfig;
 
 class GM2D3ConfigLoader {
     public:
@@ -21,6 +25,7 @@ class GM2D3ConfigLoader {
 
         static void static_open_button_pushed(Fl_Widget *_open_button, void *config_loader);
         void open_button_pushed(Fl_Widget *_open_button);
+        std::unique_ptr<Config> cfg;
 };
 
 class GM2D3OptionsGUI {

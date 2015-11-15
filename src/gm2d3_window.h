@@ -17,6 +17,9 @@ class GM2D3Window : public Fl_Double_Window {
         virtual ~GM2D3Window();
 
     private:
+
+        static void static_exit_window_callback(Fl_Widget *w, void *window);
+        void exit_window_callback(Fl_Widget *w);
         std::unique_ptr<GM2D3ManualControlGUI> manual_control;
         std::unique_ptr<GM2D3AutoControlGUI> auto_control;
         std::unique_ptr<GM2D3OptionsGUI> options;

@@ -40,6 +40,22 @@ GM2D3AutoControlGUI::GM2D3AutoControlGUI(int x, int y, int w, int h)
             user_position_inputs[Axis::VERTICAL]->align(FL_ALIGN_LEFT);
             user_position_inputs[Axis::RADIAL]->align(FL_ALIGN_LEFT);
 
+            user_position_inputs[Axis::AZIMUTHAL]->textcolor(FL_RED);
+            user_position_inputs[Axis::AZIMUTHAL]->textfont(FL_BOLD);
+            user_position_inputs[Axis::AZIMUTHAL]->value("DISCONNECTED");
+            user_position_inputs[Axis::AZIMUTHAL]->readonly(1);
+
+            user_position_inputs[Axis::VERTICAL]->textcolor(FL_RED);
+            user_position_inputs[Axis::VERTICAL]->textfont(FL_BOLD);
+            user_position_inputs[Axis::VERTICAL]->value("DISCONNECTED");
+            user_position_inputs[Axis::VERTICAL]->readonly(1);
+
+            user_position_inputs[Axis::RADIAL]->textcolor(FL_RED);
+            user_position_inputs[Axis::RADIAL]->textfont(FL_BOLD);
+            user_position_inputs[Axis::RADIAL]->value("DISCONNECTED");
+            user_position_inputs[Axis::RADIAL]->readonly(1);
+
+
             input_box_pack->end();
         }
 
@@ -51,11 +67,13 @@ GM2D3AutoControlGUI::GM2D3AutoControlGUI(int x, int y, int w, int h)
                         input_width, button_height, "CALIBRATE"));
             calibrate_button->align(FL_ALIGN_CENTER);
             calibrate_button->type(FL_TOGGLE_BUTTON);
+            calibrate_button->color2(YELLOW());
 
             go_button = std::unique_ptr<Fl_Button>(new Fl_Button(0,10,
                         input_width,button_height, "GO"));
             go_button->align(FL_ALIGN_CENTER);
             go_button->type(FL_TOGGLE_BUTTON);
+            go_button->color2(LIGHT_GREEN());
 
             stop_button = std::unique_ptr<Fl_Button>(new Fl_Button(0,20,
                         input_width,button_height,"STOP"));

@@ -8,7 +8,7 @@ GM2D3StageHistoryPlot::GM2D3StageHistoryPlot(int x, int y, int w, int h) :
     Fl_Chart(x,y,w,h)
 {
     type(FL_LINE_CHART);
-    color(fl_rgb_color(230,230,230));
+    color(fl_rgb_color(240,240,240));
 }
 
 void GM2D3StageHistoryPlot::set_line_color(Fl_Color color) { line_color = color; }

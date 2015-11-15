@@ -23,7 +23,6 @@ enum class ControllerType {
     Fake
 };
 
-
 class StageController {
     public:
         StageController( Axis _axis, double min_bound, double max_bound,

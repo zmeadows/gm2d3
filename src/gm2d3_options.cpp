@@ -31,7 +31,6 @@ GM2D3ConfigLoader::GM2D3ConfigLoader(int x, int y, int w, int h)
 
 GM2D3ConfigLoader::~GM2D3ConfigLoader(void) {};
 
-
 GM2D3OptionsGUI::GM2D3OptionsGUI(int x, int y, int w, int h)
 {
     options_box = std::unique_ptr<Fl_Box>(new Fl_Box(x,y,w,h));
@@ -49,14 +48,17 @@ GM2D3OptionsGUI::GM2D3OptionsGUI(int x, int y, int w, int h)
     enable_history_plot = std::unique_ptr<Fl_Check_Button>
         (new Fl_Check_Button(x_0, y_0, checkbox_width, checkbox_height));
     enable_history_plot->label("ENABLE HISTORY PLOTS");
+    enable_history_plot->value(1);
 
     enable_indicators = std::unique_ptr<Fl_Check_Button>
         (new Fl_Check_Button(x_0,y_0 + checkbox_height + BOX_EDGE_GAP, checkbox_width ,checkbox_height));
     enable_indicators->label("ENABLE INDICATORS");
+    enable_indicators->value(1);
 
     enable_stats = std::unique_ptr<Fl_Check_Button>
         (new Fl_Check_Button(x_0,y_0 + 2*checkbox_height + 2*BOX_EDGE_GAP, checkbox_width ,checkbox_height));
     enable_stats->label("ENABLE STATS");
+    enable_stats->value(1);
 
     config_loader = std::unique_ptr<GM2D3ConfigLoader>
         (new GM2D3ConfigLoader(x_0,y + 4*checkbox_height + 3*BOX_EDGE_GAP, checkbox_width, checkbox_height));

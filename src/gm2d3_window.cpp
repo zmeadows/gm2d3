@@ -1,6 +1,7 @@
 #include "gm2d3_window.h"
 
 #include <Fl/Fl_Pack.H>
+#include <FL/fl_ask.H>
 
 GM2D3Window::GM2D3Window(int w, int h, const char* t) :
     Fl_Double_Window(w, h, t)
@@ -22,6 +23,21 @@ GM2D3Window::GM2D3Window(int w, int h, const char* t) :
 
     diagnostics[Axis::RADIAL] = std::unique_ptr<GM2D3StageDiagnostics>
         (new GM2D3StageDiagnostics(WINDOW_EDGE_GAP,500, w-2*WINDOW_EDGE_GAP,150, "RADIAL"));
+
+    this->callback(static_exit_window_callback, (void *) this);
 }
 
 GM2D3Window::~GM2D3Window() {}
+
+void
+GM2D3Window::static_exit_window_callback(Fl_Widget *w, void *window)
+{
+    ((GM2D3Window *) window)->exit_window_callback(w);
+}
+
+void
+GM2D3Window::exit_window_callback(Fl_Widget *w)
+{
+    if (fl_choice("Really Exit?", "NO", "YES", nullptr)) { this->hide(); }
+}
+

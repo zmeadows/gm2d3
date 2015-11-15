@@ -29,3 +29,5 @@ Fl_Color DARK_GREEN();
 
 Fl_Color LIGHT_BLUE();
 Fl_Color DARK_BLUE();
+
+Fl_Color YELLOW();
