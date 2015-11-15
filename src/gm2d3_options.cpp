@@ -12,10 +12,38 @@ GM2D3ConfigLoader::GM2D3ConfigLoader(int x, int y, int w, int h)
     open_button = std::unique_ptr<Fl_Button>(new Fl_Button(x+0.85*w,y,0.15*w,h - 2));
     open_button->label("...");
 
-    config_file_chooser = std::unique_ptr<Fl_Native_File_Chooser>(new Fl_Native_File_Chooser());
+    file_chooser = std::unique_ptr<Fl_Native_File_Chooser>(new Fl_Native_File_Chooser());
 }
 
 GM2D3ConfigLoader::~GM2D3ConfigLoader(void) {};
+
+int
+GM2D3ConfigLoader::get_config_path(std::string& path)
+{
+    switch (file_chooser->show())
+    {
+        // config file successfully chosen
+        case 0:
+            const char* cpath;
+            cpath = file_chooser->filename();
+            path = std::string(cpath, strlen(cpath));
+            return 0;
+
+        // user cancelled
+        case 1:
+            return 1;
+
+        // error
+        case -1:
+            std::cout << file_chooser->errmsg() << std::endl;
+            return -1;
+
+        // who knows
+        default:
+            return -2;
+    }
+}
+
 
 GM2D3OptionsGUI::GM2D3OptionsGUI(int x, int y, int w, int h)
 {

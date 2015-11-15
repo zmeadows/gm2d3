@@ -8,7 +8,7 @@
 #include "gm2d3_manual_controller.h"
 #include "gm2d3_auto_controller.h"
 #include "gm2d3_stage_diagnostics.h"
-#include "gm2d3_stage.h"
+#include "gm2d3_stage_controller.h"
 #include "gm2d3_options.h"
 
 class GM2D3Window : public Fl_Double_Window {

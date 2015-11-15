@@ -1,19 +1,26 @@
 #include <map>
 
 #include "gm2d3.h"
-#include "gm2d3_stage.h"
 
 void
-GM2D3::static_load_config_callback(Fl_Widget *_config_loader, void *gm2d3)
+GM2D3::static_load_config_callback(Fl_Widget *, void *gm2d3)
 {
-    ((GM2D3 *) gm2d3)->load_config_callback(_config_loader);
+    ((GM2D3 *) gm2d3)->load_config_callback(nullptr);
 }
 
 void
-GM2D3::load_config_callback(Fl_Widget *_open_button)
+GM2D3::load_config_callback(Fl_Widget *)
 {
-    std::cout << window->options->config_loader->load_config_file() << std::endl;
+    std::string config_path;
+
+    if (window->options->config_loader->get_config_path(config_path) == 0)
+    {
+        std::cout << config_path << std::endl;
+        cfg->readFile(config_path.c_str());
+    }
 }
+
+
 
 GM2D3::GM2D3(int window_width, int window_height)
 {
@@ -25,10 +32,6 @@ GM2D3::GM2D3(int window_width, int window_height)
     controllers[Axis::VERTICAL]  = nullptr;
     controllers[Axis::RADIAL]    = nullptr;
 
+    cfg = std::unique_ptr<Config>(new Config());
     window->options->config_loader->callback(static_load_config_callback, (void *) this);
-}
-
-void GM2D3::attach_controller(std::unique_ptr<RaspberryPiController> c)
-{
-    controllers[c->axis] = std::move(c);
 }

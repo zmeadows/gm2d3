@@ -10,7 +10,7 @@
 #include <iostream>
 #include <memory.h>
 
-#include "gm2d3_stage.h"
+#include "gm2d3_stage_controller.h"
 
 
 class GM2D3StageHistoryPlot : public Fl_Chart

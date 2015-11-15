@@ -7,6 +7,9 @@
 #include <utility>
 #include <iostream>
 
+#include <libconfig.h++>
+using namespace libconfig;
+
 enum class Encoder {
     A, // evenly spaced high-res clock
     B, // in quadrature with A
@@ -14,19 +17,16 @@ enum class Encoder {
     D  // absolute position bit-wise encoding
 };
 
-const std::map<Encoder,bool> EMPTY_ENCODER_STATE =
-    { {Encoder::A, false}, {Encoder::B, false}, {Encoder::C, false}, {Encoder::D, false} };
-
-enum class ControllerType {
-    RaspberryPi,
-    Galil,
-    Fake
+const std::map<Encoder,bool> EMPTY_ENCODER_STATE = {
+    {Encoder::A, false},
+    {Encoder::B, false},
+    {Encoder::C, false},
+    {Encoder::D, false}
 };
 
 class StageController {
     public:
-        StageController( Axis _axis, double min_bound, double max_bound,
-                std::map<int,double> _abs_code_cypher);
+        StageController(std::unique_ptr<Config> const& cfg);
 
         const Axis axis;
         const std::pair<double,double> bounds;
@@ -45,22 +45,5 @@ class StageController {
         std::pair<bool, MotorDirection> motor_state;
         double current_position;
         bool calibrated;
-
 };
 
-class RaspberryPiController : public StageController
-{
-    public:
-        RaspberryPiController(Axis _axis, double _min_bound, double _max_bound,
-                std::map<int,double> _abs_code_cypher, int _cw_gpio, int _ccw_gpio);
-
-        void move_forward() {
-            std::cout << cw_gpio;
-        };
-        void move_backward() {
-            std::cout << ccw_gpio;
-        };
-
-    private:
-        const int cw_gpio, ccw_gpio;
-};

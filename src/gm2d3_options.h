@@ -7,6 +7,7 @@
 #include <FL/Fl_Native_File_Chooser.H>
 
 #include <memory>
+#include <string>
 #include <iostream>
 
 class GM2D3ConfigLoader {
@@ -14,17 +15,12 @@ class GM2D3ConfigLoader {
         GM2D3ConfigLoader(int x, int y, int w, int h);
         virtual ~GM2D3ConfigLoader(void);
 
-
-        const char* load_config_file(void) {
-            if (config_file_chooser->show() == 0)
-            { return config_file_chooser->filename(); }
-            else { return "ERROR"; }
-        }
+        int get_config_path(std::string &path);
 
         void callback(Fl_Callback_p cb, void *p) { open_button->callback(cb,p); }
 
     private:
-        std::unique_ptr<Fl_Native_File_Chooser> config_file_chooser;
+        std::unique_ptr<Fl_Native_File_Chooser> file_chooser;
         std::unique_ptr<Fl_Output> path_display;
         std::unique_ptr<Fl_Button> open_button;
 };

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gm2d3_stage.h"
+#include "gm2d3_stage_controller.h"
 
 #include <Fl/Fl_Input.H>
 #include <Fl/Fl_Pack.H>
