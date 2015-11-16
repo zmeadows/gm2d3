@@ -3,7 +3,6 @@
 #include "gm2d3_const.h"
 
 #include <map>
-#include <memory>
 #include <array>
 #include <utility>
 #include <iostream>
@@ -27,7 +26,7 @@ const std::map<Encoder,bool> EMPTY_ENCODER_STATE = {
 
 class StageController {
     public:
-        StageController(std::unique_ptr<Config> cfg);
+        StageController(std::unique_ptr<Config> const& cfg);
 
         const Axis axis;
         const std::pair<double,double> bounds;

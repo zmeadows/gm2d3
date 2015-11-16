@@ -15,7 +15,7 @@ GM2D3ConfigLoader::GM2D3ConfigLoader(int x, int y, int w, int h)
     file_chooser = std::unique_ptr<Fl_Native_File_Chooser>(new Fl_Native_File_Chooser());
 }
 
-GM2D3ConfigLoader::~GM2D3ConfigLoader(void) {};
+GM2D3ConfigLoader::~GM2D3ConfigLoader(void) {}
 
 int
 GM2D3ConfigLoader::get_config_path(std::string& path)
@@ -79,4 +79,4 @@ GM2D3OptionsGUI::GM2D3OptionsGUI(int x, int y, int w, int h)
 
 }
 
-GM2D3OptionsGUI::~GM2D3OptionsGUI() {};
+GM2D3OptionsGUI::~GM2D3OptionsGUI() {}

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Fl/fl_draw.H>
+#include <Fl/Fl_Draw.H>
 
 enum class Axis {
     AZIMUTHAL,

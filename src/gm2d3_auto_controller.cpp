@@ -25,8 +25,7 @@ GM2D3AutoControlGUI::GM2D3AutoControlGUI(int x, int y, int w, int h)
             input_box_pack->type(Fl_Pack::VERTICAL);
             input_box_pack->spacing(BOX_EDGE_GAP);
 
-            preset_positions_menu = std::unique_ptr<Fl_Menu_Button>
-                (new Fl_Menu_Button(0,30,input_width,input_height, "PRESETS: "));
+            preset_positions_menu = std::unique_ptr<Fl_Menu_Button>(new Fl_Menu_Button(0,30,input_width,input_height, "PRESETS: "));
             preset_positions_menu->align(FL_ALIGN_LEFT);
 
             user_position_inputs[Axis::AZIMUTHAL] = std::unique_ptr<Fl_Input>
