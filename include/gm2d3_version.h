@@ -1,0 +1,7 @@
+#ifndef GM2D3_CONST_H_IN
+#define GM2D3_CONST_H_IN
+
+#define GM2D3_VERSION_MAJOR 0
+#define GM2D3_VERSION_MINOR 1
+
+#endif

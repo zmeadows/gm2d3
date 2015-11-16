@@ -4,6 +4,7 @@
 #include "gm2d3_stage_controller.h"
 
 #include <map>
+#include <memory>
 
 #include <libconfig.h++>
 using namespace libconfig;
@@ -19,6 +20,7 @@ class GM2D3 {
         std::map<Axis, std::unique_ptr<StageController>> controllers;
         std::unique_ptr<Config> cfg;
 
+        void process_config_file(void);
         void detach_controllers(void) { controllers.clear(); }
 
         static void static_load_config_callback(Fl_Widget *, void *gm2d3);

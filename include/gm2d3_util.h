@@ -2,6 +2,6 @@
 
 #include <iostream>
 
-int gDEBUG_LEVEL = 0;
+extern int gDEBUG_LEVEL;
 
 void debug_print(int level_guard, std::string msg);

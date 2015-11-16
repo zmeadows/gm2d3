@@ -26,7 +26,8 @@ if (CONFIG++_FOUND)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lconfig++")
 endif (CONFIG++_FOUND)
 
-
+configure_file( cmake/gm2d3_version.h.in ${CMAKE_SOURCE_DIR}/include/gm2d3_version.h )
+include_directories( ${CMAKE_BINARY_DIR}/generated/ )
 
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)

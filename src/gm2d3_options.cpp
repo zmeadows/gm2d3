@@ -2,6 +2,9 @@
 
 #include "gm2d3_const.h"
 
+#include <libgen.h>
+
+
 
 GM2D3ConfigLoader::GM2D3ConfigLoader(int x, int y, int w, int h)
 {
@@ -18,15 +21,16 @@ GM2D3ConfigLoader::GM2D3ConfigLoader(int x, int y, int w, int h)
 GM2D3ConfigLoader::~GM2D3ConfigLoader(void) {}
 
 int
-GM2D3ConfigLoader::get_config_path(std::string& path)
+GM2D3ConfigLoader::user_select_config(std::string& path)
 {
     switch (file_chooser->show())
     {
         // config file successfully chosen
         case 0:
-            const char* cpath;
-            cpath = file_chooser->filename();
+            char* cpath;
+            cpath = strdup(file_chooser->filename());
             path = std::string(cpath, strlen(cpath));
+            path_display->value(basename(cpath));
             return 0;
 
         // user cancelled

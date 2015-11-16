@@ -15,9 +15,11 @@ class GM2D3ConfigLoader {
         GM2D3ConfigLoader(int x, int y, int w, int h);
         virtual ~GM2D3ConfigLoader(void);
 
-        int get_config_path(std::string &path);
+        int user_select_config(std::string &path);
 
         void callback(Fl_Callback_p cb, void *p) { open_button->callback(cb,p); }
+
+        void set_path_display_color(Fl_Color c) { path_display->color(c); }
 
     private:
         std::unique_ptr<Fl_Native_File_Chooser> file_chooser;
