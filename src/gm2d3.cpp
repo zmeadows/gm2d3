@@ -3,6 +3,15 @@
 #include "gm2d3.h"
 #include "gm2d3_util.h"
 
+void GM2D3::process_config_file(void)
+{
+    unprocess_config_file();
+}
+
+void GM2D3::unprocess_config_file(void)
+{
+    controllers.clear();
+}
 
 void
 GM2D3::static_load_config_callback(Fl_Widget *, void *gm2d3)
@@ -17,7 +26,10 @@ GM2D3::load_config_callback(Fl_Widget *)
 
     if (window->options->config_loader->user_select_config(config_path) == 0)
     {
-        try { cfg->readFile(config_path.c_str()); }
+        try {
+            cfg = std::unique_ptr<Config>(new Config());
+            cfg->readFile(config_path.c_str());
+        }
 
         catch(const FileIOException &fioex)
         {
@@ -42,7 +54,10 @@ GM2D3::load_config_callback(Fl_Widget *)
         }
 
         debug_print(1, "Successfully parsed config file: " + config_path);
-        window->options->config_loader->set_path_display_color(FL_WHITE);
+
+        window->options->config_loader->flash_config_path(FL_GREEN);
+
+        process_config_file();
     }
 }
 
@@ -56,6 +71,5 @@ GM2D3::GM2D3(int window_width, int window_height)
     controllers[Axis::VERTICAL]  = nullptr;
     controllers[Axis::RADIAL]    = nullptr;
 
-    cfg = std::unique_ptr<Config>(new Config());
     window->options->config_loader->callback(static_load_config_callback, (void *) this);
 }

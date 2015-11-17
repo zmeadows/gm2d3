@@ -3,6 +3,8 @@
 #include "gm2d3_const.h"
 
 #include <libgen.h>
+#include <unistd.h>
+
 
 
 
@@ -47,6 +49,35 @@ GM2D3ConfigLoader::user_select_config(std::string& path)
             return -2;
     }
 }
+
+void
+GM2D3ConfigLoader::flash_config_path(Fl_Color c)
+{
+    Fl::lock();
+    std::thread flash_thread([this, c]() {
+        handle_flash(c);
+    });
+    flash_thread.detach();
+    Fl::unlock();
+}
+
+void
+GM2D3ConfigLoader::handle_flash(Fl_Color c)
+{
+    int i;
+    for (i = 0; i < 20; i++)
+    {
+        path_display->color(c);
+        path_display->redraw();
+        Fl::awake();
+        usleep(4e4);
+        path_display->color(FL_WHITE);
+        path_display->redraw();
+        Fl::awake();
+        usleep(4e4);
+    }
+}
+
 
 
 GM2D3OptionsGUI::GM2D3OptionsGUI(int x, int y, int w, int h)
