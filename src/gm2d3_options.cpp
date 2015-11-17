@@ -65,16 +65,16 @@ void
 GM2D3ConfigLoader::handle_flash(Fl_Color c)
 {
     int i;
-    for (i = 0; i < 20; i++)
+    for (i = 0; i < 5; i++)
     {
         path_display->color(c);
         path_display->redraw();
         Fl::awake();
-        usleep(4e4);
+        usleep(1e5);
         path_display->color(FL_WHITE);
         path_display->redraw();
         Fl::awake();
-        usleep(4e4);
+        usleep(1e5);
     }
 }
 

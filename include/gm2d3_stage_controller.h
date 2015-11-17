@@ -30,6 +30,7 @@ const std::map<Encoder,bool> EMPTY_ENCODER_STATE = {
     {Encoder::D, false}
 };
 
+
 class StageController {
     public:
         StageController(std::unique_ptr<Config> const& cfg);

@@ -3,9 +3,17 @@
 #include "gm2d3.h"
 #include "gm2d3_util.h"
 
-void GM2D3::process_config_file(void)
+int GM2D3::process_config_file(void)
 {
     unprocess_config_file();
+    if (verify_config_base(cfg))
+    {
+        window->options->config_loader->flash_config_path(FL_GREEN);
+        return 0;
+    }
+
+    unprocess_config_file();
+    return -1;
 }
 
 void GM2D3::unprocess_config_file(void)
@@ -55,7 +63,6 @@ GM2D3::load_config_callback(Fl_Widget *)
 
         debug_print(1, "Successfully parsed config file: " + config_path);
 
-        window->options->config_loader->flash_config_path(FL_GREEN);
 
         process_config_file();
     }

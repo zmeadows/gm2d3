@@ -19,7 +19,7 @@ class GM2D3 {
         std::map<Axis, std::unique_ptr<StageController>> controllers;
         std::unique_ptr<Config> cfg;
 
-        void process_config_file(void);
+        int process_config_file(void);
         void unprocess_config_file(void);
         void attach_controller(std::unique_ptr<StageController> c);
 

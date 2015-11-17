@@ -31,14 +31,12 @@ main(int argc, char** argv)
 
     std::unique_ptr<GM2D3> gm2d3(new GM2D3(1100,665));
 
+    // set up multi-threading and run FLTK
     Fl::lock();
     Fl::run();
 
-    while (Fl::wait() > 0) {
-    if (Fl::thread_message()) {
-      /* process your data */
-    }
-  }
+    // process all multi-threaded events
+    while (Fl::wait() > 0) {}
 
     return 0;
 }

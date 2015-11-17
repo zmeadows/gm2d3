@@ -12,6 +12,7 @@ StageController::stop(void)
 {
     if (motor_state.first == false) {
         debug_print(1, "Motor appears to already be stopped. Issuing stop command anyway.");
+        stop1();
     } else {
         stop1();
         motor_state.first = false;
