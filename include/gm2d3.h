@@ -19,9 +19,15 @@ class GM2D3 {
         std::map<Axis, std::unique_ptr<StageController>> controllers;
         std::unique_ptr<Config> cfg;
 
-        int process_config_file(void);
+        bool process_config_file(void);
         void unprocess_config_file(void);
-        void attach_controller(std::unique_ptr<StageController> c);
+        void setup_callbacks(ControllerType ct);
+
+        void setup_fake_callbacks(void);
+        void setup_rpi_callbacks(void);
+        void setup_galil_callbacks(void);
+
+        void attach_controller(Axis axis, ControllerType ct, const Setting &c);
 
         static void static_load_config_callback(Fl_Widget *, void *gm2d3);
         void load_config_callback(Fl_Widget *);

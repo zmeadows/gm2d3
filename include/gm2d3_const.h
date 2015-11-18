@@ -13,9 +13,6 @@ enum class MotorDirection {
     CCW
 };
 
-// ENCODER
-const int ABS_CODE_BITS = 10;
-
 // GUI
 const int WINDOW_EDGE_GAP = 20;
 const int ADJACENT_SPACING = 5;

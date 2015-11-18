@@ -2,20 +2,122 @@
 
 #include "gm2d3.h"
 #include "gm2d3_util.h"
+#include "gm2d3_fake_controller.h"
 
-int GM2D3::process_config_file(void)
+#include <string>
+
+void
+GM2D3::setup_callbacks(ControllerType ct)
 {
-    unprocess_config_file();
-    if (verify_config_base(cfg))
-    {
-        window->options->config_loader->flash_config_path(FL_GREEN);
-        return 0;
+    switch (ct) {
+        case ControllerType::Fake:
+            setup_fake_callbacks();
+            break;
+        case ControllerType::RaspberryPi:
+            setup_rpi_callbacks();
+            break;
+        case ControllerType::Galil:
+            setup_galil_callbacks();
+            break;
+        default:
+            break;
     }
-
-    unprocess_config_file();
-    return -1;
 }
 
+void
+GM2D3::setup_fake_callbacks(void)
+{
+}
+
+void
+GM2D3::setup_rpi_callbacks(void)
+{
+}
+
+void
+GM2D3::setup_galil_callbacks(void)
+{
+}
+
+void
+GM2D3::attach_controller(Axis axis, ControllerType ct, const Setting &c)
+{
+    if (ct == ControllerType::Fake) {
+        controllers[axis] = std::unique_ptr<StageController>(new FakeController(c));
+    } else if (ct == ControllerType::RaspberryPi) {
+    } else if (ct == ControllerType::Galil) {
+    } else {
+        debug_print(0, "ERROR: unrecognized controller type");
+    }
+}
+
+bool
+GM2D3::process_config_file()
+{
+    unprocess_config_file();
+
+    try
+    {
+        ControllerType ct;
+        const Setting& root = cfg->getRoot();
+        const Setting &cs = root["controllers"];
+
+        std::string ctype_str = root.lookup("controller_type");
+
+        if (ctype_str == "fake") {
+            ct = ControllerType::Fake;
+        } else if (ctype_str == "rapsberrypi") {
+            ct = ControllerType::RaspberryPi;
+        } else if (ctype_str == "galil") {
+            ct = ControllerType::Galil;
+        } else {
+            debug_print(0, "ERROR: unrecognized controller type");
+            return false;
+        }
+
+        if (cs.exists("azimuthal")) {
+            attach_controller(Axis::AZIMUTHAL, ct, cs["azimuthal"]);
+        }
+        if (cs.exists("vertical")) {
+            attach_controller(Axis::VERTICAL, ct, cs["vertical"]);
+        }
+        if (cs.exists("radial")) {
+            attach_controller(Axis::RADIAL, ct, cs["radial"]);
+        }
+
+        if (controllers.size() < 1) { return false; }
+
+        setup_callbacks(ct);
+    }
+
+    catch(const SettingNotFoundException &nfex)
+    {
+        debug_print(0, "setting not found!");
+        return false;
+    }
+
+    catch(const SettingTypeException &tex)
+    {
+        debug_print(0, "setting of wrong type! " + std::string(tex.getPath()) );
+        return false;
+    }
+
+    catch(const ControllerException &cex)
+    {
+        debug_print(0, cex.msg);
+        return false;
+    }
+
+
+
+    window->options->config_loader->flash_config_path(FL_GREEN);
+    debug_print(1, "Successfully processed config file");
+    std::cout << controllers.size() << std::endl;
+    std::cout << controllers[Axis::AZIMUTHAL]->bounds.second << std::endl;
+    return true;
+}
+
+// TODO: void all callbacks
 void GM2D3::unprocess_config_file(void)
 {
     controllers.clear();
@@ -62,7 +164,6 @@ GM2D3::load_config_callback(Fl_Widget *)
         }
 
         debug_print(1, "Successfully parsed config file: " + config_path);
-
 
         process_config_file();
     }

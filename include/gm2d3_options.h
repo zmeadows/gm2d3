@@ -20,9 +20,7 @@ class GM2D3ConfigLoader {
         int user_select_config(std::string &path);
 
         void callback(Fl_Callback_p cb, void *p) { open_button->callback(cb,p); }
-
         void set_path_display_color(Fl_Color c) { path_display->color(c); }
-
         void flash_config_path(Fl_Color c);
 
     private:
