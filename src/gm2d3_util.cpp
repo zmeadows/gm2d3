@@ -1,5 +1,5 @@
 #include "gm2d3_util.h"
-#include "gm2d3_version.h"
+#include "../cmake/gm2d3_cmake.h"
 
 #include <iostream>
 #include <string>

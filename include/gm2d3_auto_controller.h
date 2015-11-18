@@ -15,7 +15,12 @@ class GM2D3AutoControlGUI {
         GM2D3AutoControlGUI(int x, int y, int w, int h);
         virtual ~GM2D3AutoControlGUI();
 
+        void set_input_text(Axis axis, std::string str);
+        void set_input_editable(Axis axis, bool readonly);
+
     private:
+        bool enabled;
+
         std::unique_ptr<Fl_Box> auto_control_box;
 
         std::unique_ptr<Fl_Pack> horizontal_pack;
@@ -28,5 +33,5 @@ class GM2D3AutoControlGUI {
 
         std::unique_ptr<Fl_Button> calibrate_button;
         std::unique_ptr<Fl_Button> go_button;
-        std::unique_ptr<Fl_Button> stop_button;
+        std::unique_ptr<Fl_Button> kill_button;
 };

@@ -4,3 +4,24 @@ FakeController::FakeController(const Setting &c) :
     StageController(c)
 {
 }
+
+void
+FakeController::setup(void)
+{
+}
+
+void
+FakeController::internal_change_motor_state(MotorState m)
+{
+}
+
+int
+FakeController::internal_monitor(void)
+{
+    return 0;
+}
+
+void
+FakeController::shutdown(void)
+{
+}

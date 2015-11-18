@@ -8,9 +8,10 @@ enum class Axis {
     RADIAL
 };
 
-enum class MotorDirection {
+enum class MotorState {
     CW,
-    CCW
+    CCW,
+    OFF
 };
 
 // GUI

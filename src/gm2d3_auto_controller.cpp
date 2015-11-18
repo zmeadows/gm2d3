@@ -2,7 +2,8 @@
 
 #include <map>
 
-GM2D3AutoControlGUI::GM2D3AutoControlGUI(int x, int y, int w, int h)
+GM2D3AutoControlGUI::GM2D3AutoControlGUI(int x, int y, int w, int h) :
+    enabled(false)
 {
     const int input_label_gap = 90;
     const int input_height = int( (h - 5*BOX_EDGE_GAP) / 4.0 );
@@ -74,10 +75,10 @@ GM2D3AutoControlGUI::GM2D3AutoControlGUI(int x, int y, int w, int h)
             go_button->type(FL_TOGGLE_BUTTON);
             go_button->color2(LIGHT_GREEN());
 
-            stop_button = std::unique_ptr<Fl_Button>(new Fl_Button(0,20,
-                        input_width,button_height,"STOP"));
-            stop_button->color(FL_RED);
-            stop_button->color2(FL_RED);
+            kill_button = std::unique_ptr<Fl_Button>(new Fl_Button(0,20,
+                        input_width,button_height,"KILL"));
+            kill_button->color(FL_RED);
+            kill_button->color2(FL_RED);
 
             auto_button_pack->end();
         }
@@ -87,3 +88,15 @@ GM2D3AutoControlGUI::GM2D3AutoControlGUI(int x, int y, int w, int h)
 }
 
 GM2D3AutoControlGUI::~GM2D3AutoControlGUI() {}
+
+void
+GM2D3AutoControlGUI::set_input_text(Axis axis, std::string str)
+{
+    user_position_inputs[axis]->value(str.c_str());
+}
+
+void
+GM2D3AutoControlGUI::set_input_editable(Axis axis, bool editable)
+{
+    user_position_inputs[axis]->readonly(editable ? 0 : 1);
+}

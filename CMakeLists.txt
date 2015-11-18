@@ -4,6 +4,8 @@ project (GM2D3)
 set (GM2D3_VERSION_MAJOR 0)
 set (GM2D3_VERSION_MINOR 1)
 
+# add_definitions(-DGM2D3_USE_RPI)
+
 # files from GM2D3
 include_directories(include)
 file(GLOB SOURCES "src/*.cpp")
@@ -26,8 +28,8 @@ if (CONFIG++_FOUND)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lconfig++")
 endif (CONFIG++_FOUND)
 
-configure_file( cmake/gm2d3_version.h.in ${CMAKE_SOURCE_DIR}/include/gm2d3_version.h )
-include_directories( ${CMAKE_BINARY_DIR}/generated/ )
+configure_file( cmake/gm2d3_cmake.h.in ${CMAKE_SOURCE_DIR}/cmake/gm2d3_cmake.h )
+include_directories( ${CMAKE_SOURCE_DIR}/cmake/ )
 
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)

@@ -40,28 +40,31 @@ class StageController {
         const std::pair<double,double> bounds;
         const std::map<int,double> cypher;
 
-        void stop(void);
-        void start(MotorDirection dir);
-        // virtual void setup(void) = 0;
-        // virtual void disconnect(void) = 0;
+        void move(double new_position);
+        void change_motor_state(MotorState m);
+        void stop(void) { change_motor_state(MotorState::OFF); }
 
-        double get_current_position() { return current_position; }
-
-        std::pair<bool, MotorDirection> get_motor_state() { return motor_state; }
-
-        bool is_calibrated() { return calibrated; }
+        double get_current_position() const { return current_position; }
+        MotorState get_motor_state(void) const { return motor_state; }
+        bool is_calibrated() const { return calibrated; }
 
     protected:
-        virtual void stop1(void) = 0;
-        virtual void start1(MotorDirection dir) = 0;
+        void monitor(void);
+
+        virtual void setup(void) = 0;
+        virtual void internal_change_motor_state(MotorState m) = 0;
+        virtual int internal_monitor(void) = 0;
+        virtual void shutdown(void) = 0;
+
         virtual ControllerType controller_type(void) const = 0;
 
+        MotorState motor_state;
         std::vector<bool> cypher_accumulator;
         std::map<Encoder, bool> encoder_state;
-        std::pair<bool, MotorDirection> motor_state;
 
-        double resolution;
+        const double resolution;
         double current_position;
+        double goal_position;
         bool calibrated;
         const unsigned int cypher_bits;
 };

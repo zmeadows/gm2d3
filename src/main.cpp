@@ -14,6 +14,10 @@ main(int argc, char** argv)
     /* seed the RNG */
     srand(time(NULL));
 
+#ifdef GM2D3_USE_RPI
+    std::cout << "using rpi" << std::endl;
+#endif
+
     /* parse command-line arguments */
     int c;
     while ((c = getopt (argc, argv, "V:")) != -1)

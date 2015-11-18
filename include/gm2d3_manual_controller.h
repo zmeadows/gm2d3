@@ -14,8 +14,8 @@ class GM2D3ManualControlGUI {
         GM2D3ManualControlGUI(int x, int y, int w, int h);
         virtual ~GM2D3ManualControlGUI();
 
-        void callback(Axis axis, MotorDirection dir, Fl_Callback_p cb, void *p) {
-            buttons[axis][dir]->callback(cb,p);
+        void callback(Axis axis, MotorState m, Fl_Callback_p cb, void *p) {
+            buttons[axis][m]->callback(cb,p);
         }
 
     private:
@@ -26,5 +26,5 @@ class GM2D3ManualControlGUI {
         std::unique_ptr<Fl_Pack> vertical_button_pack;
         std::unique_ptr<Fl_Pack> radial_button_pack;
 
-        std::map<Axis, std::map<MotorDirection, std::unique_ptr<Fl_Button>>> buttons;
+        std::map<Axis, std::map<MotorState, std::unique_ptr<Fl_Button>>> buttons;
 };

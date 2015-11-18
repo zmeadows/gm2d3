@@ -5,7 +5,7 @@ GM2D3ManualControlGUI::GM2D3ManualControlGUI(int x, int y, int w, int h)
     // calculate size/spacing properties
     const int button_label_gap = 90;
     const int button_height = int( (h - 2*ADJACENT_SPACING - 2*BOX_EDGE_GAP) / 3.0 );
-    const int button_width = int( (w - button_label_gap - 1*ADJACENT_SPACING - 2*BOX_EDGE_GAP ) / 2.0 );
+    const int button_width = int( (w - button_label_gap - 2*ADJACENT_SPACING - 2*BOX_EDGE_GAP ) / 3.0 );
 
     manual_control_box = std::unique_ptr<Fl_Box>(new Fl_Box(x,y,w,h));
     manual_control_box->box(FL_EMBOSSED_BOX);
@@ -28,15 +28,21 @@ GM2D3ManualControlGUI::GM2D3ManualControlGUI(int x, int y, int w, int h)
     azimuthal_button_pack->align(FL_ALIGN_LEFT);
     azimuthal_button_pack->label("AZIMUTHAL: ");
 
-    buttons[Axis::AZIMUTHAL][MotorDirection::CW] =
+    buttons[Axis::AZIMUTHAL][MotorState::CW] =
         std::unique_ptr<Fl_Button>(new Fl_Button(0, 0, button_width, button_height, "CW"));
-    buttons[Axis::AZIMUTHAL][MotorDirection::CW]->type(FL_RADIO_BUTTON);
-    buttons[Axis::AZIMUTHAL][MotorDirection::CW]->down_color(YELLOW());
+    buttons[Axis::AZIMUTHAL][MotorState::CW]->type(FL_RADIO_BUTTON);
+    buttons[Axis::AZIMUTHAL][MotorState::CW]->down_color(YELLOW());
 
-    buttons[Axis::AZIMUTHAL][MotorDirection::CCW] = std::unique_ptr<Fl_Button>(new Fl_Button(
+    buttons[Axis::AZIMUTHAL][MotorState::CCW] = std::unique_ptr<Fl_Button>(new Fl_Button(
                 button_width + ADJACENT_SPACING, 0, button_width, button_height, "CCW"));
-    buttons[Axis::AZIMUTHAL][MotorDirection::CCW]->type(FL_RADIO_BUTTON);
-    buttons[Axis::AZIMUTHAL][MotorDirection::CCW]->down_color(YELLOW());
+    buttons[Axis::AZIMUTHAL][MotorState::CCW]->type(FL_RADIO_BUTTON);
+    buttons[Axis::AZIMUTHAL][MotorState::CCW]->down_color(YELLOW());
+
+    buttons[Axis::AZIMUTHAL][MotorState::OFF] = std::unique_ptr<Fl_Button>(new Fl_Button(
+                2*button_width + 2*ADJACENT_SPACING, 0, button_width, button_height, "OFF"));
+    buttons[Axis::AZIMUTHAL][MotorState::OFF]->type(FL_RADIO_BUTTON);
+    buttons[Axis::AZIMUTHAL][MotorState::OFF]->down_color(YELLOW());
+    buttons[Axis::AZIMUTHAL][MotorState::OFF]->value(1);
 
     azimuthal_button_pack->end();
     }
@@ -49,15 +55,21 @@ GM2D3ManualControlGUI::GM2D3ManualControlGUI(int x, int y, int w, int h)
     vertical_button_pack->align(FL_ALIGN_LEFT);
     vertical_button_pack->label("VERTICAL: ");
 
-    buttons[Axis::VERTICAL][MotorDirection::CW] = std::unique_ptr<Fl_Button>
+    buttons[Axis::VERTICAL][MotorState::CW] = std::unique_ptr<Fl_Button>
         (new Fl_Button(0, 0, button_width, button_height, "CW"));
-    buttons[Axis::VERTICAL][MotorDirection::CW]->type(FL_RADIO_BUTTON);
-    buttons[Axis::VERTICAL][MotorDirection::CW]->down_color(YELLOW());
+    buttons[Axis::VERTICAL][MotorState::CW]->type(FL_RADIO_BUTTON);
+    buttons[Axis::VERTICAL][MotorState::CW]->down_color(YELLOW());
 
-    buttons[Axis::VERTICAL][MotorDirection::CCW] = std::unique_ptr<Fl_Button>
+    buttons[Axis::VERTICAL][MotorState::CCW] = std::unique_ptr<Fl_Button>
         (new Fl_Button( button_width + ADJACENT_SPACING, 0, button_width, button_height, "CCW"));
-    buttons[Axis::VERTICAL][MotorDirection::CCW]->type(FL_RADIO_BUTTON);
-    buttons[Axis::VERTICAL][MotorDirection::CCW]->down_color(YELLOW());
+    buttons[Axis::VERTICAL][MotorState::CCW]->type(FL_RADIO_BUTTON);
+    buttons[Axis::VERTICAL][MotorState::CCW]->down_color(YELLOW());
+
+    buttons[Axis::VERTICAL][MotorState::OFF] = std::unique_ptr<Fl_Button>
+        (new Fl_Button( 2*button_width + 2*ADJACENT_SPACING, 0, button_width, button_height, "OFF"));
+    buttons[Axis::VERTICAL][MotorState::OFF]->type(FL_RADIO_BUTTON);
+    buttons[Axis::VERTICAL][MotorState::OFF]->down_color(YELLOW());
+    buttons[Axis::VERTICAL][MotorState::OFF]->value(1);
 
     vertical_button_pack->end();
     }
@@ -70,15 +82,21 @@ GM2D3ManualControlGUI::GM2D3ManualControlGUI(int x, int y, int w, int h)
     radial_button_pack->align(FL_ALIGN_LEFT);
     radial_button_pack->label("RADIAL: ");
 
-    buttons[Axis::RADIAL][MotorDirection::CW] = std::unique_ptr<Fl_Button>(new Fl_Button(0, 0,
+    buttons[Axis::RADIAL][MotorState::CW] = std::unique_ptr<Fl_Button>(new Fl_Button(0, 0,
                 button_width, button_height, "CW"));
-    buttons[Axis::RADIAL][MotorDirection::CW]->type(FL_RADIO_BUTTON);
-    buttons[Axis::RADIAL][MotorDirection::CW]->down_color(YELLOW());
+    buttons[Axis::RADIAL][MotorState::CW]->type(FL_RADIO_BUTTON);
+    buttons[Axis::RADIAL][MotorState::CW]->down_color(YELLOW());
 
-    buttons[Axis::RADIAL][MotorDirection::CCW] = std::unique_ptr<Fl_Button>(new Fl_Button(
+    buttons[Axis::RADIAL][MotorState::CCW] = std::unique_ptr<Fl_Button>(new Fl_Button(
                 button_width + ADJACENT_SPACING, 0, button_width, button_height,"CCW"));
-    buttons[Axis::RADIAL][MotorDirection::CCW]->type(FL_RADIO_BUTTON);
-    buttons[Axis::RADIAL][MotorDirection::CCW]->down_color(YELLOW());
+    buttons[Axis::RADIAL][MotorState::CCW]->type(FL_RADIO_BUTTON);
+    buttons[Axis::RADIAL][MotorState::CCW]->down_color(YELLOW());
+
+    buttons[Axis::RADIAL][MotorState::OFF] = std::unique_ptr<Fl_Button>(new Fl_Button(
+                2*button_width + 2*ADJACENT_SPACING, 0, button_width, button_height,"OFF"));
+    buttons[Axis::RADIAL][MotorState::OFF]->type(FL_RADIO_BUTTON);
+    buttons[Axis::RADIAL][MotorState::OFF]->down_color(YELLOW());
+    buttons[Axis::RADIAL][MotorState::OFF]->value(1);
 
     radial_button_pack->end();
     }
