@@ -16,13 +16,13 @@ GM2D3Window::GM2D3Window(int w, int h, const char* t) :
         (new GM2D3OptionsGUI(800 + WINDOW_EDGE_GAP + 2*ADJACENT_SPACING, WINDOW_EDGE_GAP, 250, 145));
 
     diagnostics[Axis::AZIMUTHAL] = std::unique_ptr<GM2D3StageDiagnostics>
-        (new GM2D3StageDiagnostics(WINDOW_EDGE_GAP,180, w-2*WINDOW_EDGE_GAP,150, "AZIMUTHAL"));
+        (new GM2D3StageDiagnostics(WINDOW_EDGE_GAP,180, w-2*WINDOW_EDGE_GAP,150, Axis::AZIMUTHAL));
 
     diagnostics[Axis::VERTICAL] = std::unique_ptr<GM2D3StageDiagnostics>
-        (new GM2D3StageDiagnostics(WINDOW_EDGE_GAP,340, w-2*WINDOW_EDGE_GAP,150, "VERTICAL"));
+        (new GM2D3StageDiagnostics(WINDOW_EDGE_GAP,340, w-2*WINDOW_EDGE_GAP,150, Axis::VERTICAL));
 
     diagnostics[Axis::RADIAL] = std::unique_ptr<GM2D3StageDiagnostics>
-        (new GM2D3StageDiagnostics(WINDOW_EDGE_GAP,500, w-2*WINDOW_EDGE_GAP,150, "RADIAL"));
+        (new GM2D3StageDiagnostics(WINDOW_EDGE_GAP,500, w-2*WINDOW_EDGE_GAP,150, Axis::RADIAL));
 
     color(fl_rgb_color(160,160,160));
 

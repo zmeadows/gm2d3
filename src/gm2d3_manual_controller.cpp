@@ -21,7 +21,6 @@ GM2D3ManualControlButton::GM2D3ManualControlButton(int x, int y, int w, int h,
             label("OFF");
             break;
     }
-
 }
 
 GM2D3ManualControlButton::~GM2D3ManualControlButton() {}

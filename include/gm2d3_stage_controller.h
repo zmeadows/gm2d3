@@ -27,7 +27,7 @@ const std::map<Encoder,bool> EMPTY_ENCODER_STATE = {
     {Encoder::A, false},
     {Encoder::B, false},
     {Encoder::C, false},
-    {Encoder::D, false}
+    {Encoder::D, false} 
 };
 
 std::pair<double,double> config_get_bounds(const Setting &c);
@@ -41,11 +41,10 @@ class StageController {
         const std::map<int,double> cypher;
 
         void move(double new_position);
-        void change_motor_state(MotorState m);
-        void stop(void) { change_motor_state(MotorState::OFF); }
+        void change_motor_state(MotorState next_motor_state);
 
         double get_current_position() const { return current_position; }
-        MotorState get_motor_state(void) const { return motor_state; }
+        MotorState get_current_motor_state(void) const { return current_motor_state; }
         bool is_calibrated() const { return calibrated; }
 
     protected:
@@ -57,7 +56,7 @@ class StageController {
 
         virtual ControllerType controller_type(void) const = 0;
 
-        MotorState motor_state;
+        MotorState current_motor_state;
         std::vector<bool> cypher_accumulator;
         std::map<Encoder, bool> encoder_state;
 

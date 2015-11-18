@@ -7,15 +7,16 @@
 #include <string>
 
 void
-GM2D3::setup_callbacks(void)
+GM2D3::setup_controller_callbacks(void)
 {
+     window->manual_control->callback(static_manual_button_callback, (void *) this);
 }
 
 void
 GM2D3::attach_controller(Axis axis, ControllerType ct, const Setting &c)
 {
     if (ct == ControllerType::Fake) {
-        controllers[axis] = std::unique_ptr<StageController>(new FakeController(c));
+        controllers[axis] = std::shared_ptr<StageController>(new FakeController(c));
 
 #ifdef GM2D3_USE_RPI
     } else if (ct == ControllerType::RaspberryPi) {
@@ -77,7 +78,7 @@ GM2D3::process_config_file()
 
         if (controllers.size() < 1) { return false; }
 
-        setup_callbacks();
+        setup_controller_callbacks();
     }
 
     catch(const SettingNotFoundException &nfex)
@@ -102,8 +103,6 @@ GM2D3::process_config_file()
 
     window->options->config_loader->flash_config_path(FL_GREEN);
     debug_print(1, "Successfully processed config file");
-    std::cout << controllers.size() << std::endl;
-    std::cout << controllers[Axis::AZIMUTHAL]->bounds.second << std::endl;
     return true;
 }
 
@@ -111,6 +110,75 @@ GM2D3::process_config_file()
 void GM2D3::unprocess_config_file(void)
 {
     controllers.clear();
+}
+
+void
+GM2D3::static_manual_button_callback(Fl_Widget *button, void *gm2d3)
+{
+    ((GM2D3 *) gm2d3)->manual_button_callback(button);
+}
+
+void
+GM2D3::manual_button_callback(Fl_Widget *button)
+{
+    GM2D3ManualControlButton *b = (GM2D3ManualControlButton*) button;
+
+    //std::cout << b->value() << std::endl;
+
+    controllers[b->axis]->change_motor_state(b->motor_state);
+}
+
+void
+GM2D3::static_enable_plot_callback(Fl_Widget *enable_plot_checkbox, void *gm2d3)
+{
+    ((GM2D3 *) gm2d3)->enable_plot_callback(enable_plot_checkbox);
+}
+
+void
+GM2D3::enable_plot_callback(Fl_Widget *enable_plot_checkbox)
+{
+    Fl_Check_Button *b = (Fl_Check_Button*) enable_plot_checkbox;
+
+    switch (b->value())
+    {
+        case 0:
+            *keep_plotting = false;
+            for (auto &c : controllers) { window->diagnostics[c.first]->history_plot->disable(); }
+            break;
+        case 1:
+            *keep_plotting = true;
+            for (auto &c : controllers) { 
+                window->diagnostics[c.first]->history_plot->enable(); 
+            }
+            detach_plot_threads();
+            break;
+    }
+}
+
+void
+GM2D3::detach_plot_threads(void)
+{
+    auto plot_updater = [](
+            std::shared_ptr<StageController> sc,
+            std::shared_ptr<GM2D3StageHistoryPlot> hp,
+            std::shared_ptr<bool> kp) -> void
+    {
+            while(*kp)
+            {
+                hp->add_point(sc->get_current_position());
+                Fl::awake();
+                usleep(1e6);
+            }
+    };
+
+    for (auto& c : controllers)
+    {
+        Fl::lock();
+        std::thread plot_thread(plot_updater, c.second, 
+                window->diagnostics[c.first]->history_plot, keep_plotting);
+        plot_thread.detach();
+        Fl::unlock();
+    }
 }
 
 void
@@ -165,9 +233,9 @@ GM2D3::GM2D3(int window_width, int window_height)
     window->end();
     window->show();
 
-    controllers[Axis::AZIMUTHAL] = nullptr;
-    controllers[Axis::VERTICAL]  = nullptr;
-    controllers[Axis::RADIAL]    = nullptr;
+    keep_plotting = std::make_shared<bool>();
+    *keep_plotting = false;
 
     window->options->config_loader->callback(static_load_config_callback, (void *) this);
+    window->options->enable_history_plot->callback(static_enable_plot_callback, (void *) this);
 }

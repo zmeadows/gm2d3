@@ -16,11 +16,16 @@
 class GM2D3StageHistoryPlot : public Fl_Chart
 {
     public:
-        GM2D3StageHistoryPlot(int x, int y, int w, int h);
+        GM2D3StageHistoryPlot(int x, int y, int w, int h, Axis _axis);
         virtual ~GM2D3StageHistoryPlot();
 
+        const Axis axis;
+
         void set_line_color(Fl_Color color);
-        void plot_random_points(double min, double max, int N);
+        void add_point(double val);
+
+        void enable();
+        void disable();
 
     private:
         Fl_Color line_color;
@@ -41,12 +46,13 @@ class GM2D3StageIndicators
 class GM2D3StageDiagnostics
 {
     public:
-        GM2D3StageDiagnostics(int x, int y, int w, int h, const char *label);
+        GM2D3StageDiagnostics(int x, int y, int w, int h, Axis axis);
         virtual ~GM2D3StageDiagnostics();
+
+        std::shared_ptr<GM2D3StageHistoryPlot> history_plot;
+        std::unique_ptr<GM2D3StageIndicators> indicators;
+        std::unique_ptr<Fl_Multiline_Output> info;
 
     private:
         std::unique_ptr<Fl_Box> diagnostics_box;
-        std::unique_ptr<GM2D3StageHistoryPlot> history_plot;
-        std::unique_ptr<Fl_Multiline_Output> info;
-        std::unique_ptr<GM2D3StageIndicators> indicators;
 };

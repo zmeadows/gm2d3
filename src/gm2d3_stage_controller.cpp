@@ -2,11 +2,12 @@
 #include "gm2d3_util.h"
 
 #include <thread>
+#include <Fl/Fl.H>
 
 StageController::StageController(const Setting &c) :
     bounds(config_get_bounds(c.lookup("bounds"))),
     cypher(config_get_cypher(c.lookup("cypher"))),
-    motor_state(MotorState::OFF),
+    current_motor_state(MotorState::OFF),
     encoder_state(EMPTY_ENCODER_STATE),
     resolution(double(c.lookup("resolution"))),
     current_position(0.0),
@@ -35,20 +36,33 @@ StageController::StageController(const Setting &c) :
 }
 
 void
-StageController::change_motor_state(MotorState m)
+StageController::change_motor_state(MotorState next_motor_state)
 {
-    if (m == MotorState::OFF && motor_state == MotorState::OFF) {
-        debug_print(1, "Motor appears to already be stopped. Issuing stop command again.");
+
+    if (next_motor_state == MotorState::OFF)
+    {
+        if (current_motor_state == MotorState::OFF) 
+        {
+            debug_print(1, "Motor appears to already be stopped. Issuing stop command again.");
+        } 
+
         internal_change_motor_state(MotorState::OFF);
-    } else if (m == motor_state) {
-        debug_print(1, "Motor appears to already be moving in that direction.");
-    } else if (m != motor_state && motor_state != MotorState::OFF) {
-        internal_change_motor_state(MotorState::OFF);
-        internal_change_motor_state(m);
-        motor_state = m;
-    } else if (m != motor_state && motor_state == MotorState::OFF) {
-        internal_change_motor_state(m);
-        motor_state = m;
+        current_motor_state = MotorState::OFF;
+    }
+
+    else 
+    {
+        if (current_motor_state == next_motor_state)
+        {
+            debug_print(1, "Motor appears to already be moving in that direction.");
+        }
+
+        else
+        {
+            if (current_motor_state != MotorState::OFF) internal_change_motor_state(MotorState::OFF);
+            internal_change_motor_state(next_motor_state);
+            current_motor_state = next_motor_state;
+        }
     }
 }
 
@@ -56,7 +70,6 @@ void
 StageController::monitor()
 {
     int ret_code = internal_monitor();
-    stop();
 
     switch (ret_code)
     {
@@ -91,10 +104,12 @@ StageController::move(double new_position)
     if (new_position > current_position) {
         change_motor_state(MotorState::CCW);
 
+        Fl::lock();
         monitor_thread = std::thread([this]() {
             monitor();
         });
         monitor_thread.detach();
+        Fl::unlock();
     }
 
     if (new_position < current_position) {

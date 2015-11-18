@@ -4,14 +4,48 @@
 #include <stdlib.h>
 #include <time.h>
 
-GM2D3StageHistoryPlot::GM2D3StageHistoryPlot(int x, int y, int w, int h) :
-    Fl_Chart(x,y,w,h)
+GM2D3StageHistoryPlot::GM2D3StageHistoryPlot(int x, int y, int w, int h, Axis _axis) :
+    Fl_Chart(x,y,w,h),
+    axis(_axis)
 {
     type(FL_LINE_CHART);
     color(fl_rgb_color(240,240,240));
+    disable();
+}
+
+void
+GM2D3StageHistoryPlot::disable()
+{
+    deactivate();
+    align(FL_ALIGN_CENTER);
+    label("PAUSED");
+}
+
+void
+GM2D3StageHistoryPlot::enable()
+{
+    activate();
+    align(FL_ALIGN_TOP_LEFT | FL_ALIGN_INSIDE);
+    switch (axis)
+    {
+        case Axis::AZIMUTHAL:
+            label("AZIMUTHAL");
+            break;
+        case Axis::VERTICAL:
+            label("VERTICAL");
+            break;
+        case Axis::RADIAL:
+            label("RADIAL");
+            break;
+    }
 }
 
 void GM2D3StageHistoryPlot::set_line_color(Fl_Color color) { line_color = color; }
+
+void GM2D3StageHistoryPlot::add_point(double val)
+{
+    add(val, std::to_string(val).c_str(), line_color);
+}
 
 GM2D3StageHistoryPlot::~GM2D3StageHistoryPlot() {}
 
@@ -69,7 +103,7 @@ GM2D3StageIndicators::GM2D3StageIndicators(int x, int y, int w) :
 GM2D3StageIndicators::~GM2D3StageIndicators() {}
 
 
-GM2D3StageDiagnostics::GM2D3StageDiagnostics(int x, int y, int w, int h, const char *label)
+GM2D3StageDiagnostics::GM2D3StageDiagnostics(int x, int y, int w, int h, Axis axis)
 {
 
     diagnostics_box = std::unique_ptr<Fl_Box>(new Fl_Box(x,y,w,h));
@@ -84,10 +118,8 @@ GM2D3StageDiagnostics::GM2D3StageDiagnostics(int x, int y, int w, int h, const c
     const int info_width = h2 * 1.8;
     const int plot_width = w2 - info_width - h2 - 2*ADJACENT_SPACING;
 
-    history_plot = std::unique_ptr<GM2D3StageHistoryPlot>
-        (new GM2D3StageHistoryPlot(x_0,y_0,plot_width,h2));
-    history_plot->align(FL_ALIGN_TOP_LEFT | FL_ALIGN_INSIDE);
-    history_plot->label(label);
+    history_plot = std::shared_ptr<GM2D3StageHistoryPlot>
+        (new GM2D3StageHistoryPlot(x_0,y_0,plot_width,h2, axis));
 
     info = std::unique_ptr<Fl_Multiline_Output>
         (new Fl_Multiline_Output(x_0 + plot_width + ADJACENT_SPACING,y_0, info_width, h2));

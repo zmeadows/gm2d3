@@ -8,6 +8,18 @@ FakeController::FakeController(const Setting &c) :
 void
 FakeController::internal_change_motor_state(MotorState m)
 {
+    switch(m)
+    {
+        case MotorState::CW:
+            std::cout << "CW" << std::endl;
+            break;
+        case MotorState::CCW:
+            std::cout << "CCW " << std::endl;
+            break;
+        case MotorState::OFF:
+            std::cout << "OFF " << std::endl;
+            break;
+    }
 }
 
 int

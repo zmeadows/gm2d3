@@ -25,8 +25,12 @@ class GM2D3ManualControlGUI {
         GM2D3ManualControlGUI(int x, int y, int w, int h);
         virtual ~GM2D3ManualControlGUI();
 
-        void callback(Axis axis, MotorState m, Fl_Callback_p cb, void *p) {
-            buttons[axis][m]->callback(cb,p);
+        void callback(Fl_Callback_p cb, void *p) {
+            for (auto& a : ALL_AXES) {
+                for (auto& m : ALL_MOTOR_STATES) {
+                    buttons[a][m]->callback(cb,p);
+                }
+            }
         }
 
         void enable_axis(Axis axis);
