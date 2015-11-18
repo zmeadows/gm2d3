@@ -2,8 +2,30 @@
 
 #include <map>
 
-GM2D3AutoControlGUI::GM2D3AutoControlGUI(int x, int y, int w, int h) :
-    enabled(false)
+
+GM2D3AutoControlInput::GM2D3AutoControlInput(int x, int y, int w, int h, Axis _axis)
+    : Fl_Input(x,y,w,h),
+    axis(_axis)
+{
+    align(FL_ALIGN_LEFT);
+
+    switch (axis)
+    {
+        case Axis::AZIMUTHAL:
+            label("AZIMUTHAL: ");
+            break;
+        case Axis::VERTICAL:
+            label("VERTICAL: ");
+            break;
+        case Axis::RADIAL:
+            label("RADIAL: ");
+            break;
+    }
+}
+
+GM2D3AutoControlInput::~GM2D3AutoControlInput() {}
+
+GM2D3AutoControlGUI::GM2D3AutoControlGUI(int x, int y, int w, int h)
 {
     const int input_label_gap = 90;
     const int input_height = int( (h - 5*BOX_EDGE_GAP) / 4.0 );
@@ -17,8 +39,8 @@ GM2D3AutoControlGUI::GM2D3AutoControlGUI(int x, int y, int w, int h) :
     auto_control_box->label("AUTO CONTROL:");
     auto_control_box->labelfont(FL_BOLD);
 
-    {horizontal_pack = std::unique_ptr<Fl_Pack>(new Fl_Pack(x + input_label_gap + BOX_EDGE_GAP,
-            y + BOX_EDGE_GAP, w, h));
+    {horizontal_pack = std::unique_ptr<Fl_Pack>(new Fl_Pack
+            (x + input_label_gap + BOX_EDGE_GAP, y + BOX_EDGE_GAP, w, h));
         horizontal_pack->type(Fl_Pack::HORIZONTAL);
         horizontal_pack->spacing(ADJACENT_SPACING);
 
@@ -29,32 +51,12 @@ GM2D3AutoControlGUI::GM2D3AutoControlGUI(int x, int y, int w, int h) :
             preset_positions_menu = std::unique_ptr<Fl_Menu_Button>(new Fl_Menu_Button(0,30,input_width,input_height, "PRESETS: "));
             preset_positions_menu->align(FL_ALIGN_LEFT);
 
-            user_position_inputs[Axis::AZIMUTHAL] = std::unique_ptr<Fl_Input>
-                (new Fl_Input(0,0,input_width,input_height, "AZIMUTHAL: "));
-            user_position_inputs[Axis::VERTICAL]  = std::unique_ptr<Fl_Input>
-                (new Fl_Input(0,10,input_width,input_height, "VERTICAL: "));
-            user_position_inputs[Axis::RADIAL]    = std::unique_ptr<Fl_Input>
-                (new Fl_Input(0,20,input_width,input_height, "RADIAL: "));
-
-            user_position_inputs[Axis::AZIMUTHAL]->align(FL_ALIGN_LEFT);
-            user_position_inputs[Axis::VERTICAL]->align(FL_ALIGN_LEFT);
-            user_position_inputs[Axis::RADIAL]->align(FL_ALIGN_LEFT);
-
-            user_position_inputs[Axis::AZIMUTHAL]->textcolor(FL_RED);
-            user_position_inputs[Axis::AZIMUTHAL]->textfont(FL_BOLD);
-            user_position_inputs[Axis::AZIMUTHAL]->value("DISCONNECTED");
-            user_position_inputs[Axis::AZIMUTHAL]->readonly(1);
-
-            user_position_inputs[Axis::VERTICAL]->textcolor(FL_RED);
-            user_position_inputs[Axis::VERTICAL]->textfont(FL_BOLD);
-            user_position_inputs[Axis::VERTICAL]->value("DISCONNECTED");
-            user_position_inputs[Axis::VERTICAL]->readonly(1);
-
-            user_position_inputs[Axis::RADIAL]->textcolor(FL_RED);
-            user_position_inputs[Axis::RADIAL]->textfont(FL_BOLD);
-            user_position_inputs[Axis::RADIAL]->value("DISCONNECTED");
-            user_position_inputs[Axis::RADIAL]->readonly(1);
-
+            user_position_inputs[Axis::AZIMUTHAL] = std::unique_ptr<GM2D3AutoControlInput>
+                (new GM2D3AutoControlInput(0,0,input_width,input_height, Axis::AZIMUTHAL));
+            user_position_inputs[Axis::VERTICAL]  = std::unique_ptr<GM2D3AutoControlInput>
+                (new GM2D3AutoControlInput(0,10,input_width,input_height, Axis::VERTICAL));
+            user_position_inputs[Axis::RADIAL]    = std::unique_ptr<GM2D3AutoControlInput>
+                (new GM2D3AutoControlInput(0,20,input_width,input_height, Axis::RADIAL));
 
             input_box_pack->end();
         }
@@ -85,18 +87,43 @@ GM2D3AutoControlGUI::GM2D3AutoControlGUI(int x, int y, int w, int h) :
 
         horizontal_pack->end();
     }
+
+    for (auto& a : ALL_AXES) { disable_input(a); }
+    deactivate();
 }
 
 GM2D3AutoControlGUI::~GM2D3AutoControlGUI() {}
 
 void
-GM2D3AutoControlGUI::set_input_text(Axis axis, std::string str)
+GM2D3AutoControlGUI::enable_input(Axis axis)
 {
-    user_position_inputs[axis]->value(str.c_str());
+    user_position_inputs[axis]->activate();
+    user_position_inputs[axis]->textcolor(FL_BLACK);
+    user_position_inputs[axis]->textfont(0);
+    user_position_inputs[axis]->value("");
+    user_position_inputs[axis]->readonly(0);
 }
 
 void
-GM2D3AutoControlGUI::set_input_editable(Axis axis, bool editable)
+GM2D3AutoControlGUI::disable_input(Axis axis)
 {
-    user_position_inputs[axis]->readonly(editable ? 0 : 1);
+    user_position_inputs[axis]->deactivate();
+    user_position_inputs[axis]->textcolor(FL_RED);
+    user_position_inputs[axis]->textfont(FL_BOLD);
+    user_position_inputs[axis]->value("DISCONNECTED");
+    user_position_inputs[axis]->readonly(1);
+}
+
+void
+GM2D3AutoControlGUI::activate()
+{
+    calibrate_button->activate();
+    go_button->activate();
+}
+
+void
+GM2D3AutoControlGUI::deactivate()
+{
+    calibrate_button->deactivate();
+    go_button->deactivate();
 }

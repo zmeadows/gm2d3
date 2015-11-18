@@ -6,11 +6,6 @@ FakeController::FakeController(const Setting &c) :
 }
 
 void
-FakeController::setup(void)
-{
-}
-
-void
 FakeController::internal_change_motor_state(MotorState m)
 {
 }

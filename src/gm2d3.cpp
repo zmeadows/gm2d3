@@ -7,49 +7,9 @@
 #include <string>
 
 void
-GM2D3::setup_callbacks(ControllerType ct)
-{
-    switch (ct) {
-        case ControllerType::Fake:
-            setup_fake_callbacks();
-            break;
-
-#ifdef GM2D3_USE_RPI
-        case ControllerType::RaspberryPi:
-            setup_rpi_callbacks();
-            break;
-#endif
-
-#ifdef GM2D3_USE_GALIL
-        case ControllerType::Galil:
-            setup_galil_callbacks();
-            break;
-#endif
-        default:
-            break;
-    }
-
-
-}
-
-void
-GM2D3::setup_fake_callbacks(void)
+GM2D3::setup_callbacks(void)
 {
 }
-
-#ifdef GM2D3_USE_RPI
-void
-GM2D3::setup_rpi_callbacks(void)
-{
-}
-#endif
-
-#ifdef GM2D3_USE_GALIL
-void
-GM2D3::setup_galil_callbacks(void)
-{
-}
-#endif
 
 void
 GM2D3::attach_controller(Axis axis, ControllerType ct, const Setting &c)
@@ -69,10 +29,11 @@ GM2D3::attach_controller(Axis axis, ControllerType ct, const Setting &c)
         debug_print(0, "ERROR: unrecognized controller type");
     }
 
+    window->auto_control->activate();
     for (auto &c : controllers)
     {
-        window->auto_control->set_input_text(c.first, "");
-        window->auto_control->set_input_editable(c.first, true);
+        window->auto_control->enable_input(c.first);
+        window->manual_control->enable_axis(c.first);
     }
 }
 
@@ -116,7 +77,7 @@ GM2D3::process_config_file()
 
         if (controllers.size() < 1) { return false; }
 
-        setup_callbacks(ct);
+        setup_callbacks();
     }
 
     catch(const SettingNotFoundException &nfex)

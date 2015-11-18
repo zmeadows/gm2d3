@@ -1,6 +1,8 @@
 #pragma once
 
-#include <Fl/Fl_Draw.H>
+#include <Fl/fl_draw.H>
+
+#include <vector>
 
 enum class Axis {
     AZIMUTHAL,
@@ -8,11 +10,15 @@ enum class Axis {
     RADIAL
 };
 
+const std::vector<Axis> ALL_AXES = { Axis::AZIMUTHAL, Axis::VERTICAL, Axis::RADIAL };
+
 enum class MotorState {
     CW,
     CCW,
     OFF
 };
+
+const std::vector<MotorState> ALL_MOTOR_STATES = { MotorState::CW, MotorState::CCW, MotorState::OFF };
 
 // GUI
 const int WINDOW_EDGE_GAP = 20;

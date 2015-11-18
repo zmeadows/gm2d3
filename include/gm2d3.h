@@ -21,11 +21,7 @@ class GM2D3 {
 
         bool process_config_file(void);
         void unprocess_config_file(void);
-        void setup_callbacks(ControllerType ct);
-
-        void setup_fake_callbacks(void);
-        void setup_rpi_callbacks(void);
-        void setup_galil_callbacks(void);
+        void setup_callbacks(void);
 
         void attach_controller(Axis axis, ControllerType ct, const Setting &c);
 

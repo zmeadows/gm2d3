@@ -51,7 +51,6 @@ class StageController {
     protected:
         void monitor(void);
 
-        virtual void setup(void) = 0;
         virtual void internal_change_motor_state(MotorState m) = 0;
         virtual int internal_monitor(void) = 0;
         virtual void shutdown(void) = 0;
