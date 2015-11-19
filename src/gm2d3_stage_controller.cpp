@@ -8,6 +8,7 @@ StageController::StageController(const Setting &c) :
     cypher(config_get_cypher(c.lookup("cypher"))),
     current_motor_state(MotorState::OFF),
     encoder_state(EMPTY_ENCODER_STATE),
+    prev_encoder_state(EMPTY_ENCODER_STATE),
     resolution(double(c.lookup("resolution"))),
     current_position(0.0),
     goal_position(0.0),

@@ -18,6 +18,8 @@ enum class Encoder {
     D  // absolute position bit-wise encoding
 };
 
+const std::vector<Encoder> ALL_ENCODERS = { Encoder::A, Encoder::B, Encoder::C, Encoder::D };
+
 enum class ControllerType {
     RaspberryPi,
     Galil,
@@ -47,6 +49,7 @@ class StageController {
         double get_current_position() const { return current_position; }
         MotorState get_current_motor_state(void) const { return current_motor_state; }
         bool is_calibrated() const { return calibrated; }
+        std::map<Encoder, bool> get_encoder_state() const { return encoder_state; }
 
     protected:
         void monitor(void);
@@ -60,6 +63,7 @@ class StageController {
         MotorState current_motor_state;
         std::vector<bool> cypher_accumulator;
         std::map<Encoder, bool> encoder_state;
+        std::map<Encoder, bool> prev_encoder_state;
 
         const double resolution;
         double current_position;
