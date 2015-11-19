@@ -8,6 +8,10 @@
 #include <iostream>
 #include <memory>
 
+#ifdef GM2D3_USE_RPI
+#include <pigpio.h>
+#endif
+
 int
 main(int argc, char** argv)
 {
@@ -15,6 +19,7 @@ main(int argc, char** argv)
     srand(time(NULL));
 
 #ifdef GM2D3_USE_RPI
+    if (gpioInitialise() < 0) return 1;
     std::cout << "using rpi" << std::endl;
 #endif
 

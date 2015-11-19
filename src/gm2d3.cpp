@@ -3,6 +3,7 @@
 #include "gm2d3.h"
 #include "gm2d3_util.h"
 #include "gm2d3_fake_controller.h"
+#include "gm2d3_rpi_controller.h"
 
 #include <string>
 
@@ -20,6 +21,7 @@ GM2D3::attach_controller(Axis axis, ControllerType ct, const Setting &c)
 
 #ifdef GM2D3_USE_RPI
     } else if (ct == ControllerType::RaspberryPi) {
+        controllers[axis] = std::shared_ptr<StageController>(new RaspberryPiController(c));
 #endif
 
 #ifdef GM2D3_USE_GALIL
@@ -54,7 +56,7 @@ GM2D3::process_config_file()
         if (ctype_str == "fake") {
             ct = ControllerType::Fake;
 #ifdef GM2D3_USE_RPI
-        } else if (ctype_str == "rapsberrypi") {
+        } else if (ctype_str == "raspberrypi") {
             ct = ControllerType::RaspberryPi;
 #endif
 #ifdef GM2D3_USE_GALIL
@@ -147,8 +149,8 @@ GM2D3::enable_plot_callback(Fl_Widget *enable_plot_checkbox)
             break;
         case 1:
             *keep_plotting = true;
-            for (auto &c : controllers) { 
-                window->diagnostics[c.first]->history_plot->enable(); 
+            for (auto &c : controllers) {
+                window->diagnostics[c.first]->history_plot->enable();
             }
             detach_plot_threads();
             break;
@@ -174,7 +176,7 @@ GM2D3::detach_plot_threads(void)
     for (auto& c : controllers)
     {
         Fl::lock();
-        std::thread plot_thread(plot_updater, c.second, 
+        std::thread plot_thread(plot_updater, c.second,
                 window->diagnostics[c.first]->history_plot, keep_plotting);
         plot_thread.detach();
         Fl::unlock();

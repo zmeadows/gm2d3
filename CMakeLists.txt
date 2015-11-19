@@ -1,10 +1,10 @@
 cmake_minimum_required (VERSION 2.8)
-project (GM2D3)
+project (GM2D3 C CXX)
 # The version number.
 set (GM2D3_VERSION_MAJOR 0)
 set (GM2D3_VERSION_MINOR 1)
 
-# add_definitions(-DGM2D3_USE_RPI)
+add_definitions(-DGM2D3_USE_RPI)
 
 # files from GM2D3
 include_directories(include)
@@ -21,12 +21,20 @@ if (FLTK_FOUND)
   target_link_libraries (gm2d3 ${FLTK_LIBRARIES})
 endif (FLTK_FOUND)
 
-find_package (Config++ REQUIRED)
-if (CONFIG++_FOUND)
-  include_directories(${CONFIG++_INCLUDE_DIRS})
-  target_link_libraries (gm2d3 ${CONFIG++_LIBRARIES})
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lconfig++")
-endif (CONFIG++_FOUND)
+target_compile_options(gm2d3 PRIVATE -lpigpio -lrt)
+
+# find_package (Config++ REQUIRED)
+# if (CONFIG++_FOUND)
+#   include_directories(${CONFIG++_INCLUDE_DIRS})
+#   target_link_libraries (gm2d3 ${CONFIG++_LIBRARIES})
+#   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lconfig++")
+# endif (CONFIG++_FOUND)
+
+LINK_DIRECTORIES(/usr/lib/arm-linux-gnueabihf/)
+TARGET_LINK_LIBRARIES(gm2d3 config++ pigpio rt)
+
+find_package (Threads)
+target_link_libraries (gm2d3 ${CMAKE_THREAD_LIBS_INIT})
 
 configure_file( cmake/gm2d3_cmake.h.in ${CMAKE_SOURCE_DIR}/cmake/gm2d3_cmake.h )
 include_directories( ${CMAKE_SOURCE_DIR}/cmake/ )

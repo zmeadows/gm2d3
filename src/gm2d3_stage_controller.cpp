@@ -1,7 +1,6 @@
 #include "gm2d3_stage_controller.h"
 #include "gm2d3_util.h"
 
-#include <thread>
 #include <Fl/Fl.H>
 
 StageController::StageController(const Setting &c) :
@@ -41,16 +40,16 @@ StageController::change_motor_state(MotorState next_motor_state)
 
     if (next_motor_state == MotorState::OFF)
     {
-        if (current_motor_state == MotorState::OFF) 
+        if (current_motor_state == MotorState::OFF)
         {
             debug_print(1, "Motor appears to already be stopped. Issuing stop command again.");
-        } 
+        }
 
         internal_change_motor_state(MotorState::OFF);
         current_motor_state = MotorState::OFF;
     }
 
-    else 
+    else
     {
         if (current_motor_state == next_motor_state)
         {

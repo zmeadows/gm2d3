@@ -6,6 +6,7 @@
 #include <vector>
 #include <utility>
 #include <iostream>
+#include <thread>
 
 #include <libconfig.h++>
 using namespace libconfig;
@@ -27,7 +28,7 @@ const std::map<Encoder,bool> EMPTY_ENCODER_STATE = {
     {Encoder::A, false},
     {Encoder::B, false},
     {Encoder::C, false},
-    {Encoder::D, false} 
+    {Encoder::D, false}
 };
 
 std::pair<double,double> config_get_bounds(const Setting &c);

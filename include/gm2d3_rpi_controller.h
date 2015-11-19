@@ -3,18 +3,20 @@
 #include "gm2d3_stage_controller.h"
 #include "gm2d3_const.h"
 
+#include <memory>
+#include <iostream>
+
 class RaspberryPiController : public StageController
 {
     public:
-        RaspberryPiController(std::unique_ptr<Config> const& cfg);
+        RaspberryPiController(const Setting &cfg);
 
-        void move_forward() {
-            std::cout << cw_gpio;
-        };
-        void move_backward() {
-            std::cout << ccw_gpio;
-        };
+        ControllerType controller_type(void) const { return ControllerType::RaspberryPi; }
 
     private:
-        const int cw_gpio, ccw_gpio;
+        const unsigned int motor_cw_gpio, motor_ccw_gpio;
+
+        void internal_change_motor_state(MotorState m);
+        int internal_monitor(void);
+        void shutdown(void);
 };

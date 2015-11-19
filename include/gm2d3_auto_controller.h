@@ -9,6 +9,7 @@
 #include <Fl/Fl_Menu_Button.H>
 
 #include <map>
+#include <memory>
 
 class GM2D3AutoControlInput : public Fl_Input {
     public:

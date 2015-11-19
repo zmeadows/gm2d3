@@ -8,7 +8,7 @@
 
 #include <map>
 #include <iostream>
-#include <memory.h>
+#include <memory>
 
 #include "gm2d3_stage_controller.h"
 

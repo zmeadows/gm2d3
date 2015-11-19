@@ -6,6 +6,7 @@
 #include <Fl/Fl_Light_Button.H>
 
 #include <map>
+#include <memory>
 
 #include "gm2d3_const.h"
 

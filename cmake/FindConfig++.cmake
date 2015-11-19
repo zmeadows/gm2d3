@@ -1,6 +1,6 @@
-FIND_PATH(CONFIG++_INCLUDE_DIR libconfig.h++ /usr/include /usr/local/include)
+FIND_PATH(CONFIG++_INCLUDE_DIR libconfig.h++ /usr/include/ /usr/local/include)
 
-FIND_LIBRARY(CONFIG++_LIBRARY NAMES config++ PATH /usr/lib /usr/local/lib /usr/lib/i386-linux-gnu/) 
+FIND_LIBRARY(CONFIG++_LIBRARY NAMES config++ libconfig++ libconfig config PATH /usr/lib /usr/local/lib /usr/lib/arm-linux-gnueabihf/)
 
 IF (CONFIG++_INCLUDE_DIR AND CONFIG++_LIBRARY)
     SET(CONFIG++_FOUND TRUE)
