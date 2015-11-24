@@ -44,7 +44,8 @@ void GM2D3StageHistoryPlot::set_line_color(Fl_Color color) { line_color = color;
 
 void GM2D3StageHistoryPlot::add_point(double val)
 {
-    add(val, std::to_string(val).c_str(), line_color);
+    //add(val, std::to_string(val).c_str(), line_color);
+    add(val, nullptr, line_color);
 }
 
 GM2D3StageHistoryPlot::~GM2D3StageHistoryPlot() {}

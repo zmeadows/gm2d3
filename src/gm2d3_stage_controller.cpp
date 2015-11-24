@@ -3,17 +3,21 @@
 
 #include <Fl/Fl.H>
 
-StageController::StageController(const Setting &c) :
+StageController::StageController(Axis _axis, gui_encoder_callback _gec, const void *_gm2d3,
+        const Setting &c) :
     bounds(config_get_bounds(c.lookup("bounds"))),
     cypher(config_get_cypher(c.lookup("cypher"))),
-    current_motor_state(MotorState::OFF),
-    encoder_state(EMPTY_ENCODER_STATE),
-    prev_encoder_state(EMPTY_ENCODER_STATE),
+    gm2d3(_gm2d3),
+    gec(_gec),
     resolution(double(c.lookup("resolution"))),
     current_position(0.0),
     goal_position(0.0),
     calibrated(false),
-    cypher_bits(unsigned(c.lookup("cypher_bits")))
+    cypher_bits(unsigned(c.lookup("cypher_bits"))),
+    axis(_axis),
+    current_motor_state(MotorState::OFF),
+    current_encoder_state(EMPTY_ENCODER_STATE),
+    previous_encoder_state(EMPTY_ENCODER_STATE)
 {
         if ((bounds.second - bounds.first) <= 0) {
             throw ControllerException("Invalid controller bounds");
@@ -33,6 +37,12 @@ StageController::StageController(const Setting &c) :
 
         cypher_accumulator.resize(cypher_bits);
         std::fill(cypher_accumulator.begin(), cypher_accumulator.end(), false);
+
+        high_resolution_clock::time_point init_time = high_resolution_clock::now();
+        for (auto &e : ALL_ENCODERS)
+        {
+            last_encoder_updates[e] = init_time;
+        }
 }
 
 void
@@ -69,17 +79,74 @@ StageController::change_motor_state(MotorState next_motor_state)
 void
 StageController::monitor()
 {
-    int ret_code = internal_monitor();
+//     int ret_code = internal_monitor();
+//
+//     switch (ret_code)
+//     {
+//         case 0:
+//             debug_print(1, "successfully moved motor");
+//         case -1:
+//             debug_print(1, "failed to move motor");
+//         default:
+//             break;
+//     }
+}
 
-    switch (ret_code)
+void
+StageController::update_encoder_state(Encoder e, bool state)
+{
+    std::lock_guard<std::mutex> guard(encoder_mutex);
+
+    high_resolution_clock::time_point current_time = high_resolution_clock::now();
+
+    duration<double> time_span = duration_cast<duration<double>>
+        (current_time - last_encoder_updates[e]);
+
+    // TODO: check that this state transition makes sense, throw exception if it doesn't
+    previous_encoder_state[e] = !state;
+    current_encoder_state[e] = state;
+
+    switch (e)
     {
-        case 0:
-            debug_print(1, "successfully moved motor");
-        case -1:
-            debug_print(1, "failed to move motor");
-        default:
+        case Encoder::A:
+            current_position += resolution/2.0;
+            break;
+
+        case Encoder::B:
+            current_position += resolution/2.0;
+            break;
+
+        case Encoder::C:
+            break;
+
+        case Encoder::D:
             break;
     }
+
+    // switch (current_motor_state)
+    // {
+    //     case MotorState::OFF:
+    //         debug_print(0, "ERROR: encoder state change while motor is supposed to be off");
+    //         break;
+
+    //     case MotorState::CW:
+    //         break;
+
+    //     case MotorState::CCW:
+    //         break;
+
+    // }
+
+    std::cout << axis_to_string(axis) << " :"
+        << current_encoder_state[Encoder::A]
+        << current_encoder_state[Encoder::B]
+        << current_encoder_state[Encoder::C]
+        << current_encoder_state[Encoder::D]
+        << " :" << time_span.count()
+        << std::endl;
+    std::cout << std::endl;
+
+    last_encoder_updates[e] = current_time;
 }
 
 void

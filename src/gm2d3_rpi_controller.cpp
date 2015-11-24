@@ -1,5 +1,6 @@
 #include "gm2d3_rpi_controller.h"
 
+#ifdef GM2D3_USE_RPI
 #include <pigpio.h>
 
 RaspberryPiController::RaspberryPiController(const Setting &cfg)
@@ -80,3 +81,5 @@ config_get_encoder_gpios(const Setting &c)
 
     return gpios;
 }
+
+#endif
