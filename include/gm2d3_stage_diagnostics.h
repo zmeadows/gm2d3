@@ -12,6 +12,8 @@
 
 #include "gm2d3_stage_controller.h"
 
+#include <Fl/Fl.H>
+
 
 class GM2D3StageHistoryPlot : public Fl_Chart
 {
@@ -21,7 +23,6 @@ class GM2D3StageHistoryPlot : public Fl_Chart
 
         const Axis axis;
 
-        void set_line_color(Fl_Color color);
         void add_point(double val);
 
         void enable();
@@ -36,6 +37,11 @@ class GM2D3StageIndicators
     public:
         GM2D3StageIndicators(int x, int y, int w);
         virtual ~GM2D3StageIndicators();
+
+        void set_dial_state(Encoder e, bool state);
+
+        void enable();
+        void disable();
 
     private:
         std::unique_ptr<Fl_Box> indicator_box;

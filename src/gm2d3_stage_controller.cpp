@@ -95,25 +95,35 @@ StageController::monitor()
 void
 StageController::update_encoder_state(Encoder e, bool state)
 {
-    std::lock_guard<std::mutex> guard(encoder_mutex);
 
     high_resolution_clock::time_point current_time = high_resolution_clock::now();
 
     duration<double> time_span = duration_cast<duration<double>>
         (current_time - last_encoder_updates[e]);
 
+    // TODO: add exceptions here
+    if (time_span.count() < 0) { return; }
+
+    if (time_span.count() < JITTER_TIME) { return; }
+
+    if (get_current_motor_state() == MotorState::OFF) { return; }
+
+    std::lock_guard<std::mutex> guard(encoder_mutex);
+
     // TODO: check that this state transition makes sense, throw exception if it doesn't
     previous_encoder_state[e] = !state;
     current_encoder_state[e] = state;
 
+    double delta = resolution/2.0 * (get_current_motor_state() == MotorState::CW ?  1 : -1);
+
     switch (e)
     {
         case Encoder::A:
-            current_position += resolution/2.0;
+            current_position += delta;
             break;
 
         case Encoder::B:
-            current_position += resolution/2.0;
+            current_position += delta;
             break;
 
         case Encoder::C:
@@ -123,30 +133,17 @@ StageController::update_encoder_state(Encoder e, bool state)
             break;
     }
 
-    // switch (current_motor_state)
-    // {
-    //     case MotorState::OFF:
-    //         debug_print(0, "ERROR: encoder state change while motor is supposed to be off");
-    //         break;
-
-    //     case MotorState::CW:
-    //         break;
-
-    //     case MotorState::CCW:
-    //         break;
-
-    // }
-
-    std::cout << axis_to_string(axis) << " :"
-        << current_encoder_state[Encoder::A]
-        << current_encoder_state[Encoder::B]
-        << current_encoder_state[Encoder::C]
-        << current_encoder_state[Encoder::D]
-        << " :" << time_span.count()
-        << std::endl;
-    std::cout << std::endl;
+    // std::cout << axis_to_string(axis) << " :"
+    //     << current_encoder_state[Encoder::A]
+    //     << current_encoder_state[Encoder::B]
+    //     << current_encoder_state[Encoder::C]
+    //     << current_encoder_state[Encoder::D]
+    //     << " :" << time_span.count()
+    //     << std::endl;
+    // std::cout << std::endl;
 
     last_encoder_updates[e] = current_time;
+    alert_gui(e, state ? 1 : 0);
 }
 
 void

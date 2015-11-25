@@ -23,7 +23,7 @@ enum class ControllerType {
 std::pair<double,double> config_get_bounds(const Setting &c);
 std::map<int,double> config_get_cypher(const Setting &c);
 
-typedef void (*gui_encoder_callback)(Axis, Encoder, int, const void *);
+typedef void (*gui_encoder_callback)(Axis, Encoder, bool, const void *);
 
 class StageController {
     public:
@@ -39,9 +39,9 @@ class StageController {
         double get_current_position() const { return current_position; }
         MotorState get_current_motor_state(void) const { return current_motor_state; }
         bool is_calibrated() const { return calibrated; }
-        std::map<Encoder, bool> get_encoder_state(void) { 
+        std::map<Encoder, bool> get_encoder_state(void) {
             std::lock_guard<std::mutex> guard(encoder_mutex);
-            return current_encoder_state; 
+            return current_encoder_state;
         }
 
         virtual ControllerType controller_type(void) const = 0;
@@ -57,7 +57,6 @@ class StageController {
     private:
         const void *gm2d3;
         const gui_encoder_callback gec;
-
         void alert_gui(Encoder e, int level) { gec(axis, e, level, gm2d3); }
 
         const double resolution;

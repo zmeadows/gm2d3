@@ -37,6 +37,8 @@ const std::map<Encoder,bool> EMPTY_ENCODER_STATE = {
     {Encoder::D, false}
 };
 
+const double JITTER_TIME = 0.01;
+
 // GUI
 const int WINDOW_EDGE_GAP = 20;
 const int ADJACENT_SPACING = 5;

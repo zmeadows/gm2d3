@@ -10,6 +10,20 @@ GM2D3StageHistoryPlot::GM2D3StageHistoryPlot(int x, int y, int w, int h, Axis _a
 {
     type(FL_LINE_CHART);
     color(fl_rgb_color(240,240,240));
+    switch (axis)
+    {
+        case Axis::AZIMUTHAL:
+            line_color = LIGHT_RED();
+            break;
+
+        case Axis::VERTICAL:
+            line_color = LIGHT_BLUE();
+            break;
+
+        case Axis::RADIAL:
+            line_color = LIGHT_GREEN();
+            break;
+    }
     disable();
 }
 
@@ -40,11 +54,9 @@ GM2D3StageHistoryPlot::enable()
     }
 }
 
-void GM2D3StageHistoryPlot::set_line_color(Fl_Color color) { line_color = color; }
-
+//TODO: label every Nth point
 void GM2D3StageHistoryPlot::add_point(double val)
 {
-    //add(val, std::to_string(val).c_str(), line_color);
     add(val, nullptr, line_color);
 }
 
@@ -72,6 +84,7 @@ GM2D3StageIndicators::GM2D3StageIndicators(int x, int y, int w) :
     dials[Encoder::A]->label("A");
     dials[Encoder::A]->align(FL_ALIGN_CENTER);
     dials[Encoder::A]->labelfont(FL_BOLD);
+    dials[Encoder::A]->activate();
 
     dials[Encoder::B] = std::unique_ptr<Fl_Dial>(new Fl_Dial(x_0 + dial_width + 0.1*w2, y_0,
             dial_width, dial_width));
@@ -102,6 +115,24 @@ GM2D3StageIndicators::GM2D3StageIndicators(int x, int y, int w) :
 }
 
 GM2D3StageIndicators::~GM2D3StageIndicators() {}
+
+void
+GM2D3StageIndicators::set_dial_state(Encoder e, bool state)
+{
+    Fl::lock();
+    if (state) {
+        dials[e]->color(on_color);
+        dials[e]->color2(on_color);
+        dials[e]->redraw();
+    } else {
+        dials[e]->color(off_color);
+        dials[e]->color2(off_color);
+        dials[e]->redraw();
+    }
+    Fl::awake();
+    Fl::unlock();
+}
+
 
 
 GM2D3StageDiagnostics::GM2D3StageDiagnostics(int x, int y, int w, int h, Axis axis)

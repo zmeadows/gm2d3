@@ -30,8 +30,8 @@ class GM2D3 {
         void attach_controller(Axis axis, ControllerType ct, const Setting &c);
         void setup_controllers(void);
 
-        static void static_encoder_state_callback(Axis a, Encoder e, int level, const void *gm2d3);
-        void encoder_state_callback(Axis a, Encoder e, int level);
+        static void static_encoder_state_callback(Axis a, Encoder e, bool state, const void *gm2d3);
+        void encoder_state_callback(Axis a, Encoder e, bool state);
 
         static void static_load_config_callback(Fl_Widget *, void *gm2d3);
         void load_config_callback(Fl_Widget *);

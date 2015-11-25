@@ -196,14 +196,15 @@ GM2D3::detach_plot_threads(void)
 
 
 void
-GM2D3::static_encoder_state_callback(Axis a, Encoder e, int level, const void *gm2d3)
+GM2D3::static_encoder_state_callback(Axis a, Encoder e, bool state, const void *gm2d3)
 {
-    ((GM2D3 *) gm2d3)->encoder_state_callback(a,e,level);
+    ((GM2D3 *) gm2d3)->encoder_state_callback(a,e,state);
 }
 
 void
-GM2D3::encoder_state_callback(Axis a, Encoder e, int level)
+GM2D3::encoder_state_callback(Axis a, Encoder e, bool state)
 {
+    window->diagnostics[a]->indicators->set_dial_state(e, state);
 }
 
 void
