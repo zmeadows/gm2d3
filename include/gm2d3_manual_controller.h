@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "gm2d3_const.h"
+#include "gm2d3_fltk_util.h"
 
 class GM2D3ManualControlButton : public Fl_Button {
     public:

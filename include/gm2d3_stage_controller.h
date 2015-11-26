@@ -74,7 +74,21 @@ class StageController {
 
 class ControllerException {
     public:
-        ControllerException(std::string _msg) : msg(_msg) {}
+
+        enum class Type {
+            Programmer,
+            Config,
+            SafetyWarning
+        };
+
+        ControllerException(ControllerException::Type _type, std::string _msg, unsigned int _linum, std::string _filename) 
+            : type(_type), msg(_msg), linum(_linum), filename(_filename) {}
+
+        const ControllerException::Type type;
         const std::string msg;
+        const unsigned int linum;
+        const std::string filename;
 };
+
+#define make_gm2d3_exception(t,m) ControllerException(t,m,__LINE__,__FILE__)
 

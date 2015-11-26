@@ -19,18 +19,18 @@ StageController::StageController(Axis _axis, gui_encoder_callback _gec, const vo
     previous_encoder_state(EMPTY_ENCODER_STATE)
 {
     if ((bounds.second - bounds.first) <= 0) {
-        throw ControllerException("Invalid controller bounds");
+        throw make_gm2d3_exception(ControllerException::Type::Config, "Invalid controller bounds");
     }
 
     if (resolution <= 0 || resolution >= bounds.second - bounds.first) {
-        throw ControllerException("Invalid resolution");
+        throw make_gm2d3_exception(ControllerException::Type::Config, "Invalid resolution");
     }
 
     for (auto& kv : cypher)
     {
         if (kv.second > bounds.second || kv.second < bounds.first)
         {
-            throw ControllerException("Cypher value outside min/max bounds");
+            throw make_gm2d3_exception(ControllerException::Type::Config, "Cypher value outside min/max bounds");
         }
     }
 

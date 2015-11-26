@@ -27,8 +27,10 @@ class GM2D3 {
 
         OperatingState gm2d3_state;
 
-        bool process_config_file(void);
-        void unprocess_config_file(void);
+        void update_stats(void);
+
+        void process_config_file(void);
+        void reset(void);
 
         void attach_controller(Axis axis, ControllerType ct, const Setting &c);
         void setup_controllers(void);
