@@ -6,7 +6,8 @@
 
 GM2D3StageHistoryPlot::GM2D3StageHistoryPlot(int x, int y, int w, int h, Axis _axis) :
     Fl_Chart(x,y,w,h),
-    axis(_axis)
+    axis(_axis),
+    n(0)
 {
     type(FL_LINE_CHART);
     color(fl_rgb_color(240,240,240));
@@ -54,10 +55,16 @@ GM2D3StageHistoryPlot::enable()
     }
 }
 
-//TODO: label every Nth point
 void GM2D3StageHistoryPlot::add_point(double val)
 {
-    add(val, nullptr, line_color);
+    if (n == 0) {
+        add(val, std::to_string(val).substr(0,5).c_str(), line_color);
+        n++;
+    } else
+    {
+        add(val, nullptr, line_color);
+        n == 4 ? n = 0 : n++;
+    }
 }
 
 GM2D3StageHistoryPlot::~GM2D3StageHistoryPlot() {}
@@ -111,6 +118,8 @@ GM2D3StageIndicators::GM2D3StageIndicators(int x, int y, int w) :
     dials[Encoder::D]->label("D");
     dials[Encoder::D]->align(FL_ALIGN_CENTER);
     dials[Encoder::D]->labelfont(FL_BOLD);
+
+    disable();
 }
 
 GM2D3StageIndicators::~GM2D3StageIndicators() {}
@@ -128,6 +137,33 @@ GM2D3StageIndicators::set_dial_state(Encoder e, bool state)
         dials[e]->color2(off_color);
         dials[e]->redraw();
     }
+    Fl::awake();
+    Fl::unlock();
+}
+
+void
+GM2D3StageIndicators::enable()
+{
+    Fl::lock();
+    for (auto &e : ALL_ENCODERS) {
+        dials[e]->activate();
+    }
+    indicator_box->label("");
+    Fl::awake();
+    Fl::unlock();
+}
+
+void
+GM2D3StageIndicators::disable()
+{
+    Fl::lock();
+    for (auto &e : ALL_ENCODERS) {
+        dials[e]->deactivate();
+    }
+
+    indicator_box->deactivate();
+    indicator_box->align(FL_ALIGN_CENTER);
+    indicator_box->label("PAUSED");
     Fl::awake();
     Fl::unlock();
 }

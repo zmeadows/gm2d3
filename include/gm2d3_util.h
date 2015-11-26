@@ -16,7 +16,13 @@ using namespace libconfig;
 
 extern int gDEBUG_LEVEL;
 
-void debug_print(int level_guard, std::string msg);
+enum class DebugStatementType {
+    SUCCESS,
+    WARNING,
+    ERROR
+};
+
+void debug_print(int level_guard, DebugStatementType type, std::string msg);
 
 std::string axis_to_string(Axis axis);
 

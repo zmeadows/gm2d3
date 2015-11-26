@@ -45,7 +45,7 @@ GM2D3::attach_controller(Axis axis, ControllerType ct, const Setting &c)
 #endif
 
     } else {
-        debug_print(0, "ERROR: unrecognized controller type");
+        debug_print(0, DebugStatementType::ERROR, "Unrecognized controller type.");
     }
 
 }
@@ -74,7 +74,7 @@ GM2D3::process_config_file()
             ct = ControllerType::Galil;
 #endif
         } else {
-            debug_print(0, "ERROR: unrecognized controller type");
+            debug_print(0, DebugStatementType::ERROR, "Unrecognized controller type: " + ctype_str);
             return false;
         }
 
@@ -95,26 +95,26 @@ GM2D3::process_config_file()
 
     catch(const SettingNotFoundException &nfex)
     {
-        debug_print(0, "setting not found!");
+        debug_print(0, DebugStatementType::ERROR, "setting not found!");
         return false;
     }
 
     catch(const SettingTypeException &tex)
     {
-        debug_print(0, "setting of wrong type! " + std::string(tex.getPath()) );
+        debug_print(0, DebugStatementType::ERROR, "setting of wrong type! " + std::string(tex.getPath()) );
         return false;
     }
 
     catch(const ControllerException &cex)
     {
-        debug_print(0, cex.msg);
+        debug_print(0, DebugStatementType::ERROR, cex.msg);
         return false;
     }
 
     gm2d3_state = OperatingState::WAITING;
 
     window->options->config_loader->flash_config_path(FL_GREEN);
-    debug_print(1, "Successfully attached controller(s)");
+    debug_print(1, DebugStatementType::SUCCESS, "Successfully attached controller(s)");
     return true;
 }
 
@@ -164,6 +164,7 @@ GM2D3::enable_plot_callback(Fl_Widget *enable_plot_checkbox)
                 window->diagnostics[c.first]->history_plot->disable();
             }
             break;
+
         case 1:
             *keep_updating_plots = true;
             for (auto &c : controllers) {
@@ -187,6 +188,7 @@ GM2D3::enable_indicators_callback(Fl_Widget *enable_indicators_checkbox)
                 for (auto &e : ALL_ENCODERS) {
                     window->diagnostics[c.first]->indicators->set_dial_state(e, false);
                 }
+                window->diagnostics[c.first]->indicators->disable();
             }
             break;
 
@@ -196,6 +198,7 @@ GM2D3::enable_indicators_callback(Fl_Widget *enable_indicators_checkbox)
                 for (auto &e : c.second->get_encoder_state()) {
                     window->diagnostics[c.first]->indicators->set_dial_state(e.first, e.second);
                 }
+                window->diagnostics[c.first]->indicators->enable();
             }
             break;
     }
@@ -263,7 +266,7 @@ GM2D3::load_config_callback(Fl_Widget *)
 
         catch(const FileIOException &fioex)
         {
-            debug_print(1, "File I/O error encountered when attempting to read configuration file: " + config_path);
+            debug_print(0, DebugStatementType::ERROR, "File I/O error encountered when attempting to read configuration file: " + config_path);
             window->options->config_loader->set_path_display_color(FL_RED);
             return;
         }
@@ -278,12 +281,12 @@ GM2D3::load_config_callback(Fl_Widget *)
             err_msg += pex.getError();
             err_msg += ")";
 
-            debug_print(1, err_msg);
+            debug_print(0, DebugStatementType::ERROR, err_msg);
             window->options->config_loader->set_path_display_color(FL_RED);
             return;
         }
 
-        debug_print(1, "Successfully parsed config file: " + config_path);
+        debug_print(0, DebugStatementType::SUCCESS, "Successfully parsed config file: " + config_path);
         process_config_file();
     }
 }

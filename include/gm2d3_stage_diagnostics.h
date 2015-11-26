@@ -30,6 +30,7 @@ class GM2D3StageHistoryPlot : public Fl_Chart
         void disable();
 
     private:
+        unsigned int n;
         Fl_Color line_color;
 };
 

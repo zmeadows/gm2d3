@@ -7,13 +7,32 @@
 int gDEBUG_LEVEL = 0;
 
 void
-debug_print(int level_guard, std::string msg)
+debug_print(int level_guard, DebugStatementType type, std::string msg)
 {
+    std::string prefix = 
+        "[GM2D3::v" 
+        + std::to_string(GM2D3_VERSION_MAJOR) 
+        + "." + std::to_string(GM2D3_VERSION_MINOR) 
+        + "] ";
+
     if (level_guard <= gDEBUG_LEVEL)
     {
-        std::cout << "[GM2D3::v" << GM2D3_VERSION_MAJOR << "." << GM2D3_VERSION_MINOR << "] "
-            << msg << std::endl;
+        switch (type)
+        {
+            case DebugStatementType::SUCCESS:
+                std::cout << termcolor::green << prefix << termcolor::reset;
+                break;
+            case DebugStatementType::WARNING:
+                std::cout << termcolor::yellow << prefix << termcolor::reset;
+                break;
+            case DebugStatementType::ERROR:
+                std::cout << termcolor::red << prefix << termcolor::reset;
+                break;
+        }
+
+        std::cout << msg << std::endl;
     }
+
 }
 
 std::string

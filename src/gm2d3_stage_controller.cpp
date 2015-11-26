@@ -52,7 +52,7 @@ StageController::change_motor_state(MotorState next_motor_state)
     {
         if (current_motor_state == MotorState::OFF)
         {
-            debug_print(1, "Motor appears to already be stopped. Issuing stop command again.");
+            debug_print(1, DebugStatementType::WARNING, "Motor appears to already be stopped. Issuing stop command again.");
         }
 
         internal_change_motor_state(MotorState::OFF);
@@ -63,7 +63,7 @@ StageController::change_motor_state(MotorState next_motor_state)
     {
         if (current_motor_state == next_motor_state)
         {
-            debug_print(1, "Motor appears to already be moving in that direction.");
+            debug_print(1, DebugStatementType::WARNING, "Motor appears to already be moving in that direction.");
         }
 
         else
@@ -140,13 +140,13 @@ StageController::update_encoder_state(Encoder e, bool state)
 StageController::move(double new_position)
 {
     if (new_position > bounds.second || new_position < bounds.first) {
-        debug_print(0, "Requested position not within stage bounds!");
+        debug_print(0, DebugStatementType::WARNING, "Requested position not within stage bounds!");
         return;
     }
 
     // TODO: does this constraint need to be increased/relaxed?
     if (fabs(new_position - current_position) <= resolution) {
-        debug_print(0, "Already at position to within stage resolution");
+        debug_print(0, DebugStatementType::WARNING, "Already at position to within stage resolution");
         return;
     }
 
