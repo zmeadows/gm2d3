@@ -27,8 +27,7 @@ typedef void (*gui_encoder_callback)(Axis, Encoder, bool, const void *);
 
 class StageController {
     public:
-        StageController(Axis _axis, gui_encoder_callback _gec, const void *_gm2d3,
-                const Setting &c);
+        StageController(Axis _axis, gui_encoder_callback _gec, const void *_gm2d3, const Setting &c);
 
         const std::pair<double,double> bounds;
         const std::map<int,double> cypher;
@@ -53,11 +52,10 @@ class StageController {
         virtual void internal_change_motor_state(MotorState m) = 0;
         virtual void shutdown(void) = 0;
 
-
     private:
         const void *gm2d3;
         const gui_encoder_callback gec;
-        void alert_gui(Encoder e, int level) { gec(axis, e, level, gm2d3); }
+        void alert_gui(Encoder e, bool state) { gec(axis, e, state, gm2d3); }
 
         const double resolution;
         double current_position, goal_position;

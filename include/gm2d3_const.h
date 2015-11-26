@@ -1,7 +1,5 @@
 #pragma once
 
-#include <Fl/fl_draw.H>
-
 #include <vector>
 #include <map>
 
@@ -21,6 +19,7 @@ enum class MotorState {
 
 const std::vector<MotorState> ALL_MOTOR_STATES = { MotorState::CW, MotorState::CCW, MotorState::OFF };
 
+
 enum class Encoder {
     A, // evenly spaced high-res clock
     B, // in quadrature with A
@@ -37,6 +36,15 @@ const std::map<Encoder,bool> EMPTY_ENCODER_STATE = {
     {Encoder::D, false}
 };
 
+enum class OperatingState {
+    DETACHED,
+    WAITING,
+    AUTO_TRANSLATION,
+    MANUAL_TRANSLATION,
+    CALIBRATION,
+    SHUTTING_DOWN
+};
+
 const double JITTER_TIME = 0.01;
 
 // GUI
@@ -44,13 +52,3 @@ const int WINDOW_EDGE_GAP = 20;
 const int ADJACENT_SPACING = 5;
 const int BOX_EDGE_GAP = 7;
 
-Fl_Color LIGHT_RED();
-Fl_Color DARK_RED();
-
-Fl_Color LIGHT_GREEN();
-Fl_Color DARK_GREEN();
-
-Fl_Color LIGHT_BLUE();
-Fl_Color DARK_BLUE();
-
-Fl_Color YELLOW();

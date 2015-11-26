@@ -18,7 +18,6 @@ GM2D3::setup_controllers(void)
         min = c.second->bounds.first;
         max = c.second->bounds.second;
         window->diagnostics[c.first]->history_plot->bounds(min,max);
-        std::cout << min << " " << max << std::endl;
     }
 
     window->auto_control->activate();
@@ -112,10 +111,10 @@ GM2D3::process_config_file()
         return false;
     }
 
-
+    gm2d3_state = OperatingState::WAITING;
 
     window->options->config_loader->flash_config_path(FL_GREEN);
-    debug_print(1, "Successfully processed config file");
+    debug_print(1, "Successfully attached controller(s)");
     return true;
 }
 
@@ -146,6 +145,13 @@ GM2D3::static_enable_plot_callback(Fl_Widget *enable_plot_checkbox, void *gm2d3)
 }
 
 void
+GM2D3::static_enable_indicators_callback(Fl_Widget *enable_indicators_checkbox,
+        void *gm2d3)
+{
+    ((GM2D3 *) gm2d3)->enable_indicators_callback(enable_indicators_checkbox);
+}
+
+void
 GM2D3::enable_plot_callback(Fl_Widget *enable_plot_checkbox)
 {
     Fl_Check_Button *b = (Fl_Check_Button*) enable_plot_checkbox;
@@ -164,6 +170,33 @@ GM2D3::enable_plot_callback(Fl_Widget *enable_plot_checkbox)
                 window->diagnostics[c.first]->history_plot->enable();
             }
             detach_plot_threads();
+            break;
+    }
+}
+
+void
+GM2D3::enable_indicators_callback(Fl_Widget *enable_indicators_checkbox)
+{
+    Fl_Check_Button *b = (Fl_Check_Button*) enable_indicators_checkbox;
+
+    switch (b->value())
+    {
+        case 0:
+            keep_updating_indicators = false;
+            for (auto &c : controllers) {
+                for (auto &e : ALL_ENCODERS) {
+                    window->diagnostics[c.first]->indicators->set_dial_state(e, false);
+                }
+            }
+            break;
+
+        case 1:
+            keep_updating_indicators = true;
+            for (auto &c : controllers) {
+                for (auto &e : c.second->get_encoder_state()) {
+                    window->diagnostics[c.first]->indicators->set_dial_state(e.first, e.second);
+                }
+            }
             break;
     }
 }
@@ -204,7 +237,10 @@ GM2D3::static_encoder_state_callback(Axis a, Encoder e, bool state, const void *
 void
 GM2D3::encoder_state_callback(Axis a, Encoder e, bool state)
 {
-    window->diagnostics[a]->indicators->set_dial_state(e, state);
+
+    if (keep_updating_indicators) {
+        window->diagnostics[a]->indicators->set_dial_state(e, state);
+    }
 }
 
 void
@@ -248,12 +284,13 @@ GM2D3::load_config_callback(Fl_Widget *)
         }
 
         debug_print(1, "Successfully parsed config file: " + config_path);
-
         process_config_file();
     }
 }
 
 GM2D3::GM2D3(int window_width, int window_height)
+    : keep_updating_indicators(false),
+    gm2d3_state(OperatingState::DETACHED)
 {
     window = std::unique_ptr<GM2D3Window>(new GM2D3Window(window_width,window_height,"GM2D3"));
     window->end();
@@ -261,10 +298,9 @@ GM2D3::GM2D3(int window_width, int window_height)
 
     keep_updating_plots      = std::make_shared<bool>();
     *keep_updating_plots     = false;
-    keep_updating_indicators = false;
-    keep_updating_stats      = false;
 
     window->options->config_loader->callback(static_load_config_callback, (void *) this);
     window->options->enable_history_plot->callback(static_enable_plot_callback, (void *) this);
+    window->options->enable_indicators->callback(static_enable_indicators_callback, (void *) this);
 
 }

@@ -1,11 +1,12 @@
 #include "gm2d3_manual_controller.h"
+#include "gm2d3_util.h"
 
 GM2D3ManualControlButton::GM2D3ManualControlButton(int x, int y, int w, int h,
         Axis _axis, MotorState _motor_state) :
     Fl_Button(x,y,w,h),
     axis(_axis),
     motor_state(_motor_state)
-{ 
+{
     type(FL_RADIO_BUTTON);
     down_color(YELLOW());
 
@@ -78,7 +79,7 @@ GM2D3ManualControlGUI::GM2D3ManualControlGUI(int x, int y, int w, int h)
     vertical_button_pack->align(FL_ALIGN_LEFT);
     vertical_button_pack->label("VERTICAL: ");
 
-    buttons[Axis::VERTICAL][MotorState::CW] = 
+    buttons[Axis::VERTICAL][MotorState::CW] =
         std::unique_ptr<GM2D3ManualControlButton> (new GM2D3ManualControlButton
                 (0, 0, button_width, button_height, Axis::VERTICAL, MotorState::CW));
 
@@ -103,16 +104,16 @@ GM2D3ManualControlGUI::GM2D3ManualControlGUI(int x, int y, int w, int h)
     radial_button_pack->align(FL_ALIGN_LEFT);
     radial_button_pack->label("RADIAL: ");
 
-    buttons[Axis::RADIAL][MotorState::CW] = 
+    buttons[Axis::RADIAL][MotorState::CW] =
         std::unique_ptr<GM2D3ManualControlButton>(new GM2D3ManualControlButton
                 (0, 0, button_width, button_height, Axis::RADIAL, MotorState::CW));
 
-    buttons[Axis::RADIAL][MotorState::CCW] = 
+    buttons[Axis::RADIAL][MotorState::CCW] =
         std::unique_ptr<GM2D3ManualControlButton>(new GM2D3ManualControlButton
                 (button_width + ADJACENT_SPACING, 0, button_width, button_height,
                  Axis::RADIAL, MotorState::CCW));
 
-    buttons[Axis::RADIAL][MotorState::OFF] = 
+    buttons[Axis::RADIAL][MotorState::OFF] =
         std::unique_ptr<GM2D3ManualControlButton>(new GM2D3ManualControlButton
                 (2*button_width + 2*ADJACENT_SPACING, 0, button_width, button_height,
                  Axis::RADIAL, MotorState::OFF));

@@ -2,6 +2,7 @@
 
 #include "gm2d3_window.h"
 #include "gm2d3_stage_controller.h"
+#include "gm2d3_const.h"
 
 #include <map>
 #include <memory>
@@ -22,7 +23,9 @@ class GM2D3 {
         void detach_plot_threads(void);
         std::shared_ptr<bool> keep_updating_plots;
         bool keep_updating_indicators;
-        bool keep_updating_stats;
+        // bool keep_updating_stats;
+
+        OperatingState gm2d3_state;
 
         bool process_config_file(void);
         void unprocess_config_file(void);
@@ -41,4 +44,7 @@ class GM2D3 {
 
         static void static_enable_plot_callback(Fl_Widget *enable_plot_checkbox, void *gm2d3);
         void enable_plot_callback(Fl_Widget *enable_plot_checkbox);
+
+        static void static_enable_indicators_callback(Fl_Widget *enable_plot_checkbox, void *gm2d3);
+        void enable_indicators_callback(Fl_Widget *enable_indicators_checkbox);
 };

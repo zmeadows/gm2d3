@@ -3,9 +3,8 @@
 
 #include <Fl/Fl.H>
 
-StageController::StageController(Axis _axis, gui_encoder_callback _gec, const void *_gm2d3,
-        const Setting &c) :
-    bounds(config_get_bounds(c.lookup("bounds"))),
+StageController::StageController(Axis _axis, gui_encoder_callback _gec, const void *_gm2d3, const Setting &c)
+    : bounds(config_get_bounds(c.lookup("bounds"))),
     cypher(config_get_cypher(c.lookup("cypher"))),
     gm2d3(_gm2d3),
     gec(_gec),
@@ -19,33 +18,33 @@ StageController::StageController(Axis _axis, gui_encoder_callback _gec, const vo
     current_encoder_state(EMPTY_ENCODER_STATE),
     previous_encoder_state(EMPTY_ENCODER_STATE)
 {
-        if ((bounds.second - bounds.first) <= 0) {
-            throw ControllerException("Invalid controller bounds");
-        }
+    if ((bounds.second - bounds.first) <= 0) {
+        throw ControllerException("Invalid controller bounds");
+    }
 
-        if (resolution <= 0 || resolution >= bounds.second - bounds.first) {
-            throw ControllerException("Invalid resolution");
-        }
+    if (resolution <= 0 || resolution >= bounds.second - bounds.first) {
+        throw ControllerException("Invalid resolution");
+    }
 
-        for (auto& kv : cypher)
+    for (auto& kv : cypher)
+    {
+        if (kv.second > bounds.second || kv.second < bounds.first)
         {
-            if (kv.second > bounds.second || kv.second < bounds.first)
-            {
-                throw ControllerException("Cypher value outside min/max bounds");
-            }
+            throw ControllerException("Cypher value outside min/max bounds");
         }
+    }
 
-        cypher_accumulator.resize(cypher_bits);
-        std::fill(cypher_accumulator.begin(), cypher_accumulator.end(), false);
+    cypher_accumulator.resize(cypher_bits);
+    std::fill(cypher_accumulator.begin(), cypher_accumulator.end(), false);
 
-        high_resolution_clock::time_point init_time = high_resolution_clock::now();
-        for (auto &e : ALL_ENCODERS)
-        {
-            last_encoder_updates[e] = init_time;
-        }
+    high_resolution_clock::time_point init_time = high_resolution_clock::now();
+    for (auto &e : ALL_ENCODERS)
+    {
+        last_encoder_updates[e] = init_time;
+    }
 }
 
-void
+    void
 StageController::change_motor_state(MotorState next_motor_state)
 {
 
@@ -76,23 +75,23 @@ StageController::change_motor_state(MotorState next_motor_state)
     }
 }
 
-void
+    void
 StageController::monitor()
 {
-//     int ret_code = internal_monitor();
-//
-//     switch (ret_code)
-//     {
-//         case 0:
-//             debug_print(1, "successfully moved motor");
-//         case -1:
-//             debug_print(1, "failed to move motor");
-//         default:
-//             break;
-//     }
+    //     int ret_code = internal_monitor();
+    //
+    //     switch (ret_code)
+    //     {
+    //         case 0:
+    //             debug_print(1, "successfully moved motor");
+    //         case -1:
+    //             debug_print(1, "failed to move motor");
+    //         default:
+    //             break;
+    //     }
 }
 
-void
+    void
 StageController::update_encoder_state(Encoder e, bool state)
 {
 
@@ -133,20 +132,11 @@ StageController::update_encoder_state(Encoder e, bool state)
             break;
     }
 
-    // std::cout << axis_to_string(axis) << " :"
-    //     << current_encoder_state[Encoder::A]
-    //     << current_encoder_state[Encoder::B]
-    //     << current_encoder_state[Encoder::C]
-    //     << current_encoder_state[Encoder::D]
-    //     << " :" << time_span.count()
-    //     << std::endl;
-    // std::cout << std::endl;
-
     last_encoder_updates[e] = current_time;
-    alert_gui(e, state ? 1 : 0);
+    alert_gui(e, state);
 }
 
-void
+    void
 StageController::move(double new_position)
 {
     if (new_position > bounds.second || new_position < bounds.first) {
@@ -170,8 +160,8 @@ StageController::move(double new_position)
 
         Fl::lock();
         monitor_thread = std::thread([this]() {
-            monitor();
-        });
+                monitor();
+                });
         monitor_thread.detach();
         Fl::unlock();
     }
@@ -182,7 +172,7 @@ StageController::move(double new_position)
     }
 }
 
-std::pair<double,double>
+    std::pair<double,double>
 config_get_bounds(const Setting &c)
 {
     double min, max;
@@ -191,7 +181,7 @@ config_get_bounds(const Setting &c)
     return std::make_pair(min, max);
 }
 
-std::map<int,double>
+    std::map<int,double>
 config_get_cypher(const Setting &c)
 {
     std::map<int,double> cypher;

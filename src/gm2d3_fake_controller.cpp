@@ -27,6 +27,9 @@ FakeController::internal_change_motor_state(MotorState m)
     {
         bool A, B;
         std::map<Encoder, bool> em;
+        
+        if (this->keep_moving) 
+            std::this_thread::sleep_for(std::chrono::microseconds(this->timestep_us));
 
         while(this->keep_moving)
         {

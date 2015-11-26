@@ -1,12 +1,14 @@
 #pragma once
 
-#include "gm2d3_stage_controller.h"
+#include "gm2d3_const.h"
+#include "gm2d3_util.h"
 
 #include <Fl/Fl_Input.H>
 #include <Fl/Fl_Pack.H>
 #include <Fl/Fl_Button.H>
 #include <Fl/Fl_Box.H>
 #include <Fl/Fl_Menu_Button.H>
+#include <Fl/fl_draw.H>
 
 #include <map>
 #include <memory>

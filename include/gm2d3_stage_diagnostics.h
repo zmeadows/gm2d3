@@ -10,7 +10,8 @@
 #include <iostream>
 #include <memory>
 
-#include "gm2d3_stage_controller.h"
+#include "gm2d3_const.h"
+#include "gm2d3_util.h"
 
 #include <Fl/Fl.H>
 
