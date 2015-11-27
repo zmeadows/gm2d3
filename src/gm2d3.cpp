@@ -33,6 +33,12 @@ GM2D3::attach_controllers(void)
 }
 
 void
+GM2D3::detach_controllers(void)
+{
+    //window->manual_control->callback(nullptr, nullptr);
+}
+
+void
 GM2D3::create_controller(Axis axis, ControllerType ct, const Setting &c)
 {
     if (ct == ControllerType::Fake) {
@@ -142,15 +148,13 @@ void GM2D3::reset(void)
     Fl::awake();
     Fl::unlock();
 
-    std::cout << "MADE IT HERE" << std::endl;
-
     for (auto &c : controllers)
     {
         c.second->shutdown();
     }
 
-    //controllers.clear();
-    //cfg.reset(nullptr);
+    controllers.clear();
+    cfg.reset(nullptr);
 }
 
 void
@@ -199,8 +203,10 @@ GM2D3::static_exit_window_callback(Fl_Widget *gm2d3_window, void *gm2d3)
 void
 GM2D3::exit_window_callback(Fl_Widget *gm2d3_window)
 {
-         reset();
-         //window->hide();
+    reset();
+    Fl::lock();
+    Fl::awake(exit_gm2d3, (void *) this);
+    Fl::unlock();
 }
 
 void
@@ -406,4 +412,11 @@ GM2D3::GM2D3(int window_width, int window_height)
     window->options->enable_indicators->callback(static_enable_indicators_callback, (void *) this);
     window->auto_control->set_kill_button_callback(static_kill_button_callback, (void *) this);
     window->callback(static_exit_window_callback, (void *) this);
+}
+
+void exit_gm2d3(void *gm2d3)
+{
+    std::cout << "EXITING..." << std::endl;
+    ((GM2D3 *) gm2d3)->window->hide();
+    Fl::flush();
 }

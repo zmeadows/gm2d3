@@ -46,16 +46,11 @@ main(int argc, char** argv)
         }
     }
 
-    std::shared_ptr<GM2D3> gm2d3(new GM2D3(1100,665));
+    std::unique_ptr<GM2D3> gm2d3(new GM2D3(1100,665));
 
     // set up multi-threading and run FLTK
     Fl::lock();
-    Fl::run();
-
-    // process all multi-threaded events
-    while (Fl::wait() > 0) {}
-
-    return 0;
+    exit(Fl::run());
 }
 
 void const

@@ -14,6 +14,8 @@ class GM2D3 {
     public:
         GM2D3(int window_width, int window_height);
 
+        std::unique_ptr<GM2D3Window> window;
+
     private:
 
         enum class OperatingState {
@@ -27,7 +29,6 @@ class GM2D3 {
 
         OperatingState gm2d3_state;
 
-        std::unique_ptr<GM2D3Window> window;
         std::map<Axis, std::shared_ptr<StageController>> controllers;
         std::unique_ptr<Config> cfg;
 
@@ -48,8 +49,9 @@ class GM2D3 {
 
         void create_controller(Axis axis, ControllerType ct, const Setting &c);
         void attach_controllers(void);
+        void detach_controllers(void);
 
-        static void static_encoder_state_callback(Axis a, Encoder e, bool state, 
+        static void static_encoder_state_callback(Axis a, Encoder e, bool state,
                 high_resolution_clock::time_point tp, const void *gm2d3);
         void encoder_state_callback(Axis a, Encoder e, bool state, high_resolution_clock::time_point tp);
 
@@ -74,3 +76,5 @@ class GM2D3 {
         static void static_exit_window_callback(Fl_Widget *gm2d3_window, void *gm2d3);
         void exit_window_callback(Fl_Widget *gm2d3_window);
 };
+
+void exit_gm2d3(void *gm2d3);
