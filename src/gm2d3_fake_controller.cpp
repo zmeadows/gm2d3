@@ -51,6 +51,8 @@ FakeController::internal_change_motor_state(MotorState m)
 void
 FakeController::internal_shutdown(void)
 {
+    std::string shutdown_str = "Shutting down Fake Controller: " + axis_to_string(axis);
+    debug_print(2, DebugStatementType::WARNING, shutdown_str);
 }
 
 void

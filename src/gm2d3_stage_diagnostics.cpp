@@ -31,14 +31,18 @@ GM2D3StageHistoryPlot::GM2D3StageHistoryPlot(int x, int y, int w, int h, Axis _a
 void
 GM2D3StageHistoryPlot::disable()
 {
+    Fl::lock();
     deactivate();
     align(FL_ALIGN_CENTER);
     label("PAUSED");
+    Fl::awake();
+    Fl::unlock();
 }
 
 void
 GM2D3StageHistoryPlot::enable()
 {
+    Fl::lock();
     activate();
     align(FL_ALIGN_TOP_LEFT | FL_ALIGN_INSIDE);
     switch (axis)
@@ -53,6 +57,8 @@ GM2D3StageHistoryPlot::enable()
             label("RADIAL");
             break;
     }
+    Fl::awake();
+    Fl::unlock();
 }
 
 void GM2D3StageHistoryPlot::add_point(double val)

@@ -32,8 +32,13 @@ class GM2D3 {
         std::map<Axis, std::shared_ptr<StageController>> controllers;
         std::unique_ptr<Config> cfg;
 
-        void detach_plot_threads(void);
+        void start_plot_threads(void);
+        void cleanup_plot_threads(void);
         std::shared_ptr<bool> keep_updating_plots;
+        std::vector<std::thread> plot_threads;
+
+        void enable_indicators();
+        void disable_indicators();
         bool keep_updating_indicators;
         // bool keep_updating_stats;
 
@@ -42,8 +47,8 @@ class GM2D3 {
         void process_config_file(void);
         void reset(void);
 
-        void attach_controller(Axis axis, ControllerType ct, const Setting &c);
-        void setup_controllers(void);
+        void create_controller(Axis axis, ControllerType ct, const Setting &c);
+        void attach_controllers(void);
 
         static void static_encoder_state_callback(Axis a, Encoder e, bool state, 
                 high_resolution_clock::time_point tp, const void *gm2d3);

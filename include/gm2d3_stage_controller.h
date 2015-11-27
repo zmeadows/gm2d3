@@ -62,6 +62,8 @@ class StageController {
 
         void shutdown(void);
 
+        const Axis axis;
+
     protected:
         void monitor(void);
         void update_encoder_state(Encoder e, bool state,
@@ -88,7 +90,6 @@ class StageController {
         double current_position, goal_position;
         bool calibrated;
         const unsigned int cypher_bits;
-        const Axis axis;
 
         MotorState current_motor_state;
 

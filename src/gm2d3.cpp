@@ -7,11 +7,12 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <chrono>
 
 #include <FL/fl_ask.H>
 
 void
-GM2D3::setup_controllers(void)
+GM2D3::attach_controllers(void)
 {
      window->manual_control->callback(static_manual_button_callback, (void *) this);
 
@@ -32,7 +33,7 @@ GM2D3::setup_controllers(void)
 }
 
 void
-GM2D3::attach_controller(Axis axis, ControllerType ct, const Setting &c)
+GM2D3::create_controller(Axis axis, ControllerType ct, const Setting &c)
 {
     if (ct == ControllerType::Fake) {
         controllers[axis] = std::shared_ptr<StageController>(new FakeController(axis,
@@ -82,20 +83,20 @@ GM2D3::process_config_file()
         }
 
         if (cs.exists("azimuthal")) {
-            attach_controller(Axis::AZIMUTHAL, ct, cs["azimuthal"]);
+            create_controller(Axis::AZIMUTHAL, ct, cs["azimuthal"]);
         }
         if (cs.exists("vertical")) {
-            attach_controller(Axis::VERTICAL, ct, cs["vertical"]);
+            create_controller(Axis::VERTICAL, ct, cs["vertical"]);
         }
         if (cs.exists("radial")) {
-            attach_controller(Axis::RADIAL, ct, cs["radial"]);
+            create_controller(Axis::RADIAL, ct, cs["radial"]);
         }
 
         if (controllers.size() < 1) {
             throw make_gm2d3_exception(GM2D3Exception::Type::Config, "No controllers found in config file!");
         }
 
-        setup_controllers();
+        attach_controllers();
     }
 
     catch(const SettingNotFoundException &nfex)
@@ -132,14 +133,22 @@ GM2D3::process_config_file()
     debug_print(1, DebugStatementType::SUCCESS, "Successfully attached controllers");
 }
 
-// TODO: void all callbacks
+// TODO: void all stage-related callbacks
 void GM2D3::reset(void)
 {
+    disable_indicators();
+    cleanup_plot_threads();
+
     for (auto &c : controllers)
     {
+        window->diagnostics[c.first]->indicators->disable();
+        window->diagnostics[c.first]->history_plot->disable();
         c.second->shutdown();
     }
-    cfg.reset(nullptr);
+
+
+    controllers.clear();
+    cfg = nullptr;
 }
 
 void
@@ -190,18 +199,11 @@ GM2D3::enable_plot_callback(Fl_Widget *enable_plot_checkbox)
     switch (b->value())
     {
         case 0:
-            *keep_updating_plots = false;
-            for (auto &c : controllers) {
-                window->diagnostics[c.first]->history_plot->disable();
-            }
+            cleanup_plot_threads();
             break;
 
         case 1:
-            *keep_updating_plots = true;
-            for (auto &c : controllers) {
-                window->diagnostics[c.first]->history_plot->enable();
-            }
-            detach_plot_threads();
+            start_plot_threads();
             break;
     }
 }
@@ -214,50 +216,82 @@ GM2D3::enable_indicators_callback(Fl_Widget *enable_indicators_checkbox)
     switch (b->value())
     {
         case 0:
-            keep_updating_indicators = false;
-            for (auto &c : controllers) {
-                for (auto &e : ALL_ENCODERS) {
-                    window->diagnostics[c.first]->indicators->set_dial_state(e, false);
-                }
-                window->diagnostics[c.first]->indicators->disable();
-            }
+            disable_indicators();
             break;
 
         case 1:
-            keep_updating_indicators = true;
-            for (auto &c : controllers) {
-                for (auto &e : c.second->get_encoder_state()) {
-                    window->diagnostics[c.first]->indicators->set_dial_state(e.first, e.second);
-                }
-                window->diagnostics[c.first]->indicators->enable();
-            }
+            enable_indicators();
             break;
     }
 }
 
 void
-GM2D3::detach_plot_threads(void)
+GM2D3::enable_indicators()
 {
+
+    keep_updating_indicators = true;
+    for (const auto &c : controllers) {
+        for (const auto &e : c.second->get_encoder_state()) {
+            window->diagnostics[c.first]->indicators->set_dial_state(e.first, e.second);
+        }
+        window->diagnostics[c.first]->indicators->enable();
+    }
+}
+
+void
+GM2D3::disable_indicators()
+{
+    keep_updating_indicators = false;
+    for (const auto &c : controllers) {
+        for (const auto &e : ALL_ENCODERS) {
+            window->diagnostics[c.first]->indicators->set_dial_state(e, false);
+        }
+        window->diagnostics[c.first]->indicators->disable();
+    }
+}
+
+void
+GM2D3::start_plot_threads(void)
+{
+    *keep_updating_plots = true;
+    for (auto &c : controllers) {
+        window->diagnostics[c.first]->history_plot->enable();
+    }
+
     auto plot_updater = [](
             std::shared_ptr<StageController> const &sc,
             std::shared_ptr<GM2D3StageHistoryPlot> hp,
             std::shared_ptr<bool> const &kp) -> void
     {
-        while(*kp)
+        while(*kp && sc != nullptr)
         {
             Fl::lock();
             hp->add_point(sc->get_current_position());
             Fl::awake();
             Fl::unlock();
-            usleep(1e6);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     };
 
     for (auto& c : controllers)
     {
-        std::thread plot_thread(plot_updater, c.second,
-                window->diagnostics[c.first]->history_plot, keep_updating_plots);
-        plot_thread.detach();
+        plot_threads.push_back(std::thread(plot_updater, c.second,
+                window->diagnostics[c.first]->history_plot, keep_updating_plots));
+    }
+}
+
+void
+GM2D3::cleanup_plot_threads(void)
+{
+    *keep_updating_plots = false;
+    for (auto &c : controllers) {
+        window->diagnostics[c.first]->history_plot->disable();
+    }
+
+    while (!plot_threads.empty())
+    {
+        plot_threads.back().join();
+        plot_threads.pop_back();
     }
 }
 
@@ -285,9 +319,6 @@ GM2D3::static_shutdown_callback(Axis a, const void *gm2d3)
 void
 GM2D3::shutdown_callback(Axis a)
 {
-    controllers[a] = nullptr;
-    keep_updating_indicators = false;
-    *keep_updating_plots = false;
 }
 
 void
