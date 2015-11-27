@@ -95,7 +95,7 @@ GM2D3AutoControlGUI::enable_input(Axis axis)
     user_position_inputs[axis]->activate();
     user_position_inputs[axis]->textcolor(FL_BLACK);
     user_position_inputs[axis]->textfont(0);
-    user_position_inputs[axis]->value("");
+    user_position_inputs[axis]->value(nullptr);
     user_position_inputs[axis]->readonly(0);
 }
 
@@ -112,6 +112,7 @@ GM2D3AutoControlGUI::disable_input(Axis axis)
 void
 GM2D3AutoControlGUI::activate()
 {
+    for (auto &a : ALL_AXES) { enable_input(a); }
     calibrate_button->activate();
     go_button->activate();
 }
@@ -119,6 +120,7 @@ GM2D3AutoControlGUI::activate()
 void
 GM2D3AutoControlGUI::deactivate()
 {
+    for (auto &a : ALL_AXES) { disable_input(a); }
     calibrate_button->deactivate();
     go_button->deactivate();
 }

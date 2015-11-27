@@ -15,7 +15,6 @@
 using namespace libconfig;
 
 extern int gDEBUG_LEVEL;
-static std::mutex print_mutex;
 
 std::string axis_to_string(Axis axis);
 
@@ -62,20 +61,26 @@ class GM2D3DebugPrinter {
             return static_instance;
         }
 
-        void lock(void) { print_mutex.lock(); }
-        void unlock(void) { print_mutex.unlock(); }
-        void print() const;
+        void lock(void) { print_mutex_.lock(); }
+        void unlock(void) { print_mutex_.unlock(); }
+        void print();
 
-        void set_message(std::string message) { message_ = message; }
-        void set_level_guard(unsigned int level_guard) { level_guard_ = level_guard; }
-        void set_type(DebugStatementType type) { type_ = type; }
+        void set_message(const std::string &message) { message_ = message; }
+        void set_sub_messages(const std::vector<std::string> &sub_messages)
+                { sub_messages_ = sub_messages; }
+        void set_level_guard(const unsigned level_guard) { level_guard_ = level_guard; }
+        void set_type(const DebugStatementType type) { type_ = type; }
 
     private:
         std::mutex print_mutex_;
         std::string message_;
+        std::vector<std::string> sub_messages_;
         unsigned int level_guard_;
         DebugStatementType type_;
 };
 
-void debug_print(int level_guard, DebugStatementType type, std::string msg);
+void debug_print(const unsigned level_guard, const DebugStatementType type,
+        const std::string &msg, const std::vector<std::string> &sub_messages);
+void debug_print(const unsigned level_guard, const DebugStatementType type,
+        const std::string &msg);
 void debug_print(const GM2D3Exception &gex);

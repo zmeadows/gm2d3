@@ -5,13 +5,14 @@
 #include <string>
 #include <time.h>
 #include <mutex>
+#include <vector>
 
 int gDEBUG_LEVEL = 0;
 
 GM2D3DebugPrinter *GM2D3DebugPrinter::static_instance = nullptr;
 
 void
-GM2D3DebugPrinter::print() const
+GM2D3DebugPrinter::print()
 {
     std::string prefix =
         "[GM2D3::v"
@@ -47,21 +48,39 @@ GM2D3DebugPrinter::print() const
         msg_time.pop_back(); // remove newline at end
 
         std::cout << "[" << msg_time << "] " << message_ << std::endl;
+
+        while (!sub_messages_.empty())
+        {
+            std::cout << "\t" << sub_messages_.back() << std::endl;
+            sub_messages_.pop_back();
+        }
+
+        if (type_ == DebugStatementType::SUCCESS) std::cout << std::endl;
     }
 }
 
 void
-debug_print(int level_guard, DebugStatementType type, std::string message)
+debug_print(const unsigned level_guard, const DebugStatementType type,
+        const std::string &message, const std::vector<std::string> &sub_messages)
 {
     GM2D3DebugPrinter::instance()->lock();
 
     GM2D3DebugPrinter::instance()->set_level_guard(level_guard);
     GM2D3DebugPrinter::instance()->set_type(type);
     GM2D3DebugPrinter::instance()->set_message(message);
+    GM2D3DebugPrinter::instance()->set_sub_messages(sub_messages);
 
     GM2D3DebugPrinter::instance()->print();
 
     GM2D3DebugPrinter::instance()->unlock();
+}
+
+void
+debug_print(const unsigned level_guard, const DebugStatementType type,
+        const std::string &message)
+{
+    std::vector<std::string> empty;
+    debug_print(level_guard, type, message, empty);
 }
 
 void
@@ -83,10 +102,11 @@ debug_print(const GM2D3Exception &gex)
     }
 
     std::string full_msg = gex.msg;
-    full_msg += "\n\tFILE: " + std::string(gex.filename);
-    full_msg += "\n\tLINE: " + std::to_string(gex.linum);
+    std::vector<std::string> sub_msgs;
+    sub_msgs.push_back("FILE: " + std::string(gex.filename));
+    sub_msgs.push_back("LINE: " + std::to_string(gex.linum));
 
-    debug_print(0, d, full_msg);
+    debug_print(0, d, gex.msg, sub_msgs);
 }
 
 std::string
@@ -119,5 +139,5 @@ print_logo()
         << termcolor::blue << R"(
 _|"""""|_|"""""|_|"""""|_|"""""|_|"""""|
 "`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-' )"
-    << termcolor::reset << std::endl;
+        << termcolor::reset << std::endl;
 }

@@ -57,6 +57,6 @@ void const
 print_info()
 {
     std::cout
-        << "VERSION " << GM2D3_VERSION_MAJOR << "." << GM2D3_VERSION_MINOR << std::endl
+        << "VERSION " << GM2D3_VERSION_MAJOR << "." << GM2D3_VERSION_MINOR
         << "COMPILED ON " << __DATE__ << " AT " << __TIME__ << std::endl << std::endl;
 }

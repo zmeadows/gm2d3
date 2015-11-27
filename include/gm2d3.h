@@ -18,13 +18,13 @@ class GM2D3 {
 
     private:
         enum class OperatingState {
-            DETACHED,
-            WAITING_ON_USER,
-            CALIBRATION,
-            AUTO_TRANSLATION,
-            MANUAL_TRANSLATION,
-            RESETTING,
-            SHUTTING_DOWN
+            DETACHED, // default blank slate, state of program when first opened
+            UNCALIBRATED, // controllers attached but uncalibrated
+            CALIBRATING, // in the middle of calibration routine
+            WAITING, // finished with calibration and waiting for user
+            AUTO_TRANSLATION, // in the middle of auto translation routine
+            MANUAL_TRANSLATION, // underoing user-fed manual translation
+            RESETTING // in the process of resetting
         };
 
         OperatingState gm2d3_state;
@@ -32,10 +32,10 @@ class GM2D3 {
         std::map<Axis, std::shared_ptr<StageController>> controllers;
         std::unique_ptr<Config> cfg;
 
-        void start_plot_threads(void);
-        void cleanup_plot_threads(void);
         std::shared_ptr<bool> keep_updating_plots;
         std::vector<std::thread> plot_threads;
+        void start_plot_threads(void);
+        void cleanup_plot_threads(void);
 
         void enable_indicators();
         void disable_indicators();

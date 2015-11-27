@@ -27,7 +27,6 @@ GM2D3::attach_controllers(void)
     window->auto_control->activate();
     for (auto &c : controllers)
     {
-        window->auto_control->enable_input(c.first);
         window->manual_control->enable_axis(c.first);
     }
 }
@@ -35,7 +34,16 @@ GM2D3::attach_controllers(void)
 void
 GM2D3::detach_controllers(void)
 {
-    //window->manual_control->callback(nullptr, nullptr);
+    Fl::lock();
+    for (auto &c : controllers)
+    {
+        window->manual_control->buttons[c.first][MotorState::OFF]->setonly();
+    }
+    window->auto_control->deactivate();
+    Fl::awake();
+    Fl::unlock();
+
+    controllers.clear();
 }
 
 void
@@ -119,9 +127,9 @@ GM2D3::process_config_file()
         return;
     }
 
-    catch(const GM2D3Exception &cex)
+    catch(const GM2D3Exception &gex)
     {
-        debug_print(0, DebugStatementType::ERROR, cex.msg);
+        debug_print(gex);
         reset();
         return;
     }
@@ -133,7 +141,7 @@ GM2D3::process_config_file()
         return;
     }
 
-    gm2d3_state = OperatingState::WAITING_ON_USER;
+    gm2d3_state = OperatingState::UNCALIBRATED;
 
     window->options->config_loader->flash_config_path(FL_GREEN);
     debug_print(1, DebugStatementType::SUCCESS, "Successfully attached controllers");
@@ -142,6 +150,9 @@ GM2D3::process_config_file()
 // TODO: void all stage-related callbacks
 void GM2D3::reset(void)
 {
+    gm2d3_state = OperatingState::RESETTING;
+    debug_print(1, DebugStatementType::ATTEMPT, "Attempting reset...");
+
     Fl::lock();
     if (keep_updating_indicators) disable_indicators();
     if (*keep_updating_plots) cleanup_plot_threads();
@@ -153,8 +164,21 @@ void GM2D3::reset(void)
         c.second->shutdown();
     }
 
-    controllers.clear();
+    detach_controllers();
+
+
+    Fl::lock();
+    window->options->enable_history_plot->value(0);
+    window->options->enable_indicators->value(0);
+    window->options->enable_stats->value(0);
+    window->options->config_loader->path_display->value(nullptr);
+    Fl::awake();
+    Fl::unlock();
+
     cfg.reset(nullptr);
+
+    gm2d3_state = OperatingState::DETACHED;
+    debug_print(1, DebugStatementType::SUCCESS, "reset compeleted.");
 }
 
 void
@@ -167,7 +191,7 @@ void
 GM2D3::manual_button_callback(Fl_Widget *button)
 {
     GM2D3ManualControlButton *b = (GM2D3ManualControlButton*) button;
-    controllers[b->axis]->change_motor_state(b->motor_state);
+    if (gm2d3_state != OperatingState::DETACHED) controllers[b->axis]->change_motor_state(b->motor_state);
 }
 
 void
