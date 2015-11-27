@@ -21,9 +21,12 @@ class FakeController : public StageController {
 
         void maybe_jitter(Encoder e, bool init_state);
 
+        void detach_motor_mover_thread(MotorState m);
+
+     std::thread motor_mover;
+
         const int timestep_us;
         bool keep_moving;
-        std::thread motor_mover;
 
         static constexpr double JITTER_PROBABILITY = 0.01;
 };

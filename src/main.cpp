@@ -46,7 +46,7 @@ main(int argc, char** argv)
         }
     }
 
-    std::unique_ptr<GM2D3> gm2d3(new GM2D3(1100,665));
+    std::shared_ptr<GM2D3> gm2d3(new GM2D3(1100,665));
 
     // set up multi-threading and run FLTK
     Fl::lock();

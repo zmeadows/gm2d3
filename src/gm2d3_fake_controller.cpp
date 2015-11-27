@@ -1,7 +1,9 @@
 #include "gm2d3_fake_controller.h"
+#include <unistd.h>
 
 
-FakeController::FakeController(Axis _axis, gui_encoder_callback _gec, 
+
+FakeController::FakeController(Axis _axis, gui_encoder_callback _gec,
         gui_shutdown_callback _gsc, const void *_gm2d3, const Setting &c)
     : StageController(_axis, _gec, _gsc, _gm2d3, c), timestep_us(3e5), keep_moving(false)
 {
@@ -11,41 +13,44 @@ void
 FakeController::internal_change_motor_state(MotorState m)
 {
 
-    if (m == MotorState::OFF) {
+    if (m == MotorState::OFF)
+    {
         keep_moving = false;
-        motor_mover.join();
+        if (motor_mover.joinable()) motor_mover.join();
         return;
     }
 
-    if (keep_moving == true && m != get_current_motor_state()) {
+    if (m != get_current_motor_state())
+    {
         keep_moving = false;
-        motor_mover.join();
+        if (motor_mover.joinable()) motor_mover.join();
     }
 
-    auto fake_mover = [this, m]() -> void
-    {
-        bool A, B;
-        std::map<Encoder, bool> em;
-
-        std::this_thread::sleep_for(std::chrono::microseconds(this->timestep_us));
-
-        while(this->keep_moving)
-        {
-            em = this->get_encoder_state();
-            A = em[Encoder::A];
-            B = em[Encoder::B];
-
-            std::pair<Encoder, bool> nt = next_transition(m, A, B);
-
-            update_encoder_state(nt.first, nt.second, high_resolution_clock::now());
-            maybe_jitter(nt.first, nt.second);
-
-            std::this_thread::sleep_for(std::chrono::microseconds(this->timestep_us));
-        }
-    };
-
     keep_moving = true;
-    motor_mover = std::thread(fake_mover);
+    motor_mover = std::thread(&FakeController::detach_motor_mover_thread, this, m);
+}
+
+void
+FakeController::detach_motor_mover_thread(MotorState m)
+{
+    bool A, B;
+    std::map<Encoder, bool> em;
+
+    std::pair<Encoder, bool> nt;
+        std::this_thread::sleep_for(std::chrono::microseconds(timestep_us));
+    while(keep_moving)
+    {
+        em = get_encoder_state();
+        A = em[Encoder::A];
+        B = em[Encoder::B];
+
+        nt = next_transition(m, A, B);
+
+        update_encoder_state(nt.first, nt.second, high_resolution_clock::now());
+        //maybe_jitter(nt.first, nt.second);
+
+        std::this_thread::sleep_for(std::chrono::microseconds(timestep_us));
+    }
 }
 
 void

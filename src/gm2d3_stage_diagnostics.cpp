@@ -63,6 +63,7 @@ GM2D3StageHistoryPlot::enable()
 
 void GM2D3StageHistoryPlot::add_point(double val)
 {
+    Fl::lock();
     if (n == 0) {
         add(val, std::to_string(val).substr(0,5).c_str(), line_color);
         n++;
@@ -71,9 +72,9 @@ void GM2D3StageHistoryPlot::add_point(double val)
         add(val, nullptr, line_color);
         n == 4 ? n = 0 : n++;
     }
+    Fl::awake();
+    Fl::unlock();
 }
-
-GM2D3StageHistoryPlot::~GM2D3StageHistoryPlot() {}
 
 GM2D3StageIndicators::GM2D3StageIndicators(int x, int y, int w) :
     on_color(FL_GREEN),
@@ -127,8 +128,6 @@ GM2D3StageIndicators::GM2D3StageIndicators(int x, int y, int w) :
 
     disable();
 }
-
-GM2D3StageIndicators::~GM2D3StageIndicators() {}
 
 void
 GM2D3StageIndicators::set_dial_state(Encoder e, bool state)
@@ -201,8 +200,3 @@ GM2D3StageDiagnostics::GM2D3StageDiagnostics(int x, int y, int w, int h, Axis ax
         (new GM2D3StageIndicators(x_0 + plot_width + info_width + 2*ADJACENT_SPACING,y_0,h2));
 
 }
-
-GM2D3StageDiagnostics::~GM2D3StageDiagnostics() {
-
-}
-

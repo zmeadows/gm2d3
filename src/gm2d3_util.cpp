@@ -11,7 +11,7 @@ int gDEBUG_LEVEL = 0;
 void
 debug_print(int level_guard, DebugStatementType type, std::string msg)
 {
-
+    std::lock_guard<std::mutex> guard(print_mutex);
     std::string prefix =
         "[GM2D3::v"
         + std::to_string(GM2D3_VERSION_MAJOR)
@@ -30,6 +30,9 @@ debug_print(int level_guard, DebugStatementType type, std::string msg)
                 break;
             case DebugStatementType::ERROR:
                 std::cout << termcolor::red << prefix << termcolor::reset;
+                break;
+            case DebugStatementType::GENERIC:
+                std::cout << prefix << termcolor::reset;
                 break;
         }
 

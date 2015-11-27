@@ -13,6 +13,7 @@ StageController::StageController(
         ) :
         bounds(config_get_bounds(c.lookup("bounds"))),
         cypher(config_get_cypher(c.lookup("cypher"))),
+        axis(_axis),
         jitters_rejected(0),
         jittering(false),
         gm2d3(_gm2d3),
@@ -24,7 +25,6 @@ StageController::StageController(
         goal_position(middle_position),
         calibrated(false),
         cypher_bits(unsigned(c.lookup("cypher_bits"))),
-        axis(_axis),
         current_motor_state(MotorState::OFF),
         current_encoder_state(EMPTY_ENCODER_STATE),
         previous_encoder_state(EMPTY_ENCODER_STATE)
@@ -66,6 +66,7 @@ StageController::change_motor_state(MotorState next_motor_state)
             debug_print(1, DebugStatementType::WARNING, "Motor appears to already be stopped. Issuing stop command again.");
         }
 
+        debug_print(1, DebugStatementType::GENERIC, "Stopping motor...");
         internal_change_motor_state(MotorState::OFF);
         current_motor_state = MotorState::OFF;
     }
@@ -110,7 +111,7 @@ StageController::update_encoder_state( Encoder e, bool state,
     // LOCK ENCODER STATE
     // insures that all encoder transitions are processed in order,
     // as long as update_encoder_state is called in order
-    std::lock_guard<std::mutex> guard(encoder_mutex);
+    encoder_mutex.lock();
 
     duration<double> time_span = duration_cast<duration<double>>
         (tp - get_last_transition_time(e));
@@ -166,6 +167,7 @@ StageController::update_encoder_state( Encoder e, bool state,
     }
 
     // add transition to the history
+    if (encoder_history[e].size() > 10) encoder_history[e].clear();
     encoder_history[e].push_back(std::make_pair(tp,state));
 
     previous_encoder_state[e] = !state;
@@ -190,6 +192,7 @@ StageController::update_encoder_state( Encoder e, bool state,
             break;
     }
 
+    encoder_mutex.unlock();
     alert_gui(e, state, tp);
 }
 
@@ -293,7 +296,7 @@ next_transition(MotorState m, bool A, bool B)
 void
 StageController::shutdown(void)
 {
-    internal_change_motor_state(MotorState::OFF);
+    change_motor_state(MotorState::OFF);
     internal_shutdown();
 
     // std::string shutdown_msg

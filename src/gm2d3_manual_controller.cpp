@@ -24,8 +24,6 @@ GM2D3ManualControlButton::GM2D3ManualControlButton(int x, int y, int w, int h,
     }
 }
 
-GM2D3ManualControlButton::~GM2D3ManualControlButton() {}
-
 GM2D3ManualControlGUI::GM2D3ManualControlGUI(int x, int y, int w, int h)
 {
     // calculate size/spacing properties
@@ -126,8 +124,6 @@ GM2D3ManualControlGUI::GM2D3ManualControlGUI(int x, int y, int w, int h)
 
     for (auto& a : ALL_AXES) { disable_axis(a); }
 }
-
-GM2D3ManualControlGUI::~GM2D3ManualControlGUI() {}
 
 void
 GM2D3ManualControlGUI::enable_axis(Axis axis) {

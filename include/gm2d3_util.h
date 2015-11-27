@@ -19,7 +19,8 @@ static std::mutex print_mutex;
 enum class DebugStatementType {
     SUCCESS,
     WARNING,
-    ERROR
+    ERROR,
+    GENERIC
 };
 
 

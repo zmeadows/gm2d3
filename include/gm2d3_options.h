@@ -15,7 +15,6 @@
 class GM2D3ConfigLoader {
     public:
         GM2D3ConfigLoader(int x, int y, int w, int h);
-        virtual ~GM2D3ConfigLoader(void);
 
         int user_select_config(std::string &path);
 
@@ -33,7 +32,6 @@ class GM2D3ConfigLoader {
 class GM2D3OptionsGUI {
     public:
         GM2D3OptionsGUI(int x, int y, int w, int h);
-        virtual ~GM2D3OptionsGUI(void);
 
         std::unique_ptr<GM2D3ConfigLoader> config_loader;
         std::unique_ptr<Fl_Check_Button> enable_history_plot;

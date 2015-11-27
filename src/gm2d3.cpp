@@ -136,19 +136,16 @@ GM2D3::process_config_file()
 // TODO: void all stage-related callbacks
 void GM2D3::reset(void)
 {
-    disable_indicators();
-    cleanup_plot_threads();
+    if (*keep_updating_plots) cleanup_plot_threads();
+    if (keep_updating_indicators) disable_indicators();
 
     for (auto &c : controllers)
     {
-        window->diagnostics[c.first]->indicators->disable();
-        window->diagnostics[c.first]->history_plot->disable();
         c.second->shutdown();
     }
 
-
     controllers.clear();
-    cfg = nullptr;
+    cfg.reset(nullptr);
 }
 
 void
@@ -162,6 +159,18 @@ GM2D3::manual_button_callback(Fl_Widget *button)
 {
     GM2D3ManualControlButton *b = (GM2D3ManualControlButton*) button;
     controllers[b->axis]->change_motor_state(b->motor_state);
+}
+
+void
+GM2D3::static_kill_button_callback(Fl_Widget *button, void *gm2d3)
+{
+    ((GM2D3 *) gm2d3)->kill_button_callback();
+}
+
+void
+GM2D3::kill_button_callback()
+{
+    reset();
 }
 
 void
@@ -185,10 +194,8 @@ GM2D3::static_exit_window_callback(Fl_Widget *gm2d3_window, void *gm2d3)
 void
 GM2D3::exit_window_callback(Fl_Widget *gm2d3_window)
 {
-     if (fl_choice("Really Exit?", "NO", "YES", nullptr)) {
          reset();
-         window->hide(); 
-     }
+         //window->hide();
 }
 
 void
@@ -228,10 +235,9 @@ GM2D3::enable_indicators_callback(Fl_Widget *enable_indicators_checkbox)
 void
 GM2D3::enable_indicators()
 {
-
     keep_updating_indicators = true;
-    for (const auto &c : controllers) {
-        for (const auto &e : c.second->get_encoder_state()) {
+    for (auto &c : controllers) {
+        for (auto &e : c.second->get_encoder_state()) {
             window->diagnostics[c.first]->indicators->set_dial_state(e.first, e.second);
         }
         window->diagnostics[c.first]->indicators->enable();
@@ -241,9 +247,10 @@ GM2D3::enable_indicators()
 void
 GM2D3::disable_indicators()
 {
+    debug_print(3, DebugStatementType::GENERIC, "Disabling Indicators");
     keep_updating_indicators = false;
-    for (const auto &c : controllers) {
-        for (const auto &e : ALL_ENCODERS) {
+    for (auto &c : controllers) {
+        for (auto &e : ALL_ENCODERS) {
             window->diagnostics[c.first]->indicators->set_dial_state(e, false);
         }
         window->diagnostics[c.first]->indicators->disable();
@@ -283,6 +290,7 @@ GM2D3::start_plot_threads(void)
 void
 GM2D3::cleanup_plot_threads(void)
 {
+    debug_print(3, DebugStatementType::GENERIC, "Cleaning up plot threads.");
     *keep_updating_plots = false;
     for (auto &c : controllers) {
         window->diagnostics[c.first]->history_plot->disable();
@@ -376,17 +384,20 @@ GM2D3::update_stats(void)
 
 GM2D3::GM2D3(int window_width, int window_height)
     : gm2d3_state(OperatingState::DETACHED),
+    keep_updating_plots(std::make_shared<bool>()),
     keep_updating_indicators(false)
 {
     window = std::unique_ptr<GM2D3Window>(new GM2D3Window(window_width,window_height,"GM2D3"));
     window->end();
     window->show();
 
-    keep_updating_plots      = std::make_shared<bool>();
     *keep_updating_plots     = false;
+
+    plot_threads.clear();
 
     window->options->config_loader->callback(static_load_config_callback, (void *) this);
     window->options->enable_history_plot->callback(static_enable_plot_callback, (void *) this);
     window->options->enable_indicators->callback(static_enable_indicators_callback, (void *) this);
+    window->auto_control->set_kill_button_callback(static_kill_button_callback, (void *) this);
     window->callback(static_exit_window_callback, (void *) this);
 }

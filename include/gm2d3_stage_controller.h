@@ -38,6 +38,8 @@ class StageController {
                 const void *_gm2d3,
                 const Setting &c);
 
+        virtual ~StageController(void) {};
+
         const std::pair<double,double> bounds;
         const std::map<int,double> cypher;
 

@@ -13,7 +13,6 @@ using namespace libconfig;
 class GM2D3 {
     public:
         GM2D3(int window_width, int window_height);
-        virtual ~GM2D3() {};
 
     private:
 
@@ -62,6 +61,9 @@ class GM2D3 {
 
         static void static_manual_button_callback(Fl_Widget *button, void *gm2d3);
         void manual_button_callback(Fl_Widget *button);
+
+        static void static_kill_button_callback(Fl_Widget *button, void *gm2d3);
+        void kill_button_callback();
 
         static void static_enable_plot_callback(Fl_Widget *enable_plot_checkbox, void *gm2d3);
         void enable_plot_callback(Fl_Widget *enable_plot_checkbox);

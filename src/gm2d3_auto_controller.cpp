@@ -22,8 +22,6 @@ GM2D3AutoControlInput::GM2D3AutoControlInput(int x, int y, int w, int h, Axis _a
     }
 }
 
-GM2D3AutoControlInput::~GM2D3AutoControlInput() {}
-
 GM2D3AutoControlGUI::GM2D3AutoControlGUI(int x, int y, int w, int h)
 {
     const int input_label_gap = 90;
@@ -90,8 +88,6 @@ GM2D3AutoControlGUI::GM2D3AutoControlGUI(int x, int y, int w, int h)
     for (auto& a : ALL_AXES) { disable_input(a); }
     deactivate();
 }
-
-GM2D3AutoControlGUI::~GM2D3AutoControlGUI() {}
 
 void
 GM2D3AutoControlGUI::enable_input(Axis axis)

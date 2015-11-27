@@ -20,7 +20,6 @@ class GM2D3StageHistoryPlot : public Fl_Chart
 {
     public:
         GM2D3StageHistoryPlot(int x, int y, int w, int h, Axis _axis);
-        virtual ~GM2D3StageHistoryPlot();
 
         const Axis axis;
 
@@ -38,7 +37,6 @@ class GM2D3StageIndicators
 {
     public:
         GM2D3StageIndicators(int x, int y, int w);
-        virtual ~GM2D3StageIndicators();
 
         void set_dial_state(Encoder e, bool state);
 
@@ -55,7 +53,6 @@ class GM2D3StageDiagnostics
 {
     public:
         GM2D3StageDiagnostics(int x, int y, int w, int h, Axis axis);
-        virtual ~GM2D3StageDiagnostics();
 
         std::shared_ptr<GM2D3StageHistoryPlot> history_plot;
         std::unique_ptr<GM2D3StageIndicators> indicators;

@@ -6,8 +6,6 @@
 #include <unistd.h>
 
 
-
-
 GM2D3ConfigLoader::GM2D3ConfigLoader(int x, int y, int w, int h)
 {
     path_display = std::unique_ptr<Fl_Output>(new Fl_Output(x,y,0.8*w,h));
@@ -19,8 +17,6 @@ GM2D3ConfigLoader::GM2D3ConfigLoader(int x, int y, int w, int h)
 
     file_chooser = std::unique_ptr<Fl_Native_File_Chooser>(new Fl_Native_File_Chooser());
 }
-
-GM2D3ConfigLoader::~GM2D3ConfigLoader(void) {}
 
 int
 GM2D3ConfigLoader::user_select_config(std::string& path)
@@ -113,5 +109,3 @@ GM2D3OptionsGUI::GM2D3OptionsGUI(int x, int y, int w, int h)
         (new GM2D3ConfigLoader(x_0,y + 4*checkbox_height + 3*BOX_EDGE_GAP, checkbox_width, checkbox_height));
 
 }
-
-GM2D3OptionsGUI::~GM2D3OptionsGUI() {}
