@@ -11,7 +11,7 @@ using namespace libconfig;
 
 class FakeController : public StageController {
     public:
-        FakeController(Axis _axis, gui_encoder_callback _gec, 
+        FakeController(Axis _axis, gui_encoder_callback _gec,
                 gui_shutdown_callback _gsc, const void *_gm2d3,
                 const Setting &c);
     private:
@@ -25,5 +25,5 @@ class FakeController : public StageController {
         bool keep_moving;
         std::thread motor_mover;
 
-        static constexpr double JITTER_PROBABILITY = 0.1;
+        static constexpr double JITTER_PROBABILITY = 0.01;
 };

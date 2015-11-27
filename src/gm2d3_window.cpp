@@ -1,7 +1,6 @@
 #include "gm2d3_window.h"
 
 #include <Fl/Fl_Pack.H>
-#include <FL/fl_ask.H>
 
 GM2D3Window::GM2D3Window(int w, int h, const char* t) :
     Fl_Double_Window(w, h, t)
@@ -26,20 +25,20 @@ GM2D3Window::GM2D3Window(int w, int h, const char* t) :
 
     color(fl_rgb_color(160,160,160));
 
-    this->callback(static_exit_window_callback, (void *) this);
+    // this->callback(static_exit_window_callback, (void *) this);
 }
 
 GM2D3Window::~GM2D3Window() {}
 
-void
-GM2D3Window::static_exit_window_callback(Fl_Widget *w, void *window)
-{
-    ((GM2D3Window *) window)->exit_window_callback(w);
-}
-
-void
-GM2D3Window::exit_window_callback(Fl_Widget *w)
-{
-    if (fl_choice("Really Exit?", "NO", "YES", nullptr)) { this->hide(); }
-}
-
+// void
+// GM2D3Window::static_exit_window_callback(Fl_Widget *w, void *window)
+// {
+//     ((GM2D3Window *) window)->exit_window_callback(w);
+// }
+//
+// void
+// GM2D3Window::exit_window_callback(Fl_Widget *w)
+// {
+//     if (fl_choice("Really Exit?", "NO", "YES", nullptr)) { this->hide(); }
+// }
+//

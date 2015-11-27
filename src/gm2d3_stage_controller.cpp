@@ -14,6 +14,7 @@ StageController::StageController(
         bounds(config_get_bounds(c.lookup("bounds"))),
         cypher(config_get_cypher(c.lookup("cypher"))),
         jitters_rejected(0),
+        jittering(false),
         gm2d3(_gm2d3),
         gec(_gec),
         gsc(_gsc),
@@ -114,31 +115,34 @@ StageController::update_encoder_state( Encoder e, bool state,
     duration<double> time_span = duration_cast<duration<double>>
         (tp - get_last_transition_time(e));
 
-    // add transition to the history
-    encoder_history[e].push_back(std::make_pair(tp,state));
 
     try
     {
+        // OUT-OF-TIME TRANSITION PROCESSING
         if (time_span.count() < 0) {
             throw make_gm2d3_exception(GM2D3Exception::Type::Programmer,
                     "Attempted to process encoder events out of order. This should never happen!");
         }
 
-        if (time_span.count() < JITTER_TIME) {
+        if (time_span.count() < JITTER_TIME)
+        {
+            if (!jittering) jittering = true;
             jitters_rejected++;
-            last_jitter_time = tp;
-
-            std::string jitter_msg = "Jitter detected on ";
-            jitter_msg += axis_to_string(axis);
-            jitter_msg += " axis: (" ;
-            jitter_msg += std::to_string(jitters_rejected);
-            jitter_msg += " rejected jitter transitions so far)";
-
-            if(jitters_rejected % 10 == 0 || !jittering) {
-                    jittering = true;
-                    throw make_gm2d3_exception(GM2D3Exception::Type::SafetyWarning, jitter_msg );
-            } else { jitters_rejected++; }
-        } else { jittering = false; }
+            return;
+        }
+        else
+        {
+            if (jittering) // DONE JITTERING
+            {
+                jittering = false;
+                std::string jitter_msg = "Jittering detected on ";
+                jitter_msg += axis_to_string(axis);
+                jitter_msg += " axis: (" ;
+                jitter_msg += std::to_string(jitters_rejected);
+                jitter_msg += " rejected jitter transitions so far)";
+                throw make_gm2d3_exception(GM2D3Exception::Type::SafetyWarning, jitter_msg );
+            }
+        }
 
         if (get_current_motor_state() == MotorState::OFF) {
             throw make_gm2d3_exception(GM2D3Exception::Type::SafetyWarning,
@@ -160,6 +164,9 @@ StageController::update_encoder_state( Encoder e, bool state,
                 "Unrecognized error occurred, shutting down...");
         shutdown();
     }
+
+    // add transition to the history
+    encoder_history[e].push_back(std::make_pair(tp,state));
 
     previous_encoder_state[e] = !state;
     current_encoder_state[e] = state;

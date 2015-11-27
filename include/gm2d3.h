@@ -37,7 +37,6 @@ class GM2D3 {
         bool keep_updating_indicators;
         // bool keep_updating_stats;
 
-
         void update_stats(void);
 
         void process_config_file(void);
@@ -64,4 +63,7 @@ class GM2D3 {
 
         static void static_enable_indicators_callback(Fl_Widget *enable_plot_checkbox, void *gm2d3);
         void enable_indicators_callback(Fl_Widget *enable_indicators_checkbox);
+
+        static void static_exit_window_callback(Fl_Widget *gm2d3_window, void *gm2d3);
+        void exit_window_callback(Fl_Widget *gm2d3_window);
 };

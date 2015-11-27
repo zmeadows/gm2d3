@@ -21,8 +21,8 @@ class GM2D3Window : public Fl_Double_Window {
         std::unique_ptr<GM2D3OptionsGUI> options;
         std::map<Axis, std::unique_ptr<GM2D3StageDiagnostics>> diagnostics;
 
-    private:
-        static void static_exit_window_callback(Fl_Widget *w, void *window);
-        void exit_window_callback(Fl_Widget *w);
+    // private:
+        // static void static_exit_window_callback(Fl_Widget *w, void *window);
+        // void exit_window_callback(Fl_Widget *w);
 
 };

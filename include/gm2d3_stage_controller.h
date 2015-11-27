@@ -42,11 +42,15 @@ class StageController {
         const std::map<int,double> cypher;
 
         void move(double new_position);
+
         void change_motor_state(MotorState next_motor_state);
 
         double get_current_position() const { return current_position; }
+
         MotorState get_current_motor_state(void) const { return current_motor_state; }
+
         bool is_calibrated() const { return calibrated; }
+
         std::map<Encoder, bool> get_encoder_state(void) {
             std::lock_guard<std::mutex> guard(encoder_mutex);
             return current_encoder_state;
@@ -72,7 +76,6 @@ class StageController {
 
         unsigned int jitters_rejected;
         bool jittering;
-        high_resolution_clock::time_point last_jitter_time;
 
         const void *gm2d3;
         const gui_encoder_callback gec;

@@ -8,6 +8,8 @@
 #include <string>
 #include <memory>
 
+#include <FL/fl_ask.H>
+
 void
 GM2D3::setup_controllers(void)
 {
@@ -133,9 +135,11 @@ GM2D3::process_config_file()
 // TODO: void all callbacks
 void GM2D3::reset(void)
 {
-    // TODO: disable all gui options (same as startup state)
+    for (auto &c : controllers)
+    {
+        c.second->shutdown();
+    }
     cfg.reset(nullptr);
-    controllers.clear();
 }
 
 void
@@ -158,10 +162,24 @@ GM2D3::static_enable_plot_callback(Fl_Widget *enable_plot_checkbox, void *gm2d3)
 }
 
 void
-GM2D3::static_enable_indicators_callback(Fl_Widget *enable_indicators_checkbox,
-        void *gm2d3)
+GM2D3::static_enable_indicators_callback(Fl_Widget *enable_indicators_checkbox, void *gm2d3)
 {
     ((GM2D3 *) gm2d3)->enable_indicators_callback(enable_indicators_checkbox);
+}
+
+void
+GM2D3::static_exit_window_callback(Fl_Widget *gm2d3_window, void *gm2d3)
+{
+    ((GM2D3 *) gm2d3)->exit_window_callback(gm2d3_window);
+}
+
+void
+GM2D3::exit_window_callback(Fl_Widget *gm2d3_window)
+{
+     if (fl_choice("Really Exit?", "NO", "YES", nullptr)) {
+         reset();
+         window->hide(); 
+     }
 }
 
 void
@@ -243,9 +261,8 @@ GM2D3::detach_plot_threads(void)
     }
 }
 
-
 void
-GM2D3::static_encoder_state_callback(Axis a, Encoder e, bool state, 
+GM2D3::static_encoder_state_callback(Axis a, Encoder e, bool state,
         high_resolution_clock::time_point tp, const void *gm2d3)
 {
     ((GM2D3 *) gm2d3)->encoder_state_callback(a,e,state, tp);
@@ -254,7 +271,7 @@ GM2D3::static_encoder_state_callback(Axis a, Encoder e, bool state,
 void
 GM2D3::encoder_state_callback(Axis a, Encoder e, bool state, high_resolution_clock::time_point tp)
 {
-    if (keep_updating_indicators && !controllers[a]->is_jittering()) {
+    if (keep_updating_indicators) {
         window->diagnostics[a]->indicators->set_dial_state(e, state);
     }
 }
@@ -340,4 +357,5 @@ GM2D3::GM2D3(int window_width, int window_height)
     window->options->config_loader->callback(static_load_config_callback, (void *) this);
     window->options->enable_history_plot->callback(static_enable_plot_callback, (void *) this);
     window->options->enable_indicators->callback(static_enable_indicators_callback, (void *) this);
+    window->callback(static_exit_window_callback, (void *) this);
 }
