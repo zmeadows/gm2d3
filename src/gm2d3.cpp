@@ -34,7 +34,7 @@ GM2D3::attach_controller(Axis axis, ControllerType ct, const Setting &c)
 {
     if (ct == ControllerType::Fake) {
         controllers[axis] = std::shared_ptr<StageController>(new FakeController(axis,
-                    static_encoder_state_callback, this, c));
+                    static_encoder_state_callback, static_shutdown_callback, this, c));
 
 #ifdef GM2D3_USE_RPI
     } else if (ct == ControllerType::RaspberryPi) {
@@ -254,9 +254,23 @@ GM2D3::static_encoder_state_callback(Axis a, Encoder e, bool state,
 void
 GM2D3::encoder_state_callback(Axis a, Encoder e, bool state, high_resolution_clock::time_point tp)
 {
-    if (keep_updating_indicators) {
+    if (keep_updating_indicators && !controllers[a]->is_jittering()) {
         window->diagnostics[a]->indicators->set_dial_state(e, state);
     }
+}
+
+void
+GM2D3::static_shutdown_callback(Axis a, const void *gm2d3)
+{
+    ((GM2D3 *) gm2d3)->shutdown_callback(a);
+}
+
+void
+GM2D3::shutdown_callback(Axis a)
+{
+    controllers[a] = nullptr;
+    keep_updating_indicators = false;
+    *keep_updating_plots = false;
 }
 
 void

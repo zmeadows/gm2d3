@@ -25,12 +25,16 @@ std::pair<double,double> config_get_bounds(const Setting &c);
 std::map<int,double> config_get_cypher(const Setting &c);
 
 typedef void (*gui_encoder_callback)(Axis, Encoder, bool, const high_resolution_clock::time_point tp, const void *);
+typedef void (*gui_shutdown_callback)(Axis, const void *);
+
+std::pair<Encoder, bool> next_transition(MotorState m, bool A, bool B);
 
 class StageController {
     public:
         StageController(
                 Axis _axis,
                 gui_encoder_callback _gec,
+                gui_shutdown_callback _gsc,
                 const void *_gm2d3,
                 const Setting &c);
 
@@ -48,7 +52,11 @@ class StageController {
             return current_encoder_state;
         }
 
+        bool is_jittering() const { return jittering; }
+
         virtual ControllerType controller_type(void) const = 0;
+
+        void shutdown(void);
 
     protected:
         void monitor(void);
@@ -56,15 +64,19 @@ class StageController {
                 high_resolution_clock::time_point tp);
 
         virtual void internal_change_motor_state(MotorState m) = 0;
-        virtual void shutdown(void) = 0;
+        virtual void internal_shutdown(void) = 0;
 
     private:
+
         const high_resolution_clock::time_point get_last_transition_time(Encoder e);
 
         unsigned int jitters_rejected;
+        bool jittering;
+        high_resolution_clock::time_point last_jitter_time;
 
         const void *gm2d3;
         const gui_encoder_callback gec;
+        const gui_shutdown_callback gsc;
         void alert_gui(Encoder e, bool state, high_resolution_clock::time_point tp) {
             gec(axis, e, state, tp, gm2d3);
         }

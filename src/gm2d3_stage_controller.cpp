@@ -7,6 +7,7 @@ using namespace std::chrono;
 StageController::StageController(
         Axis _axis,
         gui_encoder_callback _gec,
+        gui_shutdown_callback _gsc,
         const void *_gm2d3,
         const Setting &c
         ) :
@@ -15,6 +16,7 @@ StageController::StageController(
         jitters_rejected(0),
         gm2d3(_gm2d3),
         gec(_gec),
+        gsc(_gsc),
         resolution(double(c.lookup("resolution"))),
         middle_position(bounds.first + (bounds.second - bounds.first)/2.0),
         current_position(middle_position),
@@ -117,25 +119,29 @@ StageController::update_encoder_state( Encoder e, bool state,
 
     try
     {
-        if (time_span.count() < 0) { 
-            throw make_gm2d3_exception(GM2D3Exception::Type::Programmer, 
+        if (time_span.count() < 0) {
+            throw make_gm2d3_exception(GM2D3Exception::Type::Programmer,
                     "Attempted to process encoder events out of order. This should never happen!");
         }
 
-        if (time_span.count() < JITTER_TIME) { 
+        if (time_span.count() < JITTER_TIME) {
             jitters_rejected++;
+            last_jitter_time = tp;
 
             std::string jitter_msg = "Jitter detected on ";
             jitter_msg += axis_to_string(axis);
-            jitter_msg += "axis: (" ;
+            jitter_msg += " axis: (" ;
             jitter_msg += std::to_string(jitters_rejected);
-            jitter_msg += " rejected so far)";
+            jitter_msg += " rejected jitter transitions so far)";
 
-            throw make_gm2d3_exception(GM2D3Exception::Type::SafetyWarning, jitter_msg );
-        }
+            if(jitters_rejected % 10 == 0 || !jittering) {
+                    jittering = true;
+                    throw make_gm2d3_exception(GM2D3Exception::Type::SafetyWarning, jitter_msg );
+            } else { jitters_rejected++; }
+        } else { jittering = false; }
 
-        if (get_current_motor_state() == MotorState::OFF) { 
-            throw make_gm2d3_exception(GM2D3Exception::Type::SafetyWarning, 
+        if (get_current_motor_state() == MotorState::OFF) {
+            throw make_gm2d3_exception(GM2D3Exception::Type::SafetyWarning,
                     "Encoder logic transition occurred while motor was off! Ignoring...");
         }
     }
@@ -143,6 +149,16 @@ StageController::update_encoder_state( Encoder e, bool state,
     catch (GM2D3Exception &gex)
     {
         debug_print(gex);
+
+        if (gex.type != GM2D3Exception::Type::SafetyWarning) shutdown();
+        return;
+    }
+
+    catch (...)
+    {
+        debug_print(0, DebugStatementType::ERROR,
+                "Unrecognized error occurred, shutting down...");
+        shutdown();
     }
 
     previous_encoder_state[e] = !state;
@@ -228,4 +244,52 @@ config_get_cypher(const Setting &c)
         cypher[i] = double(c[i]);
     }
     return cypher;
+}
+
+std::pair<Encoder, bool>
+next_transition(MotorState m, bool A, bool B)
+{
+    switch (m)
+    {
+        case MotorState::CW:
+            if (A && !B) {
+                return std::make_pair(Encoder::B, true);
+            } else if (A && B) {
+                return std::make_pair(Encoder::A, false);
+            } else if (!A && B) {
+                return std::make_pair(Encoder::B, false);
+            } else {
+                return std::make_pair(Encoder::A, true);
+            }
+            break;
+
+        case MotorState::CCW:
+            if (A && !B) {
+                return std::make_pair(Encoder::A, false);
+            } else if (A && B) {
+                return std::make_pair(Encoder::B, false);
+            } else if (!A && B) {
+                return std::make_pair(Encoder::A, true);
+            } else {
+                return std::make_pair(Encoder::B, true);
+            }
+            break;
+
+        case MotorState::OFF:
+            throw make_gm2d3_exception(GM2D3Exception::Type::Programmer,
+                    "Fake controller attempted to change encoder state while \
+                    motor was off!");
+            break;
+    }
+}
+
+void
+StageController::shutdown(void)
+{
+    internal_change_motor_state(MotorState::OFF);
+    internal_shutdown();
+
+    // std::string shutdown_msg
+    // debug_print(0, DebugStatementType::WARNING, "Shutto
+    gsc(axis, gm2d3);
 }

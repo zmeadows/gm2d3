@@ -50,6 +50,9 @@ class GM2D3 {
                 high_resolution_clock::time_point tp, const void *gm2d3);
         void encoder_state_callback(Axis a, Encoder e, bool state, high_resolution_clock::time_point tp);
 
+        static void static_shutdown_callback(Axis a, const void *gm2d3);
+        void shutdown_callback(Axis a);
+
         static void static_load_config_callback(Fl_Widget *, void *gm2d3);
         void load_config_callback(Fl_Widget *);
 

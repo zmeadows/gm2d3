@@ -14,6 +14,7 @@
 using namespace libconfig;
 
 extern int gDEBUG_LEVEL;
+static std::mutex print_mutex;
 
 enum class DebugStatementType {
     SUCCESS,
