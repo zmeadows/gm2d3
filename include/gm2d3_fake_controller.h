@@ -28,5 +28,5 @@ class FakeController : public StageController {
         const int timestep_us;
         bool keep_moving;
 
-        static constexpr double JITTER_PROBABILITY = 0.01;
+        static constexpr double JITTER_PROBABILITY = 0.1;
 };

@@ -13,21 +13,16 @@ void
 FakeController::internal_change_motor_state(MotorState m)
 {
 
-    if (m == MotorState::OFF)
-    {
-        keep_moving = false;
-        if (motor_mover.joinable()) motor_mover.join();
-        return;
-    }
 
-    if (m != get_current_motor_state())
+    keep_moving = false;
+    if (motor_mover.joinable()) motor_mover.join();
+
+    if (m != MotorState::OFF && m != get_current_motor_state())
     {
-        keep_moving = false;
-        if (motor_mover.joinable()) motor_mover.join();
-    }
 
     keep_moving = true;
     motor_mover = std::thread(&FakeController::detach_motor_mover_thread, this, m);
+    }
 }
 
 void

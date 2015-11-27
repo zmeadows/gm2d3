@@ -136,16 +136,21 @@ GM2D3::process_config_file()
 // TODO: void all stage-related callbacks
 void GM2D3::reset(void)
 {
-    if (*keep_updating_plots) cleanup_plot_threads();
+    Fl::lock();
     if (keep_updating_indicators) disable_indicators();
+    if (*keep_updating_plots) cleanup_plot_threads();
+    Fl::awake();
+    Fl::unlock();
+
+    std::cout << "MADE IT HERE" << std::endl;
 
     for (auto &c : controllers)
     {
         c.second->shutdown();
     }
 
-    controllers.clear();
-    cfg.reset(nullptr);
+    //controllers.clear();
+    //cfg.reset(nullptr);
 }
 
 void
@@ -292,14 +297,15 @@ GM2D3::cleanup_plot_threads(void)
 {
     debug_print(3, DebugStatementType::GENERIC, "Cleaning up plot threads.");
     *keep_updating_plots = false;
-    for (auto &c : controllers) {
-        window->diagnostics[c.first]->history_plot->disable();
-    }
 
     while (!plot_threads.empty())
     {
         plot_threads.back().join();
         plot_threads.pop_back();
+    }
+
+    for (auto &c : controllers) {
+        window->diagnostics[c.first]->history_plot->disable();
     }
 }
 
