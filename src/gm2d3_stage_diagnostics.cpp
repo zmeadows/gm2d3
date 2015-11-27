@@ -163,6 +163,7 @@ GM2D3StageIndicators::disable()
 {
     Fl::lock();
     for (auto &e : ALL_ENCODERS) {
+        set_dial_state(e, false);
         dials[e]->deactivate();
     }
 

@@ -17,13 +17,13 @@ class GM2D3 {
         std::unique_ptr<GM2D3Window> window;
 
     private:
-
         enum class OperatingState {
             DETACHED,
             WAITING_ON_USER,
+            CALIBRATION,
             AUTO_TRANSLATION,
             MANUAL_TRANSLATION,
-            CALIBRATION,
+            RESETTING,
             SHUTTING_DOWN
         };
 

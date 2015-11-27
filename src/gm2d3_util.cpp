@@ -8,20 +8,24 @@
 
 int gDEBUG_LEVEL = 0;
 
+GM2D3DebugPrinter *GM2D3DebugPrinter::static_instance = nullptr;
+
 void
-debug_print(int level_guard, DebugStatementType type, std::string msg)
+GM2D3DebugPrinter::print() const
 {
-    std::lock_guard<std::mutex> guard(print_mutex);
     std::string prefix =
         "[GM2D3::v"
         + std::to_string(GM2D3_VERSION_MAJOR)
         + "." + std::to_string(GM2D3_VERSION_MINOR)
         + "] ";
 
-    if (level_guard <= gDEBUG_LEVEL)
+    if (level_guard_ <= gDEBUG_LEVEL)
     {
-        switch (type)
+        switch (type_)
         {
+            case DebugStatementType::ATTEMPT:
+                std::cout << prefix;
+                break;
             case DebugStatementType::SUCCESS:
                 std::cout << termcolor::green << prefix << termcolor::reset;
                 break;
@@ -36,17 +40,28 @@ debug_print(int level_guard, DebugStatementType type, std::string msg)
                 break;
         }
 
-
         time_t raw_time;
         time(&raw_time);
 
         std::string msg_time = std::string(asctime(localtime(&raw_time)));
         msg_time.pop_back(); // remove newline at end
 
-        std::cout << "[" << msg_time << "] " << msg << std::endl;
-
+        std::cout << "[" << msg_time << "] " << message_ << std::endl;
     }
+}
 
+void
+debug_print(int level_guard, DebugStatementType type, std::string message)
+{
+    GM2D3DebugPrinter::instance()->lock();
+
+    GM2D3DebugPrinter::instance()->set_level_guard(level_guard);
+    GM2D3DebugPrinter::instance()->set_type(type);
+    GM2D3DebugPrinter::instance()->set_message(message);
+
+    GM2D3DebugPrinter::instance()->print();
+
+    GM2D3DebugPrinter::instance()->unlock();
 }
 
 void

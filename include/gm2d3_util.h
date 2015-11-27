@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <math.h>
 #include <string>
+#include <memory>
 
 #include "termcolor.hpp"
 
@@ -15,14 +16,6 @@ using namespace libconfig;
 
 extern int gDEBUG_LEVEL;
 static std::mutex print_mutex;
-
-enum class DebugStatementType {
-    SUCCESS,
-    WARNING,
-    ERROR,
-    GENERIC
-};
-
 
 std::string axis_to_string(Axis axis);
 
@@ -47,6 +40,42 @@ class GM2D3Exception {
 };
 
 #define make_gm2d3_exception(t,m) GM2D3Exception(t,m,__LINE__,__FILE__)
+
+enum class DebugStatementType {
+    ATTEMPT,
+    SUCCESS,
+    WARNING,
+    ERROR,
+    GENERIC
+};
+
+class GM2D3DebugPrinter {
+    public:
+        GM2D3DebugPrinter(void) : message_(""), level_guard_(0), type_(DebugStatementType::GENERIC) {}
+
+        static GM2D3DebugPrinter *static_instance;
+
+        static GM2D3DebugPrinter* instance()
+        {
+            if (!static_instance)
+                static_instance = new GM2D3DebugPrinter();
+            return static_instance;
+        }
+
+        void lock(void) { print_mutex.lock(); }
+        void unlock(void) { print_mutex.unlock(); }
+        void print() const;
+
+        void set_message(std::string message) { message_ = message; }
+        void set_level_guard(unsigned int level_guard) { level_guard_ = level_guard; }
+        void set_type(DebugStatementType type) { type_ = type; }
+
+    private:
+        std::mutex print_mutex_;
+        std::string message_;
+        unsigned int level_guard_;
+        DebugStatementType type_;
+};
 
 void debug_print(int level_guard, DebugStatementType type, std::string msg);
 void debug_print(const GM2D3Exception &gex);

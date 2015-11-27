@@ -231,6 +231,7 @@ GM2D3::enable_indicators_callback(Fl_Widget *enable_indicators_checkbox)
 {
     Fl_Check_Button *b = (Fl_Check_Button*) enable_indicators_checkbox;
 
+
     switch (b->value())
     {
         case 0:
@@ -246,6 +247,8 @@ GM2D3::enable_indicators_callback(Fl_Widget *enable_indicators_checkbox)
 void
 GM2D3::enable_indicators()
 {
+    debug_print(3, DebugStatementType::GENERIC, "Enabling encoder indicator icons...");
+
     keep_updating_indicators = true;
     for (auto &c : controllers) {
         for (auto &e : c.second->get_encoder_state()) {
@@ -253,24 +256,26 @@ GM2D3::enable_indicators()
         }
         window->diagnostics[c.first]->indicators->enable();
     }
+
+    debug_print(3, DebugStatementType::SUCCESS, "Successfully enabled encoder indicators.");
 }
 
 void
 GM2D3::disable_indicators()
 {
-    debug_print(3, DebugStatementType::GENERIC, "Disabling Indicators");
+    debug_print(3, DebugStatementType::GENERIC, "Disabling encoder indicator icons...");
+
     keep_updating_indicators = false;
-    for (auto &c : controllers) {
-        for (auto &e : ALL_ENCODERS) {
-            window->diagnostics[c.first]->indicators->set_dial_state(e, false);
-        }
-        window->diagnostics[c.first]->indicators->disable();
-    }
+    for (auto &c : controllers) { window->diagnostics[c.first]->indicators->disable(); }
+
+    debug_print(3, DebugStatementType::SUCCESS, "Successfully disabled encoder indicators.");
 }
 
 void
 GM2D3::start_plot_threads(void)
 {
+    debug_print(3, DebugStatementType::GENERIC, "Enabling stage position plots...");
+
     *keep_updating_plots = true;
     for (auto &c : controllers) {
         window->diagnostics[c.first]->history_plot->enable();
@@ -296,6 +301,8 @@ GM2D3::start_plot_threads(void)
         plot_threads.push_back(std::thread(plot_updater, c.second,
                 window->diagnostics[c.first]->history_plot, keep_updating_plots));
     }
+
+    debug_print(3, DebugStatementType::SUCCESS, "Successfully enabled plots.");
 }
 
 void

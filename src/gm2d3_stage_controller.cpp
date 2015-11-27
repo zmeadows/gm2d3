@@ -193,6 +193,7 @@ StageController::update_encoder_state( Encoder e, bool state,
     }
 
     encoder_mutex.unlock();
+
     alert_gui(e, state, tp);
 }
 
