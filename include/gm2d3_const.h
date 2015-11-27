@@ -21,6 +21,7 @@ const std::vector<MotorState> ALL_MOTOR_STATES = { MotorState::CW, MotorState::C
 
 
 enum class Encoder {
+
     A, // evenly spaced high-res clock
     B, // in quadrature with A
     C, // low-res absolute position clock
@@ -36,16 +37,8 @@ const std::map<Encoder,bool> EMPTY_ENCODER_STATE = {
     {Encoder::D, false}
 };
 
-enum class OperatingState {
-    DETACHED,
-    WAITING,
-    AUTO_TRANSLATION,
-    MANUAL_TRANSLATION,
-    CALIBRATION,
-    SHUTTING_DOWN
-};
 
-const double JITTER_TIME = 0.01;
+const double JITTER_TIME = 0.1;
 
 // GUI
 const int WINDOW_EDGE_GAP = 20;

@@ -1,6 +1,5 @@
 #include "gm2d3_fltk_util.h"
 
-
 Fl_Color LIGHT_RED() { return fl_rgb_color(186,60,60); }
 Fl_Color DARK_RED() { return fl_rgb_color(139,39,39); }
 

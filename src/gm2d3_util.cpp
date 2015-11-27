@@ -35,6 +35,27 @@ debug_print(int level_guard, DebugStatementType type, std::string msg)
 
 }
 
+void
+debug_print(const GM2D3Exception &gex)
+{
+    DebugStatementType d;
+
+    switch (gex.type)
+    {
+        case GM2D3Exception::Type::Programmer:
+            d = DebugStatementType::ERROR;
+            break;
+        case GM2D3Exception::Type::Config:
+            d = DebugStatementType::ERROR;
+            break;
+        case GM2D3Exception::Type::SafetyWarning:
+            d = DebugStatementType::WARNING;
+            break;
+    }
+
+    debug_print(0, d, gex.msg);
+}
+
 std::string
 axis_to_string(Axis axis)
 {

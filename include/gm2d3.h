@@ -16,6 +16,18 @@ class GM2D3 {
         virtual ~GM2D3() {};
 
     private:
+
+        enum class OperatingState {
+            DETACHED,
+            WAITING_ON_USER,
+            AUTO_TRANSLATION,
+            MANUAL_TRANSLATION,
+            CALIBRATION,
+            SHUTTING_DOWN
+        };
+
+        OperatingState gm2d3_state;
+
         std::unique_ptr<GM2D3Window> window;
         std::map<Axis, std::shared_ptr<StageController>> controllers;
         std::unique_ptr<Config> cfg;
@@ -25,7 +37,6 @@ class GM2D3 {
         bool keep_updating_indicators;
         // bool keep_updating_stats;
 
-        OperatingState gm2d3_state;
 
         void update_stats(void);
 
@@ -35,8 +46,9 @@ class GM2D3 {
         void attach_controller(Axis axis, ControllerType ct, const Setting &c);
         void setup_controllers(void);
 
-        static void static_encoder_state_callback(Axis a, Encoder e, bool state, const void *gm2d3);
-        void encoder_state_callback(Axis a, Encoder e, bool state);
+        static void static_encoder_state_callback(Axis a, Encoder e, bool state, 
+                high_resolution_clock::time_point tp, const void *gm2d3);
+        void encoder_state_callback(Axis a, Encoder e, bool state, high_resolution_clock::time_point tp);
 
         static void static_load_config_callback(Fl_Widget *, void *gm2d3);
         void load_config_callback(Fl_Widget *);

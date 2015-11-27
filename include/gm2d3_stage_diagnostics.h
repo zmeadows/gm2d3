@@ -16,7 +16,6 @@
 
 #include <Fl/Fl.H>
 
-
 class GM2D3StageHistoryPlot : public Fl_Chart
 {
     public:

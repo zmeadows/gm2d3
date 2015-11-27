@@ -3,6 +3,8 @@
 #include "gm2d3_stage_controller.h"
 
 #include <chrono>
+using namespace std::chrono;
+
 #include <libconfig.h++>
 using namespace libconfig;
 
@@ -16,7 +18,11 @@ class FakeController : public StageController {
         int internal_monitor(void);
         void shutdown(void);
 
+        void maybe_jitter(Encoder e, bool init_state);
+
         const int timestep_us;
         bool keep_moving;
         std::thread motor_mover;
+
+        static constexpr double JITTER_PROBABILITY = 0.1;
 };

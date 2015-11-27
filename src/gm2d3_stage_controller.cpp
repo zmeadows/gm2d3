@@ -1,46 +1,54 @@
 #include "gm2d3_stage_controller.h"
 #include "gm2d3_util.h"
 
-#include <Fl/Fl.H>
+#include <chrono>
+using namespace std::chrono;
 
-StageController::StageController(Axis _axis, gui_encoder_callback _gec, const void *_gm2d3, const Setting &c)
-    : bounds(config_get_bounds(c.lookup("bounds"))),
-    cypher(config_get_cypher(c.lookup("cypher"))),
-    gm2d3(_gm2d3),
-    gec(_gec),
-    resolution(double(c.lookup("resolution"))),
-    current_position(0.0),
-    goal_position(0.0),
-    calibrated(false),
-    cypher_bits(unsigned(c.lookup("cypher_bits"))),
-    axis(_axis),
-    current_motor_state(MotorState::OFF),
-    current_encoder_state(EMPTY_ENCODER_STATE),
-    previous_encoder_state(EMPTY_ENCODER_STATE)
+StageController::StageController(
+        Axis _axis,
+        gui_encoder_callback _gec,
+        const void *_gm2d3,
+        const Setting &c
+        ) :
+        bounds(config_get_bounds(c.lookup("bounds"))),
+        cypher(config_get_cypher(c.lookup("cypher"))),
+        jitters_rejected(0),
+        gm2d3(_gm2d3),
+        gec(_gec),
+        resolution(double(c.lookup("resolution"))),
+        middle_position(bounds.first + (bounds.second - bounds.first)/2.0),
+        current_position(middle_position),
+        goal_position(middle_position),
+        calibrated(false),
+        cypher_bits(unsigned(c.lookup("cypher_bits"))),
+        axis(_axis),
+        current_motor_state(MotorState::OFF),
+        current_encoder_state(EMPTY_ENCODER_STATE),
+        previous_encoder_state(EMPTY_ENCODER_STATE)
 {
+    // CONSISTENCY CHECKS
     if ((bounds.second - bounds.first) <= 0) {
-        throw make_gm2d3_exception(ControllerException::Type::Config, "Invalid controller bounds");
+        throw make_gm2d3_exception(GM2D3Exception::Type::Config, "Invalid controller bounds");
     }
 
     if (resolution <= 0 || resolution >= bounds.second - bounds.first) {
-        throw make_gm2d3_exception(ControllerException::Type::Config, "Invalid resolution");
+        throw make_gm2d3_exception(GM2D3Exception::Type::Config, "Invalid resolution");
     }
 
     for (auto& kv : cypher)
     {
         if (kv.second > bounds.second || kv.second < bounds.first)
         {
-            throw make_gm2d3_exception(ControllerException::Type::Config, "Cypher value outside min/max bounds");
+            throw make_gm2d3_exception(GM2D3Exception::Type::Config, "Cypher value outside min/max bounds");
         }
     }
-
-    cypher_accumulator.resize(cypher_bits);
-    std::fill(cypher_accumulator.begin(), cypher_accumulator.end(), false);
 
     high_resolution_clock::time_point init_time = high_resolution_clock::now();
     for (auto &e : ALL_ENCODERS)
     {
-        last_encoder_updates[e] = init_time;
+        for (auto &s : { true, false }) {
+            encoder_history[e].push_back(std::make_pair(init_time, s));
+        }
     }
 }
 
@@ -91,25 +99,52 @@ StageController::monitor()
     //     }
 }
 
-    void
-StageController::update_encoder_state(Encoder e, bool state)
+void
+StageController::update_encoder_state( Encoder e, bool state,
+        high_resolution_clock::time_point tp)
 {
 
-    high_resolution_clock::time_point current_time = high_resolution_clock::now();
-
-    duration<double> time_span = duration_cast<duration<double>>
-        (current_time - last_encoder_updates[e]);
-
-    // TODO: add exceptions here
-    if (time_span.count() < 0) { return; }
-
-    if (time_span.count() < JITTER_TIME) { return; }
-
-    if (get_current_motor_state() == MotorState::OFF) { return; }
-
+    // LOCK ENCODER STATE
+    // insures that all encoder transitions are processed in order,
+    // as long as update_encoder_state is called in order
     std::lock_guard<std::mutex> guard(encoder_mutex);
 
-    // TODO: check that this state transition makes sense, throw exception if it doesn't
+    duration<double> time_span = duration_cast<duration<double>>
+        (tp - get_last_transition_time(e));
+
+    // add transition to the history
+    encoder_history[e].push_back(std::make_pair(tp,state));
+
+    try
+    {
+        if (time_span.count() < 0) { 
+            throw make_gm2d3_exception(GM2D3Exception::Type::Programmer, 
+                    "Attempted to process encoder events out of order. This should never happen!");
+        }
+
+        if (time_span.count() < JITTER_TIME) { 
+            jitters_rejected++;
+
+            std::string jitter_msg = "Jitter detected on ";
+            jitter_msg += axis_to_string(axis);
+            jitter_msg += "axis: (" ;
+            jitter_msg += std::to_string(jitters_rejected);
+            jitter_msg += " rejected so far)";
+
+            throw make_gm2d3_exception(GM2D3Exception::Type::SafetyWarning, jitter_msg );
+        }
+
+        if (get_current_motor_state() == MotorState::OFF) { 
+            throw make_gm2d3_exception(GM2D3Exception::Type::SafetyWarning, 
+                    "Encoder logic transition occurred while motor was off! Ignoring...");
+        }
+    }
+
+    catch (GM2D3Exception &gex)
+    {
+        debug_print(gex);
+    }
+
     previous_encoder_state[e] = !state;
     current_encoder_state[e] = state;
 
@@ -132,11 +167,16 @@ StageController::update_encoder_state(Encoder e, bool state)
             break;
     }
 
-    last_encoder_updates[e] = current_time;
-    alert_gui(e, state);
+    alert_gui(e, state, tp);
 }
 
-    void
+const high_resolution_clock::time_point
+StageController::get_last_transition_time(Encoder e)
+{
+    return encoder_history[e].back().first;
+}
+
+void
 StageController::move(double new_position)
 {
     if (new_position > bounds.second || new_position < bounds.first) {
@@ -158,12 +198,10 @@ StageController::move(double new_position)
     if (new_position > current_position) {
         change_motor_state(MotorState::CCW);
 
-        Fl::lock();
         monitor_thread = std::thread([this]() {
                 monitor();
                 });
         monitor_thread.detach();
-        Fl::unlock();
     }
 
     if (new_position < current_position) {
@@ -172,7 +210,7 @@ StageController::move(double new_position)
     }
 }
 
-    std::pair<double,double>
+std::pair<double,double>
 config_get_bounds(const Setting &c)
 {
     double min, max;

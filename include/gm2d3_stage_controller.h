@@ -8,6 +8,7 @@
 #include <iostream>
 #include <thread>
 #include <mutex>
+
 #include <chrono>
 using namespace std::chrono;
 
@@ -23,11 +24,15 @@ enum class ControllerType {
 std::pair<double,double> config_get_bounds(const Setting &c);
 std::map<int,double> config_get_cypher(const Setting &c);
 
-typedef void (*gui_encoder_callback)(Axis, Encoder, bool, const void *);
+typedef void (*gui_encoder_callback)(Axis, Encoder, bool, const high_resolution_clock::time_point tp, const void *);
 
 class StageController {
     public:
-        StageController(Axis _axis, gui_encoder_callback _gec, const void *_gm2d3, const Setting &c);
+        StageController(
+                Axis _axis,
+                gui_encoder_callback _gec,
+                const void *_gm2d3,
+                const Setting &c);
 
         const std::pair<double,double> bounds;
         const std::map<int,double> cypher;
@@ -47,48 +52,35 @@ class StageController {
 
     protected:
         void monitor(void);
-        void update_encoder_state(Encoder e, bool state);
+        void update_encoder_state(Encoder e, bool state,
+                high_resolution_clock::time_point tp);
 
         virtual void internal_change_motor_state(MotorState m) = 0;
         virtual void shutdown(void) = 0;
 
     private:
+        const high_resolution_clock::time_point get_last_transition_time(Encoder e);
+
+        unsigned int jitters_rejected;
+
         const void *gm2d3;
         const gui_encoder_callback gec;
-        void alert_gui(Encoder e, bool state) { gec(axis, e, state, gm2d3); }
+        void alert_gui(Encoder e, bool state, high_resolution_clock::time_point tp) {
+            gec(axis, e, state, tp, gm2d3);
+        }
 
-        const double resolution;
+        const double resolution, middle_position;
         double current_position, goal_position;
         bool calibrated;
         const unsigned int cypher_bits;
         const Axis axis;
 
         MotorState current_motor_state;
-        std::vector<bool> cypher_accumulator;
 
         std::mutex encoder_mutex;
         std::map<Encoder, bool> current_encoder_state;
         std::map<Encoder, bool> previous_encoder_state;
-        std::map<Encoder, high_resolution_clock::time_point> last_encoder_updates;
+
+        std::map<Encoder, std::vector< std::pair<high_resolution_clock::time_point,bool>>> encoder_history;
 };
-
-class ControllerException {
-    public:
-
-        enum class Type {
-            Programmer,
-            Config,
-            SafetyWarning
-        };
-
-        ControllerException(ControllerException::Type _type, std::string _msg, unsigned int _linum, std::string _filename) 
-            : type(_type), msg(_msg), linum(_linum), filename(_filename) {}
-
-        const ControllerException::Type type;
-        const std::string msg;
-        const unsigned int linum;
-        const std::string filename;
-};
-
-#define make_gm2d3_exception(t,m) ControllerException(t,m,__LINE__,__FILE__)
 

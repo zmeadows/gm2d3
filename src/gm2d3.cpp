@@ -54,8 +54,6 @@ GM2D3::attach_controller(Axis axis, ControllerType ct, const Setting &c)
 void
 GM2D3::process_config_file()
 {
-    reset();
-
     try
     {
         ControllerType ct;
@@ -77,7 +75,7 @@ GM2D3::process_config_file()
         } else {
             std::string unrecognized_controller_type_msg = "Unrecognized controller type: (" + ctype_str + ")";
             unrecognized_controller_type_msg += " Did you forget to enable the Raspberry Pi or Galil in CMakeLists.txt?";
-            throw make_gm2d3_exception(ControllerException::Type::Config, unrecognized_controller_type_msg);
+            throw make_gm2d3_exception(GM2D3Exception::Type::Config, unrecognized_controller_type_msg);
             reset();
         }
 
@@ -92,7 +90,7 @@ GM2D3::process_config_file()
         }
 
         if (controllers.size() < 1) {
-            throw make_gm2d3_exception(ControllerException::Type::Config, "No controllers found in config file!");
+            throw make_gm2d3_exception(GM2D3Exception::Type::Config, "No controllers found in config file!");
         }
 
         setup_controllers();
@@ -112,7 +110,7 @@ GM2D3::process_config_file()
         return;
     }
 
-    catch(const ControllerException &cex)
+    catch(const GM2D3Exception &cex)
     {
         debug_print(0, DebugStatementType::ERROR, cex.msg);
         reset();
@@ -121,12 +119,12 @@ GM2D3::process_config_file()
 
     catch(...)
     {
-        debug_print(0, DebugStatementType::WARNING, "Uknown error encountered");
+        debug_print(0, DebugStatementType::WARNING, "Uknown error encountered, resetting just to be safe...");
         reset();
         return;
     }
 
-    gm2d3_state = OperatingState::WAITING;
+    gm2d3_state = OperatingState::WAITING_ON_USER;
 
     window->options->config_loader->flash_config_path(FL_GREEN);
     debug_print(1, DebugStatementType::SUCCESS, "Successfully attached controllers");
@@ -135,6 +133,8 @@ GM2D3::process_config_file()
 // TODO: void all callbacks
 void GM2D3::reset(void)
 {
+    // TODO: disable all gui options (same as startup state)
+    cfg.reset(nullptr);
     controllers.clear();
 }
 
@@ -148,7 +148,6 @@ void
 GM2D3::manual_button_callback(Fl_Widget *button)
 {
     GM2D3ManualControlButton *b = (GM2D3ManualControlButton*) button;
-
     controllers[b->axis]->change_motor_state(b->motor_state);
 }
 
@@ -246,13 +245,14 @@ GM2D3::detach_plot_threads(void)
 
 
 void
-GM2D3::static_encoder_state_callback(Axis a, Encoder e, bool state, const void *gm2d3)
+GM2D3::static_encoder_state_callback(Axis a, Encoder e, bool state, 
+        high_resolution_clock::time_point tp, const void *gm2d3)
 {
-    ((GM2D3 *) gm2d3)->encoder_state_callback(a,e,state);
+    ((GM2D3 *) gm2d3)->encoder_state_callback(a,e,state, tp);
 }
 
 void
-GM2D3::encoder_state_callback(Axis a, Encoder e, bool state)
+GM2D3::encoder_state_callback(Axis a, Encoder e, bool state, high_resolution_clock::time_point tp)
 {
     if (keep_updating_indicators) {
         window->diagnostics[a]->indicators->set_dial_state(e, state);
@@ -299,6 +299,7 @@ GM2D3::load_config_callback(Fl_Widget *)
             return;
         }
 
+        if (cfg) reset(); // unload current configuration, if present
         cfg = std::move(try_cfg);
         debug_print(0, DebugStatementType::SUCCESS, "Successfully parsed config file: " + config_path);
         process_config_file();
@@ -312,8 +313,8 @@ GM2D3::update_stats(void)
 }
 
 GM2D3::GM2D3(int window_width, int window_height)
-    : keep_updating_indicators(false),
-    gm2d3_state(OperatingState::DETACHED)
+    : gm2d3_state(OperatingState::DETACHED),
+    keep_updating_indicators(false)
 {
     window = std::unique_ptr<GM2D3Window>(new GM2D3Window(window_width,window_height,"GM2D3"));
     window->end();

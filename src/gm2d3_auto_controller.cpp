@@ -4,8 +4,7 @@
 
 
 GM2D3AutoControlInput::GM2D3AutoControlInput(int x, int y, int w, int h, Axis _axis)
-    : Fl_Input(x,y,w,h),
-    axis(_axis)
+    : Fl_Input(x,y,w,h), axis(_axis)
 {
     align(FL_ALIGN_LEFT);
 
