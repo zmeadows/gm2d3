@@ -4,32 +4,18 @@
 #include <chrono>
 using namespace std::chrono;
 
-StageController::StageController(
-        Axis _axis,
-        gui_encoder_callback _gec,
-        gui_shutdown_callback _gsc,
-        const void *_gm2d3,
-        const Setting &c
-        ) :
-        bounds(config_get_bounds(c.lookup("bounds"))),
-        cypher(config_get_cypher(c.lookup("cypher"))),
-        axis(_axis),
-        jitters_rejected(0),
-        jittering(false),
-        gm2d3(_gm2d3),
-        gec(_gec),
-        gsc(_gsc),
-        resolution(double(c.lookup("resolution"))),
-        middle_position(bounds.first + (bounds.second - bounds.first)/2.0),
-        current_position(middle_position),
-        goal_position(middle_position),
-        calibrated(false),
-        cypher_bits(unsigned(c.lookup("cypher_bits"))),
-        current_motor_state(MotorState::OFF),
-        current_encoder_state(EMPTY_ENCODER_STATE),
-        previous_encoder_state(EMPTY_ENCODER_STATE)
+StageController::StageController( Axis _axis, gui_encoder_callback _gec,
+        gui_shutdown_callback _gsc, const void *_gm2d3, const Setting &c)
+    : bounds(config_get_bounds(c.lookup("bounds"))),
+    cypher(config_get_cypher(c.lookup("cypher"))),
+    axis(_axis), jitters_rejected(0), jittering(false),
+    gm2d3(_gm2d3), gec(_gec), gsc(_gsc), resolution(double(c.lookup("resolution"))),
+    middle_position(bounds.first + (bounds.second - bounds.first)/2.0),
+    current_position(middle_position), goal_position(middle_position),
+    calibrated(false), cypher_bits(unsigned(c.lookup("cypher_bits"))),
+    current_motor_state(MotorState::OFF), current_encoder_state(EMPTY_ENCODER_STATE),
+    previous_encoder_state(EMPTY_ENCODER_STATE)
 {
-    // CONSISTENCY CHECKS
     if ((bounds.second - bounds.first) <= 0) {
         throw make_gm2d3_exception(GM2D3Exception::Type::Config, "Invalid controller bounds");
     }
@@ -55,7 +41,7 @@ StageController::StageController(
     }
 }
 
-    void
+void
 StageController::change_motor_state(MotorState next_motor_state)
 {
 
@@ -90,17 +76,6 @@ StageController::change_motor_state(MotorState next_motor_state)
     void
 StageController::monitor()
 {
-    //     int ret_code = internal_monitor();
-    //
-    //     switch (ret_code)
-    //     {
-    //         case 0:
-    //             debug_print(1, "successfully moved motor");
-    //         case -1:
-    //             debug_print(1, "failed to move motor");
-    //         default:
-    //             break;
-    //     }
 }
 
 void
@@ -193,7 +168,6 @@ StageController::update_encoder_state( Encoder e, bool state,
     }
 
     encoder_mutex.unlock();
-
     alert_gui(e, state, tp);
 }
 
@@ -246,7 +220,7 @@ config_get_bounds(const Setting &c)
     return std::make_pair(min, max);
 }
 
-    std::map<int,double>
+std::map<int,double>
 config_get_cypher(const Setting &c)
 {
     std::map<int,double> cypher;
@@ -297,10 +271,10 @@ next_transition(MotorState m, bool A, bool B)
 void
 StageController::shutdown(void)
 {
+    debug_print(2, DebugStatementType::ATTEMPT, "Shutting down " + axis_to_string(axis) + " stage...");
+
     change_motor_state(MotorState::OFF);
     internal_shutdown();
 
-    // std::string shutdown_msg
-    // debug_print(0, DebugStatementType::WARNING, "Shutto
     gsc(axis, gm2d3);
 }

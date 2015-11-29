@@ -20,8 +20,6 @@ GM2D3DebugPrinter::print()
         + "." + std::to_string(GM2D3_VERSION_MINOR)
         + "] ";
 
-    if (level_guard_ <= gDEBUG_LEVEL)
-    {
         switch (type_)
         {
             case DebugStatementType::ATTEMPT:
@@ -56,23 +54,27 @@ GM2D3DebugPrinter::print()
         }
 
         if (type_ == DebugStatementType::SUCCESS) std::cout << std::endl;
-    }
 }
 
 void
 debug_print(const unsigned level_guard, const DebugStatementType type,
         const std::string &message, const std::vector<std::string> &sub_messages)
 {
+
+    if (level_guard > gDEBUG_LEVEL) { 
+        return;
+    } else {
     GM2D3DebugPrinter::instance()->lock();
 
-    GM2D3DebugPrinter::instance()->set_level_guard(level_guard);
     GM2D3DebugPrinter::instance()->set_type(type);
     GM2D3DebugPrinter::instance()->set_message(message);
     GM2D3DebugPrinter::instance()->set_sub_messages(sub_messages);
 
     GM2D3DebugPrinter::instance()->print();
-
     GM2D3DebugPrinter::instance()->unlock();
+
+    }
+
 }
 
 void

@@ -54,7 +54,7 @@ class GM2D3StageDiagnostics
     public:
         GM2D3StageDiagnostics(int x, int y, int w, int h, Axis axis);
 
-        std::shared_ptr<GM2D3StageHistoryPlot> history_plot;
+        std::unique_ptr<GM2D3StageHistoryPlot> history_plot;
         std::unique_ptr<GM2D3StageIndicators> indicators;
         std::unique_ptr<Fl_Multiline_Output> info;
 

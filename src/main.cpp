@@ -1,12 +1,14 @@
 #include "gm2d3.h"
 
 #include "gm2d3_util.h"
+
 #include "gm2d3_const.h"
 #include "../cmake/gm2d3_cmake.h"
 
 #include <stdlib.h>
 #include <time.h>
 #include <iostream>
+#include <sstream>
 #include <memory>
 
 #include <Fl/Fl.H>
@@ -15,7 +17,7 @@
 #include <pigpio.h>
 #endif
 
-void const print_info(void);
+void print_info(void);
 
 int
 main(int argc, char** argv)
@@ -53,10 +55,11 @@ main(int argc, char** argv)
     exit(Fl::run());
 }
 
-void const
+void
 print_info()
 {
-    std::cout
-        << "VERSION " << GM2D3_VERSION_MAJOR << "." << GM2D3_VERSION_MINOR
-        << "COMPILED ON " << __DATE__ << " AT " << __TIME__ << std::endl << std::endl;
+    std::ostringstream info;
+    info << "VERSION " << GM2D3_VERSION_MAJOR << "." << GM2D3_VERSION_MINOR
+         << " COMPILED ON " << __DATE__ << " AT " << __TIME__ << std::endl << std::endl;
+    std::cout << info.str();
 }

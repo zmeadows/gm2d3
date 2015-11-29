@@ -29,20 +29,20 @@ class GM2D3 {
 
         OperatingState gm2d3_state;
 
-        std::map<Axis, std::shared_ptr<StageController>> controllers;
+        std::map<Axis, std::unique_ptr<StageController>> controllers;
         std::unique_ptr<Config> cfg;
 
-        std::shared_ptr<bool> keep_updating_plots;
-        std::vector<std::thread> plot_threads;
-        void start_plot_threads(void);
-        void cleanup_plot_threads(void);
+        void disable_plots(void);
+        void enable_plots(void);
+        bool keep_updating_plots;
 
         void enable_indicators();
         void disable_indicators();
         bool keep_updating_indicators;
-        // bool keep_updating_stats;
 
-        void update_stats(void);
+        void enable_info(void);
+        void disable_info(void);
+        bool keep_updating_info;
 
         void process_config_file(void);
         void reset(void);
@@ -72,6 +72,9 @@ class GM2D3 {
 
         static void static_enable_indicators_callback(Fl_Widget *enable_plot_checkbox, void *gm2d3);
         void enable_indicators_callback(Fl_Widget *enable_indicators_checkbox);
+
+        static void static_enable_info_callback(Fl_Widget *enable_info_checkbox, void *gm2d3);
+        void enable_info_callback(Fl_Widget *enable_info_checkbox);
 
         static void static_exit_window_callback(Fl_Widget *gm2d3_window, void *gm2d3);
         void exit_window_callback(Fl_Widget *gm2d3_window);

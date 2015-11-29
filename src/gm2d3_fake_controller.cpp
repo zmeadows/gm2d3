@@ -5,23 +5,20 @@
 
 FakeController::FakeController(Axis _axis, gui_encoder_callback _gec,
         gui_shutdown_callback _gsc, const void *_gm2d3, const Setting &c)
-    : StageController(_axis, _gec, _gsc, _gm2d3, c), timestep_us(3e5), keep_moving(false)
+    : StageController(_axis, _gec, _gsc, _gm2d3, c), timestep_us(1e5), keep_moving(false)
 {
 }
 
 void
 FakeController::internal_change_motor_state(MotorState m)
 {
-
-
     keep_moving = false;
     if (motor_mover.joinable()) motor_mover.join();
 
     if (m != MotorState::OFF && m != get_current_motor_state())
     {
-
-    keep_moving = true;
-    motor_mover = std::thread(&FakeController::detach_motor_mover_thread, this, m);
+        keep_moving = true;
+        motor_mover = std::thread(&FakeController::detach_motor_mover_thread, this, m);
     }
 }
 
@@ -42,7 +39,7 @@ FakeController::detach_motor_mover_thread(MotorState m)
         nt = next_transition(m, A, B);
 
         update_encoder_state(nt.first, nt.second, high_resolution_clock::now());
-        //maybe_jitter(nt.first, nt.second);
+        // maybe_jitter(nt.first, nt.second);
 
         std::this_thread::sleep_for(std::chrono::microseconds(timestep_us));
     }
@@ -51,19 +48,24 @@ FakeController::detach_motor_mover_thread(MotorState m)
 void
 FakeController::internal_shutdown(void)
 {
-    std::string shutdown_str = "Shutting down Fake Controller: " + axis_to_string(axis);
-    debug_print(2, DebugStatementType::WARNING, shutdown_str);
 }
 
+// TODO: fix. this is broken.
 void
 FakeController::maybe_jitter(Encoder e, bool init_state)
 {
     if (((double) rand() / (RAND_MAX)) > JITTER_PROBABILITY) { return; }
 
+    const unsigned int num_jitters = (unsigned) 10 * ((double) rand() / (RAND_MAX));
+
+    debug_print(2, DebugStatementType::GENERIC, "Generating " + std::to_string(num_jitters)
+            + " fake jitters...");
+
     bool next_state = !init_state;
-    for (int n = 0; n < (int) 20 * ((double) rand() / (RAND_MAX)); n++)
+    for (int n = 0; n < num_jitters; n++)
     {
-        unsigned int ms_delay = (int) ( 10.0 * ((double) rand() / (RAND_MAX)));
+        debug_print(2, DebugStatementType::GENERIC, "jittered.");
+        unsigned int ms_delay = (int) ( 20.0 * ((double) rand() / (RAND_MAX)));
         std::this_thread::sleep_for(std::chrono::milliseconds(ms_delay));
         update_encoder_state(e, next_state, high_resolution_clock::now());
         next_state = !next_state;

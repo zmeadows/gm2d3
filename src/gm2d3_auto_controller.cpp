@@ -1,8 +1,5 @@
 #include "gm2d3_auto_controller.h"
 
-#include <map>
-
-
 GM2D3AutoControlInput::GM2D3AutoControlInput(int x, int y, int w, int h, Axis _axis)
     : Fl_Input(x,y,w,h), axis(_axis)
 {
@@ -92,35 +89,57 @@ GM2D3AutoControlGUI::GM2D3AutoControlGUI(int x, int y, int w, int h)
 void
 GM2D3AutoControlGUI::enable_input(Axis axis)
 {
+    Fl::lock();
+
     user_position_inputs[axis]->activate();
     user_position_inputs[axis]->textcolor(FL_BLACK);
     user_position_inputs[axis]->textfont(0);
     user_position_inputs[axis]->value(nullptr);
     user_position_inputs[axis]->readonly(0);
+    Fl::awake();
+
+    Fl::unlock();
 }
 
 void
 GM2D3AutoControlGUI::disable_input(Axis axis)
 {
+    Fl::lock();
+
     user_position_inputs[axis]->deactivate();
     user_position_inputs[axis]->textcolor(FL_RED);
     user_position_inputs[axis]->textfont(FL_BOLD);
     user_position_inputs[axis]->value("DISCONNECTED");
     user_position_inputs[axis]->readonly(1);
+    Fl::awake();
+
+    Fl::unlock();
 }
 
 void
 GM2D3AutoControlGUI::activate()
 {
     for (auto &a : ALL_AXES) { enable_input(a); }
+
+    Fl::lock();
+
     calibrate_button->activate();
     go_button->activate();
+    Fl::awake();
+
+    Fl::unlock();
 }
 
 void
 GM2D3AutoControlGUI::deactivate()
 {
     for (auto &a : ALL_AXES) { disable_input(a); }
+
+    Fl::lock();
+
     calibrate_button->deactivate();
     go_button->deactivate();
+    Fl::awake();
+
+    Fl::unlock();
 }

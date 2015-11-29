@@ -50,7 +50,7 @@ enum class DebugStatementType {
 
 class GM2D3DebugPrinter {
     public:
-        GM2D3DebugPrinter(void) : message_(""), level_guard_(0), type_(DebugStatementType::GENERIC) {}
+        GM2D3DebugPrinter(void) : message_(""), type_(DebugStatementType::GENERIC) {}
 
         static GM2D3DebugPrinter *static_instance;
 
@@ -68,14 +68,12 @@ class GM2D3DebugPrinter {
         void set_message(const std::string &message) { message_ = message; }
         void set_sub_messages(const std::vector<std::string> &sub_messages)
                 { sub_messages_ = sub_messages; }
-        void set_level_guard(const unsigned level_guard) { level_guard_ = level_guard; }
         void set_type(const DebugStatementType type) { type_ = type; }
 
     private:
         std::mutex print_mutex_;
         std::string message_;
         std::vector<std::string> sub_messages_;
-        unsigned int level_guard_;
         DebugStatementType type_;
 };
 

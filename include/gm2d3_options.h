@@ -36,7 +36,7 @@ class GM2D3OptionsGUI {
         std::unique_ptr<GM2D3ConfigLoader> config_loader;
         std::unique_ptr<Fl_Check_Button> enable_history_plot;
         std::unique_ptr<Fl_Check_Button> enable_indicators;
-        std::unique_ptr<Fl_Check_Button> enable_stats;
+        std::unique_ptr<Fl_Check_Button> enable_info;
 
     private:
         std::unique_ptr<Fl_Box> options_box;

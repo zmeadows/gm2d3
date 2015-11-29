@@ -100,10 +100,10 @@ GM2D3OptionsGUI::GM2D3OptionsGUI(int x, int y, int w, int h)
     enable_indicators->label("ENABLE INDICATORS");
     enable_indicators->value(0);
 
-    enable_stats = std::unique_ptr<Fl_Check_Button>
+    enable_info = std::unique_ptr<Fl_Check_Button>
         (new Fl_Check_Button(x_0,y_0 + 2*checkbox_height + 2*BOX_EDGE_GAP, checkbox_width ,checkbox_height));
-    enable_stats->label("ENABLE STATS");
-    enable_stats->value(0);
+    enable_info->label("ENABLE STATS");
+    enable_info->value(0);
 
     config_loader = std::unique_ptr<GM2D3ConfigLoader>
         (new GM2D3ConfigLoader(x_0,y + 4*checkbox_height + 3*BOX_EDGE_GAP, checkbox_width, checkbox_height));

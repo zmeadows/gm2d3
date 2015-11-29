@@ -4,6 +4,7 @@
 #include <Fl/Fl_Pack.H>
 #include <Fl/Fl_Box.H>
 #include <Fl/Fl_Light_Button.H>
+#include <Fl/Fl.H>
 
 #include <map>
 #include <memory>
@@ -33,14 +34,16 @@ class GM2D3ManualControlGUI {
             }
         }
 
+        std::map<Axis, std::map<MotorState, std::unique_ptr<GM2D3ManualControlButton>>> buttons;
+
+        void activate(void);
+        void deactivate(void);
+
+    private:
         void enable_axis(Axis axis);
         void disable_axis(Axis axis);
 
-        std::map<Axis, std::map<MotorState, std::unique_ptr<GM2D3ManualControlButton>>> buttons;
-
-    private:
         std::unique_ptr<Fl_Box> manual_control_box;
-
         std::unique_ptr<Fl_Pack> vertical_pack;
         std::unique_ptr<Fl_Pack> azimuthal_button_pack;
         std::unique_ptr<Fl_Pack> vertical_button_pack;

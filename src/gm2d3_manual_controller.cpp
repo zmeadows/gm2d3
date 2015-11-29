@@ -2,10 +2,8 @@
 #include "gm2d3_util.h"
 
 GM2D3ManualControlButton::GM2D3ManualControlButton(int x, int y, int w, int h,
-        Axis _axis, MotorState _motor_state) :
-    Fl_Button(x,y,w,h),
-    axis(_axis),
-    motor_state(_motor_state)
+        Axis _axis, MotorState _motor_state)
+    : Fl_Button(x,y,w,h), axis(_axis), motor_state(_motor_state)
 {
     type(FL_RADIO_BUTTON);
     down_color(YELLOW());
@@ -122,23 +120,49 @@ GM2D3ManualControlGUI::GM2D3ManualControlGUI(int x, int y, int w, int h)
     vertical_pack->end();
     }
 
-    for (auto& a : ALL_AXES) { disable_axis(a); }
+    deactivate();
 }
 
 void
-GM2D3ManualControlGUI::enable_axis(Axis axis) {
+GM2D3ManualControlGUI::enable_axis(Axis axis) 
+{
+    Fl::lock();
+
     for (auto& m : ALL_MOTOR_STATES)
     {
         buttons[axis][m]->activate();
     }
 
     buttons[axis][MotorState::OFF]->setonly();
+    Fl::awake();
+
+    Fl::unlock();
 }
 
 void
-GM2D3ManualControlGUI::disable_axis(Axis axis) {
+GM2D3ManualControlGUI::disable_axis(Axis axis) 
+{
+    Fl::lock();
+
+    buttons[axis][MotorState::OFF]->setonly();
+
     for (auto& m : ALL_MOTOR_STATES)
     {
         buttons[axis][m]->deactivate();
     }
+    Fl::awake();
+
+    Fl::unlock();
+}
+
+void
+GM2D3ManualControlGUI::activate()
+{
+    for (auto &a : ALL_AXES) { enable_axis(a); }
+}
+
+void
+GM2D3ManualControlGUI::deactivate()
+{
+    for (auto &a : ALL_AXES) { disable_axis(a); }
 }
