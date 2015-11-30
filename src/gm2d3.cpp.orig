@@ -12,7 +12,8 @@
 
 #include <FL/fl_ask.H>
 
-void GM2D3::attach_controllers(void)
+void
+GM2D3::attach_controllers(void)
 {
     window->manual_control->callback(static_manual_button_callback, (void *) this);
 

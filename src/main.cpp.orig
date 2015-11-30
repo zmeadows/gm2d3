@@ -40,11 +40,11 @@ main(int argc, char** argv)
     {
         switch (c)
         {
-        case 'V':
-            gDEBUG_LEVEL = atoi(optarg);
-            break;
-        default:
-            abort();
+            case 'V':
+                gDEBUG_LEVEL = atoi(optarg);
+                break;
+            default:
+                abort();
         }
     }
 

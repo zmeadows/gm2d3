@@ -3,8 +3,7 @@
 #include <vector>
 #include <map>
 
-enum class Axis
-{
+enum class Axis {
     AZIMUTHAL,
     VERTICAL,
     RADIAL
@@ -12,8 +11,7 @@ enum class Axis
 
 const std::vector<Axis> ALL_AXES = { Axis::AZIMUTHAL, Axis::VERTICAL, Axis::RADIAL };
 
-enum class MotorState
-{
+enum class MotorState {
     CW,
     CCW,
     OFF
@@ -22,8 +20,7 @@ enum class MotorState
 const std::vector<MotorState> ALL_MOTOR_STATES = { MotorState::CW, MotorState::CCW, MotorState::OFF };
 
 
-enum class Encoder
-{
+enum class Encoder {
 
     A, // evenly spaced high-res clock
     B, // in quadrature with A
@@ -33,8 +30,7 @@ enum class Encoder
 
 const std::vector<Encoder> ALL_ENCODERS = { Encoder::A, Encoder::B, Encoder::C, Encoder::D };
 
-const std::map<Encoder,bool> EMPTY_ENCODER_STATE =
-{
+const std::map<Encoder,bool> EMPTY_ENCODER_STATE = {
     {Encoder::A, false},
     {Encoder::B, false},
     {Encoder::C, false},

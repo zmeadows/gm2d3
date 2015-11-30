@@ -18,46 +18,46 @@
 
 class GM2D3StageHistoryPlot : public Fl_Chart
 {
-    public:
-        GM2D3StageHistoryPlot(int x, int y, int w, int h, Axis _axis);
+public:
+    GM2D3StageHistoryPlot(int x, int y, int w, int h, Axis _axis);
 
-        const Axis axis;
+    const Axis axis;
 
-        void add_point(double val);
+    void add_point(double val);
 
-        void enable();
-        void disable();
+    void enable();
+    void disable();
 
-    private:
-        unsigned int n;
-        Fl_Color line_color;
+private:
+    unsigned int n;
+    Fl_Color line_color;
 };
 
 class GM2D3StageIndicators
 {
-    public:
-        GM2D3StageIndicators(int x, int y, int w);
+public:
+    GM2D3StageIndicators(int x, int y, int w);
 
-        void set_dial_state(Encoder e, bool state);
+    void set_dial_state(Encoder e, bool state);
 
-        void enable();
-        void disable();
+    void enable();
+    void disable();
 
-    private:
-        std::unique_ptr<Fl_Box> indicator_box;
-        std::map<Encoder, std::unique_ptr<Fl_Dial>> dials;
-        Fl_Color on_color, off_color;
+private:
+    std::unique_ptr<Fl_Box> indicator_box;
+    std::map<Encoder, std::unique_ptr<Fl_Dial>> dials;
+    Fl_Color on_color, off_color;
 };
 
 class GM2D3StageDiagnostics
 {
-    public:
-        GM2D3StageDiagnostics(int x, int y, int w, int h, Axis axis);
+public:
+    GM2D3StageDiagnostics(int x, int y, int w, int h, Axis axis);
 
-        std::unique_ptr<GM2D3StageHistoryPlot> history_plot;
-        std::unique_ptr<GM2D3StageIndicators> indicators;
-        std::unique_ptr<Fl_Multiline_Output> info;
+    std::unique_ptr<GM2D3StageHistoryPlot> history_plot;
+    std::unique_ptr<GM2D3StageIndicators> indicators;
+    std::unique_ptr<Fl_Multiline_Output> info;
 
-    private:
-        std::unique_ptr<Fl_Box> diagnostics_box;
+private:
+    std::unique_ptr<Fl_Box> diagnostics_box;
 };

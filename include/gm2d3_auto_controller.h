@@ -15,36 +15,38 @@
 #include <map>
 #include <memory>
 
-class GM2D3AutoControlInput : public Fl_Input {
-    public:
-        GM2D3AutoControlInput(int x, int y, int w, int h, Axis _axis);
+class GM2D3AutoControlInput : public Fl_Input
+{
+public:
+    GM2D3AutoControlInput(int x, int y, int w, int h, Axis _axis);
 
-        const Axis axis;
+    const Axis axis;
 };
 
-class GM2D3AutoControlGUI {
-    public:
-        GM2D3AutoControlGUI(int x, int y, int w, int h);
+class GM2D3AutoControlGUI
+{
+public:
+    GM2D3AutoControlGUI(int x, int y, int w, int h);
 
-        void disable_input(Axis axis);
-        void enable_input(Axis axis);
+    void disable_input(Axis axis);
+    void enable_input(Axis axis);
 
-        void activate();
-        void deactivate();
+    void activate();
+    void deactivate();
 
-        std::unique_ptr<Fl_Button> calibrate_button;
-        std::unique_ptr<Fl_Button> go_button;
-        std::unique_ptr<Fl_Button> kill_button;
+    std::unique_ptr<Fl_Button> calibrate_button;
+    std::unique_ptr<Fl_Button> go_button;
+    std::unique_ptr<Fl_Button> kill_button;
 
-    private:
-        std::unique_ptr<Fl_Box> auto_control_box;
+private:
+    std::unique_ptr<Fl_Box> auto_control_box;
 
-        std::unique_ptr<Fl_Pack> horizontal_pack;
-        std::unique_ptr<Fl_Pack> input_box_pack;
-        std::unique_ptr<Fl_Pack> auto_button_pack;
+    std::unique_ptr<Fl_Pack> horizontal_pack;
+    std::unique_ptr<Fl_Pack> input_box_pack;
+    std::unique_ptr<Fl_Pack> auto_button_pack;
 
 
-        std::map<Axis, std::unique_ptr<GM2D3AutoControlInput>> user_position_inputs;
+    std::map<Axis, std::unique_ptr<GM2D3AutoControlInput>> user_position_inputs;
 
-        std::unique_ptr<Fl_Menu_Button> preset_positions_menu;
+    std::unique_ptr<Fl_Menu_Button> preset_positions_menu;
 };

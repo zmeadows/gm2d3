@@ -5,24 +5,22 @@
 using namespace std::chrono;
 
 StageController::StageController( Axis _axis, gui_encoder_callback _gec,
-                                  gui_shutdown_callback _gsc, const void *_gm2d3, const Setting &c)
+        gui_shutdown_callback _gsc, const void *_gm2d3, const Setting &c)
     : bounds(config_get_bounds(c.lookup("bounds"))),
-      cypher(config_get_cypher(c.lookup("cypher"))),
-      axis(_axis), jitters_rejected(0), jittering(false),
-      gm2d3(_gm2d3), gec(_gec), gsc(_gsc), resolution(double(c.lookup("resolution"))),
-      middle_position(bounds.first + (bounds.second - bounds.first)/2.0),
-      current_position(middle_position), goal_position(middle_position),
-      calibrated(false), cypher_bits(unsigned(c.lookup("cypher_bits"))),
-      current_motor_state(MotorState::OFF), current_encoder_state(EMPTY_ENCODER_STATE),
-      previous_encoder_state(EMPTY_ENCODER_STATE)
+    cypher(config_get_cypher(c.lookup("cypher"))),
+    axis(_axis), jitters_rejected(0), jittering(false),
+    gm2d3(_gm2d3), gec(_gec), gsc(_gsc), resolution(double(c.lookup("resolution"))),
+    middle_position(bounds.first + (bounds.second - bounds.first)/2.0),
+    current_position(middle_position), goal_position(middle_position),
+    calibrated(false), cypher_bits(unsigned(c.lookup("cypher_bits"))),
+    current_motor_state(MotorState::OFF), current_encoder_state(EMPTY_ENCODER_STATE),
+    previous_encoder_state(EMPTY_ENCODER_STATE)
 {
-    if ((bounds.second - bounds.first) <= 0)
-    {
+    if ((bounds.second - bounds.first) <= 0) {
         throw make_gm2d3_exception(GM2D3Exception::Type::Config, "Invalid controller bounds");
     }
 
-    if (resolution <= 0 || resolution >= bounds.second - bounds.first)
-    {
+    if (resolution <= 0 || resolution >= bounds.second - bounds.first) {
         throw make_gm2d3_exception(GM2D3Exception::Type::Config, "Invalid resolution");
     }
 
@@ -37,11 +35,7 @@ StageController::StageController( Axis _axis, gui_encoder_callback _gec,
     high_resolution_clock::time_point init_time = high_resolution_clock::now();
     for (auto &e : ALL_ENCODERS)
     {
-        for (auto &s :
-                {
-                    true, false
-                })
-        {
+        for (auto &s : { true, false }) {
             encoder_history[e].push_back(std::make_pair(init_time, s));
         }
     }
@@ -79,7 +73,7 @@ StageController::change_motor_state(MotorState next_motor_state)
     }
 }
 
-void
+    void
 StageController::monitor()
 {
     //     int ret_code = internal_monitor();
@@ -97,7 +91,7 @@ StageController::monitor()
 
 void
 StageController::update_encoder_state( Encoder e, bool state,
-                                       high_resolution_clock::time_point tp)
+        high_resolution_clock::time_point tp)
 {
 
     // LOCK ENCODER STATE
@@ -106,16 +100,15 @@ StageController::update_encoder_state( Encoder e, bool state,
     encoder_mutex.lock();
 
     duration<double> time_span = duration_cast<duration<double>>
-                                 (tp - get_last_transition_time(e));
+        (tp - get_last_transition_time(e));
 
 
     try
     {
         // OUT-OF-TIME TRANSITION PROCESSING
-        if (time_span.count() < 0)
-        {
+        if (time_span.count() < 0) {
             throw make_gm2d3_exception(GM2D3Exception::Type::Programmer,
-                                       "Attempted to process encoder events out of order. This should never happen!");
+                    "Attempted to process encoder events out of order. This should never happen!");
         }
 
         if (time_span.count() < JITTER_TIME)
@@ -138,10 +131,9 @@ StageController::update_encoder_state( Encoder e, bool state,
             }
         }
 
-        if (get_current_motor_state() == MotorState::OFF)
-        {
+        if (get_current_motor_state() == MotorState::OFF) {
             throw make_gm2d3_exception(GM2D3Exception::Type::SafetyWarning,
-                                       "Encoder logic transition occurred while motor was off! Ignoring...");
+                    "Encoder logic transition occurred while motor was off! Ignoring...");
         }
     }
 
@@ -156,7 +148,7 @@ StageController::update_encoder_state( Encoder e, bool state,
     catch (...)
     {
         debug_print(0, DebugStatementType::ERROR,
-                    "Unrecognized error occurred, shutting down...");
+                "Unrecognized error occurred, shutting down...");
         shutdown();
     }
 
@@ -171,19 +163,19 @@ StageController::update_encoder_state( Encoder e, bool state,
 
     switch (e)
     {
-    case Encoder::A:
-        current_position += delta;
-        break;
+        case Encoder::A:
+            current_position += delta;
+            break;
 
-    case Encoder::B:
-        current_position += delta;
-        break;
+        case Encoder::B:
+            current_position += delta;
+            break;
 
-    case Encoder::C:
-        break;
+        case Encoder::C:
+            break;
 
-    case Encoder::D:
-        break;
+        case Encoder::D:
+            break;
     }
 
     encoder_mutex.unlock();
@@ -199,15 +191,13 @@ StageController::get_last_transition_time(Encoder e)
 void
 StageController::move(double new_position)
 {
-    if (new_position > bounds.second || new_position < bounds.first)
-    {
+    if (new_position > bounds.second || new_position < bounds.first) {
         debug_print(0, DebugStatementType::WARNING, "Requested position not within stage bounds!");
         return;
     }
 
     // TODO: does this constraint need to be increased/relaxed?
-    if (fabs(new_position - current_position) <= resolution)
-    {
+    if (fabs(new_position - current_position) <= resolution) {
         debug_print(0, DebugStatementType::WARNING, "Already at position to within stage resolution");
         return;
     }
@@ -217,19 +207,16 @@ StageController::move(double new_position)
     std::thread monitor_thread;
 
     // TODO: disable manual control
-    if (new_position > current_position)
-    {
+    if (new_position > current_position) {
         change_motor_state(MotorState::CCW);
 
-        monitor_thread = std::thread([this]()
-        {
-            monitor();
-        });
+        monitor_thread = std::thread([this]() {
+                monitor();
+                });
         monitor_thread.detach();
     }
 
-    if (new_position < current_position)
-    {
+    if (new_position < current_position) {
         change_motor_state(MotorState::CW);
         monitor();
     }
@@ -249,8 +236,7 @@ config_get_cypher(const Setting &c)
 {
     std::map<int,double> cypher;
     int i;
-    for (i = 0; i < c.getLength(); i++)
-    {
+    for (i = 0; i < c.getLength(); i++) {
         cypher[i] = double(c[i]);
     }
     return cypher;
@@ -261,49 +247,35 @@ next_transition(MotorState m, bool A, bool B)
 {
     switch (m)
     {
-    case MotorState::CW:
-        if (A && !B)
-        {
-            return std::make_pair(Encoder::B, true);
-        }
-        else if (A && B)
-        {
-            return std::make_pair(Encoder::A, false);
-        }
-        else if (!A && B)
-        {
-            return std::make_pair(Encoder::B, false);
-        }
-        else
-        {
-            return std::make_pair(Encoder::A, true);
-        }
-        break;
+        case MotorState::CW:
+            if (A && !B) {
+                return std::make_pair(Encoder::B, true);
+            } else if (A && B) {
+                return std::make_pair(Encoder::A, false);
+            } else if (!A && B) {
+                return std::make_pair(Encoder::B, false);
+            } else {
+                return std::make_pair(Encoder::A, true);
+            }
+            break;
 
-    case MotorState::CCW:
-        if (A && !B)
-        {
-            return std::make_pair(Encoder::A, false);
-        }
-        else if (A && B)
-        {
-            return std::make_pair(Encoder::B, false);
-        }
-        else if (!A && B)
-        {
-            return std::make_pair(Encoder::A, true);
-        }
-        else
-        {
-            return std::make_pair(Encoder::B, true);
-        }
-        break;
+        case MotorState::CCW:
+            if (A && !B) {
+                return std::make_pair(Encoder::A, false);
+            } else if (A && B) {
+                return std::make_pair(Encoder::B, false);
+            } else if (!A && B) {
+                return std::make_pair(Encoder::A, true);
+            } else {
+                return std::make_pair(Encoder::B, true);
+            }
+            break;
 
-    case MotorState::OFF:
-        throw make_gm2d3_exception(GM2D3Exception::Type::Programmer,
-                                   "Fake controller attempted to change encoder state while \
+        case MotorState::OFF:
+            throw make_gm2d3_exception(GM2D3Exception::Type::Programmer,
+                    "Fake controller attempted to change encoder state while \
                     motor was off!");
-        break;
+            break;
     }
 }
 

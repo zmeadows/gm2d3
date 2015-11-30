@@ -7,15 +7,15 @@ GM2D3AutoControlInput::GM2D3AutoControlInput(int x, int y, int w, int h, Axis _a
 
     switch (axis)
     {
-    case Axis::AZIMUTHAL:
-        label("AZIMUTHAL: ");
-        break;
-    case Axis::VERTICAL:
-        label("VERTICAL: ");
-        break;
-    case Axis::RADIAL:
-        label("RADIAL: ");
-        break;
+        case Axis::AZIMUTHAL:
+            label("AZIMUTHAL: ");
+            break;
+        case Axis::VERTICAL:
+            label("VERTICAL: ");
+            break;
+        case Axis::RADIAL:
+            label("RADIAL: ");
+            break;
     }
 }
 
@@ -33,14 +33,12 @@ GM2D3AutoControlGUI::GM2D3AutoControlGUI(int x, int y, int w, int h)
     auto_control_box->label("AUTO CONTROL:");
     auto_control_box->labelfont(FL_BOLD);
 
-    {
-        horizontal_pack = std::unique_ptr<Fl_Pack>(new Fl_Pack
-                          (x + input_label_gap + BOX_EDGE_GAP, y + BOX_EDGE_GAP, w, h));
+    {horizontal_pack = std::unique_ptr<Fl_Pack>(new Fl_Pack
+            (x + input_label_gap + BOX_EDGE_GAP, y + BOX_EDGE_GAP, w, h));
         horizontal_pack->type(Fl_Pack::HORIZONTAL);
         horizontal_pack->spacing(ADJACENT_SPACING);
 
-        {
-            input_box_pack = std::unique_ptr<Fl_Pack>(new Fl_Pack(0,0,input_width,h));
+        {input_box_pack = std::unique_ptr<Fl_Pack>(new Fl_Pack(0,0,input_width,h));
             input_box_pack->type(Fl_Pack::VERTICAL);
             input_box_pack->spacing(BOX_EDGE_GAP);
 
@@ -48,34 +46,33 @@ GM2D3AutoControlGUI::GM2D3AutoControlGUI(int x, int y, int w, int h)
             preset_positions_menu->align(FL_ALIGN_LEFT);
 
             user_position_inputs[Axis::AZIMUTHAL] = std::unique_ptr<GM2D3AutoControlInput>
-                                                    (new GM2D3AutoControlInput(0,0,input_width,input_height, Axis::AZIMUTHAL));
+                (new GM2D3AutoControlInput(0,0,input_width,input_height, Axis::AZIMUTHAL));
             user_position_inputs[Axis::VERTICAL]  = std::unique_ptr<GM2D3AutoControlInput>
-                                                    (new GM2D3AutoControlInput(0,10,input_width,input_height, Axis::VERTICAL));
+                (new GM2D3AutoControlInput(0,10,input_width,input_height, Axis::VERTICAL));
             user_position_inputs[Axis::RADIAL]    = std::unique_ptr<GM2D3AutoControlInput>
-                                                    (new GM2D3AutoControlInput(0,20,input_width,input_height, Axis::RADIAL));
+                (new GM2D3AutoControlInput(0,20,input_width,input_height, Axis::RADIAL));
 
             input_box_pack->end();
         }
 
-        {
-            auto_button_pack = std::unique_ptr<Fl_Pack>(new Fl_Pack(10,0,input_width,h));
+        {auto_button_pack = std::unique_ptr<Fl_Pack>(new Fl_Pack(10,0,input_width,h));
             auto_button_pack->type(Fl_Pack::VERTICAL);
             auto_button_pack->spacing(ADJACENT_SPACING);
 
             calibrate_button = std::unique_ptr<Fl_Button>(new Fl_Button(0,0,
-                               input_width, button_height, "CALIBRATE"));
+                        input_width, button_height, "CALIBRATE"));
             calibrate_button->align(FL_ALIGN_CENTER);
             calibrate_button->type(FL_TOGGLE_BUTTON);
             calibrate_button->color2(YELLOW());
 
             go_button = std::unique_ptr<Fl_Button>(new Fl_Button(0,10,
-                                                   input_width,button_height, "GO"));
+                        input_width,button_height, "GO"));
             go_button->align(FL_ALIGN_CENTER);
             go_button->type(FL_TOGGLE_BUTTON);
             go_button->color2(LIGHT_GREEN());
 
             kill_button = std::unique_ptr<Fl_Button>(new Fl_Button(0,20,
-                          input_width,button_height,"KILL"));
+                        input_width,button_height,"KILL"));
             kill_button->color(FL_RED);
             kill_button->color2(FL_RED);
 
@@ -85,10 +82,7 @@ GM2D3AutoControlGUI::GM2D3AutoControlGUI(int x, int y, int w, int h)
         horizontal_pack->end();
     }
 
-    for (auto& a : ALL_AXES)
-    {
-        disable_input(a);
-    }
+    for (auto& a : ALL_AXES) { disable_input(a); }
     deactivate();
 }
 
@@ -125,10 +119,7 @@ GM2D3AutoControlGUI::disable_input(Axis axis)
 void
 GM2D3AutoControlGUI::activate()
 {
-    for (auto &a : ALL_AXES)
-    {
-        enable_input(a);
-    }
+    for (auto &a : ALL_AXES) { enable_input(a); }
 
     Fl::lock();
 
@@ -142,10 +133,7 @@ GM2D3AutoControlGUI::activate()
 void
 GM2D3AutoControlGUI::deactivate()
 {
-    for (auto &a : ALL_AXES)
-    {
-        disable_input(a);
-    }
+    for (auto &a : ALL_AXES) { disable_input(a); }
 
     Fl::lock();
 

@@ -15,7 +15,8 @@ using namespace std::chrono;
 #include <libconfig.h++>
 using namespace libconfig;
 
-enum class ControllerType {
+enum class ControllerType
+{
     RaspberryPi,
     Galil,
     Fake
@@ -29,76 +30,91 @@ typedef void (*gui_shutdown_callback)(Axis, const void *);
 
 std::pair<Encoder, bool> next_transition(MotorState m, bool A, bool B);
 
-class StageController {
-    public:
-        StageController(
-                Axis _axis,
-                gui_encoder_callback _gec,
-                gui_shutdown_callback _gsc,
-                const void *_gm2d3,
-                const Setting &c);
+class StageController
+{
+public:
+    StageController(
+        Axis _axis,
+        gui_encoder_callback _gec,
+        gui_shutdown_callback _gsc,
+        const void *_gm2d3,
+        const Setting &c);
 
-        virtual ~StageController(void) {};
+    virtual ~StageController(void) {};
 
-        const std::pair<double,double> bounds;
-        const std::map<int,double> cypher;
+    const std::pair<double,double> bounds;
+    const std::map<int,double> cypher;
 
-        void move(double new_position);
+    void move(double new_position);
 
-        void change_motor_state(MotorState next_motor_state);
+    void change_motor_state(MotorState next_motor_state);
 
-        double get_current_position() const { return current_position; }
+    double get_current_position() const
+    {
+        return current_position;
+    }
 
-        MotorState get_current_motor_state(void) const { return current_motor_state; }
+    MotorState get_current_motor_state(void) const
+    {
+        return current_motor_state;
+    }
 
-        bool is_calibrated() const { return calibrated; }
+    bool is_calibrated() const
+    {
+        return calibrated;
+    }
 
-        std::map<Encoder, bool> get_encoder_state(void) {
-            std::lock_guard<std::mutex> guard(encoder_mutex);
-            return current_encoder_state;
-        }
+    std::map<Encoder, bool> get_encoder_state(void)
+    {
+        std::lock_guard<std::mutex> guard(encoder_mutex);
+        return current_encoder_state;
+    }
 
-        bool is_jittering() const { return jittering; }
+    bool is_jittering() const
+    {
+        return jittering;
+    }
 
-        virtual ControllerType controller_type(void) const = 0;
+    virtual ControllerType controller_type(void) const = 0;
 
-        void shutdown(void);
+    void shutdown(void);
 
-        const Axis axis;
+    const Axis axis;
 
-    protected:
-        void monitor(void);
-        void update_encoder_state(Encoder e, bool state,
-                high_resolution_clock::time_point tp);
+protected:
+    void monitor(void);
+    void update_encoder_state(Encoder e, bool state,
+                              high_resolution_clock::time_point tp);
 
-        virtual void internal_change_motor_state(MotorState m) = 0;
-        virtual void internal_shutdown(void) = 0;
+    virtual void internal_change_motor_state(MotorState m) = 0;
+    virtual void internal_shutdown(void) = 0;
 
-    private:
+private:
 
-        const high_resolution_clock::time_point get_last_transition_time(Encoder e);
+    const high_resolution_clock::time_point get_last_transition_time(Encoder e);
 
-        unsigned int jitters_rejected;
-        bool jittering;
+    unsigned int jitters_rejected;
+    bool jittering;
 
-        const void *gm2d3;
-        const gui_encoder_callback gec;
-        const gui_shutdown_callback gsc;
-        void alert_gui(Encoder e, bool state, high_resolution_clock::time_point tp) {
-            gec(axis, e, state, tp, gm2d3);
-        }
+    const void *gm2d3;
+    const gui_encoder_callback gec;
+    const gui_shutdown_callback gsc;
+    void alert_gui(Encoder e, bool state, high_resolution_clock::time_point tp)
+    {
+        gec(axis, e, state, tp, gm2d3);
+    }
 
-        const double resolution, middle_position;
-        double current_position, goal_position;
-        bool calibrated;
-        const unsigned int cypher_bits;
+    const double resolution, middle_position;
+    double current_position, goal_position;
+    bool calibrated;
+    const unsigned int cypher_bits;
 
-        MotorState current_motor_state;
+    MotorState current_motor_state;
 
-        std::mutex encoder_mutex;
-        std::map<Encoder, bool> current_encoder_state;
-        std::map<Encoder, bool> previous_encoder_state;
+    std::mutex encoder_mutex;
+    std::map<Encoder, bool> current_encoder_state;
+    std::map<Encoder, bool> previous_encoder_state;
 
-        std::map<Encoder, std::vector< std::pair<high_resolution_clock::time_point,bool>>> encoder_history;
+    std::map<Encoder, std::vector< std::pair<high_resolution_clock::time_point,bool>>> encoder_history;
 };
 

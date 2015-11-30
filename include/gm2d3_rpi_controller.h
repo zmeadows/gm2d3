@@ -12,21 +12,24 @@ using namespace libconfig;
 
 class RaspberryPiController : public StageController
 {
-    public:
-        RaspberryPiController(const Setting &cfg);
+public:
+    RaspberryPiController(const Setting &cfg);
 
-        ControllerType controller_type(void) const { return ControllerType::RaspberryPi; }
+    ControllerType controller_type(void) const
+    {
+        return ControllerType::RaspberryPi;
+    }
 
-    private:
-        const unsigned int motor_cw_gpio, motor_ccw_gpio;
-        std::map<unsigned int, Encoder> encoder_gpios;
+private:
+    const unsigned int motor_cw_gpio, motor_ccw_gpio;
+    std::map<unsigned int, Encoder> encoder_gpios;
 
-        void internal_change_motor_state(MotorState m);
-        int internal_monitor(void);
-        void shutdown(void);
+    void internal_change_motor_state(MotorState m);
+    int internal_monitor(void);
+    void shutdown(void);
 
-        static void static_encoder_callback(int gpio, int level, uint32_t tick, void *user);
-        void encoder_callback(int gpio, int level, uint32_t tick);
+    static void static_encoder_callback(int gpio, int level, uint32_t tick, void *user);
+    void encoder_callback(int gpio, int level, uint32_t tick);
 };
 
 std::map<unsigned int,Encoder> config_get_encoder_gpios(const Setting &c);

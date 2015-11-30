@@ -12,42 +12,47 @@
 #include "gm2d3_const.h"
 #include "gm2d3_fltk_util.h"
 
-class GM2D3ManualControlButton : public Fl_Button {
-    public:
-        GM2D3ManualControlButton(int x, int y, int w, int h, Axis _axis, MotorState _motor_state);
+class GM2D3ManualControlButton : public Fl_Button
+{
+public:
+    GM2D3ManualControlButton(int x, int y, int w, int h, Axis _axis, MotorState _motor_state);
 
-        const Axis axis;
-        const MotorState motor_state;
+    const Axis axis;
+    const MotorState motor_state;
 };
 
 
 
-class GM2D3ManualControlGUI {
-    public:
-        GM2D3ManualControlGUI(int x, int y, int w, int h);
+class GM2D3ManualControlGUI
+{
+public:
+    GM2D3ManualControlGUI(int x, int y, int w, int h);
 
-        void callback(Fl_Callback_p cb, void *p) {
-            for (auto& a : ALL_AXES) {
-                for (auto& m : ALL_MOTOR_STATES) {
-                    buttons[a][m]->callback(cb,p);
-                }
+    void callback(Fl_Callback_p cb, void *p)
+    {
+        for (auto& a : ALL_AXES)
+        {
+            for (auto& m : ALL_MOTOR_STATES)
+            {
+                buttons[a][m]->callback(cb,p);
             }
         }
+    }
 
-        std::map<Axis, std::map<MotorState, std::unique_ptr<GM2D3ManualControlButton>>> buttons;
+    std::map<Axis, std::map<MotorState, std::unique_ptr<GM2D3ManualControlButton>>> buttons;
 
-        void activate(void);
-        void deactivate(void);
+    void activate(void);
+    void deactivate(void);
 
-    private:
-        void enable_axis(Axis axis);
-        void disable_axis(Axis axis);
+private:
+    void enable_axis(Axis axis);
+    void disable_axis(Axis axis);
 
-        std::unique_ptr<Fl_Box> manual_control_box;
-        std::unique_ptr<Fl_Pack> vertical_pack;
-        std::unique_ptr<Fl_Pack> azimuthal_button_pack;
-        std::unique_ptr<Fl_Pack> vertical_button_pack;
-        std::unique_ptr<Fl_Pack> radial_button_pack;
+    std::unique_ptr<Fl_Box> manual_control_box;
+    std::unique_ptr<Fl_Pack> vertical_pack;
+    std::unique_ptr<Fl_Pack> azimuthal_button_pack;
+    std::unique_ptr<Fl_Pack> vertical_button_pack;
+    std::unique_ptr<Fl_Pack> radial_button_pack;
 
 };
 
