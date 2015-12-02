@@ -24,4 +24,7 @@ GM2D3Window::GM2D3Window(int w, int h, const char* t) :
                                 (new GM2D3StageDiagnostics(WINDOW_EDGE_GAP,500, w-2*WINDOW_EDGE_GAP,150, Axis::RADIAL));
 
     color(fl_rgb_color(160,160,160));
+
+    end();
+    show();
 }

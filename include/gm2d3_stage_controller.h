@@ -8,6 +8,7 @@
 #include <iostream>
 #include <thread>
 #include <mutex>
+#include <functional>
 
 #include <chrono>
 using namespace std::chrono;
@@ -25,8 +26,7 @@ enum class ControllerType
 std::pair<double,double> config_get_bounds(const Setting &c);
 std::map<int,double> config_get_cypher(const Setting &c);
 
-typedef void (*gui_encoder_callback)(Axis, Encoder, bool, const high_resolution_clock::time_point tp, const void *);
-typedef void (*gui_shutdown_callback)(Axis, const void *);
+typedef std::function<void(Axis, Encoder, bool, const high_resolution_clock::time_point)> gui_encoder_callback;
 
 std::pair<Encoder, bool> next_transition(MotorState m, bool A, bool B);
 
@@ -36,8 +36,6 @@ public:
     StageController(
         Axis _axis,
         gui_encoder_callback _gec,
-        gui_shutdown_callback _gsc,
-        const void *_gm2d3,
         const Setting &c);
 
     virtual ~StageController(void) {};
@@ -83,25 +81,21 @@ public:
 
 protected:
     void monitor(void);
-    void update_encoder_state(Encoder e, bool state,
-                              high_resolution_clock::time_point tp);
+    void update_encoder_state(Encoder e, bool state, high_resolution_clock::time_point tp);
 
     virtual void internal_change_motor_state(MotorState m) = 0;
     virtual void internal_shutdown(void) = 0;
 
 private:
-
     const high_resolution_clock::time_point get_last_transition_time(Encoder e);
 
     unsigned int jitters_rejected;
     bool jittering;
 
-    const void *gm2d3;
-    const gui_encoder_callback gec;
-    const gui_shutdown_callback gsc;
+    gui_encoder_callback gec;
     void alert_gui(Encoder e, bool state, high_resolution_clock::time_point tp)
     {
-        gec(axis, e, state, tp, gm2d3);
+        gec(axis, e, state, tp);
     }
 
     const double resolution, middle_position;

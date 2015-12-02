@@ -71,7 +71,6 @@ private:
     void enable_indicators_callback(Fl_Widget *enable_indicators_checkbox);
     void enable_info_callback(Fl_Widget *enable_info_checkbox);
 
-    static void static_exit_window_callback(Fl_Widget *gm2d3_window, void *gm2d3);
     void exit_window_callback(Fl_Widget *gm2d3_window);
 };
 

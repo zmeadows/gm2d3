@@ -43,10 +43,12 @@ GM2D3::detach_controllers(void)
 void
 GM2D3::create_controller(Axis axis, ControllerType c_type, const Setting &c)
 {
+    auto cb = [this](Axis a, Encoder e, bool s, const high_resolution_clock::time_point t)
+        -> void { this->encoder_state_callback(a,e,s,t); };
     if (c_type == ControllerType::Fake)
     {
         controllers[axis] = std::unique_ptr<StageController>(new FakeController(axis,
-                            static_encoder_state_callback, static_shutdown_callback, this, c));
+                            cb, c));
 
 #ifdef GM2D3_USE_RPI
     }
@@ -162,10 +164,7 @@ void GM2D3::reset(void)
     gm2d3_state = OperatingState::RESETTING;
     debug_print(1, DebugStatementType::ATTEMPT, "Attempting reset...");
 
-    for (auto &c : controllers)
-    {
-        c.second->shutdown();
-    }
+    for (auto &c : controllers) { c.second->shutdown(); }
 
     if (keep_updating_plots) disable_plots();
     if (keep_updating_indicators) disable_indicators();
@@ -197,12 +196,6 @@ GM2D3::manual_button_callback(Fl_Widget *button)
 {
     GM2D3ManualControlButton *b = (GM2D3ManualControlButton*) button;
     if (gm2d3_state != OperatingState::DETACHED) controllers[b->axis]->change_motor_state(b->motor_state);
-}
-
-void
-GM2D3::static_exit_window_callback(Fl_Widget *gm2d3_window, void *gm2d3)
-{
-    ((GM2D3 *) gm2d3)->exit_window_callback(gm2d3_window);
 }
 
 void
@@ -371,17 +364,6 @@ GM2D3::encoder_state_callback(Axis a, Encoder e, bool state, high_resolution_clo
 }
 
 void
-GM2D3::static_shutdown_callback(Axis a, const void *gm2d3)
-{
-    ((GM2D3 *) gm2d3)->shutdown_callback(a);
-}
-
-void
-GM2D3::shutdown_callback(Axis a)
-{
-}
-
-void
 GM2D3::load_config_callback()
 {
     std::string config_path;
@@ -430,11 +412,8 @@ GM2D3::GM2D3(int window_width, int window_height)
       keep_updating_info(false)
 {
     window = std::unique_ptr<GM2D3Window>(new GM2D3Window(window_width,window_height,"GM2D3"));
-    window->end();
-    window->show();
 
-    window->callback(static_exit_window_callback, (void *) this);
-
+    FLTK_CALLBACK(this, &GM2D3::exit_window_callback, window);
     FLTK_CALLBACK(this, &GM2D3::load_config_callback, window->options->config_loader->open_button);
     FLTK_CALLBACK(this, &GM2D3::enable_plot_callback, window->options->enable_history_plot);
     FLTK_CALLBACK(this, &GM2D3::enable_indicators_callback, window->options->enable_indicators);

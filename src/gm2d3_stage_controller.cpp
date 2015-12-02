@@ -4,12 +4,11 @@
 #include <chrono>
 using namespace std::chrono;
 
-StageController::StageController( Axis _axis, gui_encoder_callback _gec,
-                                  gui_shutdown_callback _gsc, const void *_gm2d3, const Setting &c)
+StageController::StageController( Axis _axis, gui_encoder_callback _gec, const Setting &c)
     : bounds(config_get_bounds(c.lookup("bounds"))),
       cypher(config_get_cypher(c.lookup("cypher"))),
       axis(_axis), jitters_rejected(0), jittering(false),
-      gm2d3(_gm2d3), gec(_gec), gsc(_gsc), resolution(double(c.lookup("resolution"))),
+      gec(_gec), resolution(double(c.lookup("resolution"))),
       middle_position(bounds.first + (bounds.second - bounds.first)/2.0),
       current_position(middle_position), goal_position(middle_position),
       calibrated(false), cypher_bits(unsigned(c.lookup("cypher_bits"))),
@@ -300,6 +299,4 @@ StageController::shutdown(void)
 
     change_motor_state(MotorState::OFF);
     internal_shutdown();
-
-    gsc(axis, gm2d3);
 }

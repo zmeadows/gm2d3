@@ -3,9 +3,8 @@
 
 
 
-FakeController::FakeController(Axis _axis, gui_encoder_callback _gec,
-                               gui_shutdown_callback _gsc, const void *_gm2d3, const Setting &c)
-    : StageController(_axis, _gec, _gsc, _gm2d3, c), timestep_us(1e5), keep_moving(false)
+FakeController::FakeController(Axis _axis, gui_encoder_callback _gec, const Setting &c)
+    : StageController(_axis, _gec, c), timestep_us(1e5), keep_moving(false)
 {
 }
 
