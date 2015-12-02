@@ -60,22 +60,15 @@ private:
     static void static_shutdown_callback(Axis a, const void *gm2d3);
     void shutdown_callback(Axis a);
 
-    static void static_load_config_callback(Fl_Widget *, void *gm2d3);
-    void load_config_callback(Fl_Widget *);
+    void load_config_callback();
 
     static void static_manual_button_callback(Fl_Widget *button, void *gm2d3);
     void manual_button_callback(Fl_Widget *button);
 
-    static void static_kill_button_callback(Fl_Widget *button, void *gm2d3);
     void kill_button_callback();
 
-    static void static_enable_plot_callback(Fl_Widget *enable_plot_checkbox, void *gm2d3);
     void enable_plot_callback(Fl_Widget *enable_plot_checkbox);
-
-    static void static_enable_indicators_callback(Fl_Widget *enable_plot_checkbox, void *gm2d3);
     void enable_indicators_callback(Fl_Widget *enable_indicators_checkbox);
-
-    static void static_enable_info_callback(Fl_Widget *enable_info_checkbox, void *gm2d3);
     void enable_info_callback(Fl_Widget *enable_info_checkbox);
 
     static void static_exit_window_callback(Fl_Widget *gm2d3_window, void *gm2d3);

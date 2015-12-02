@@ -16,7 +16,7 @@ StageController::StageController( Axis _axis, gui_encoder_callback _gec,
       current_motor_state(MotorState::OFF), current_encoder_state(EMPTY_ENCODER_STATE),
       previous_encoder_state(EMPTY_ENCODER_STATE)
 {
-    if ((bounds.second - bounds.first) <= 0)
+    if ((bounds.second - bounds.first) <= cypher_bits * resolution)
     {
         throw make_gm2d3_exception(GM2D3Exception::Type::Config, "Invalid controller bounds");
     }
@@ -37,10 +37,7 @@ StageController::StageController( Axis _axis, gui_encoder_callback _gec,
     high_resolution_clock::time_point init_time = high_resolution_clock::now();
     for (auto &e : ALL_ENCODERS)
     {
-        for (auto &s :
-                {
-                    true, false
-                })
+        for (auto &s : { true, false })
         {
             encoder_history[e].push_back(std::make_pair(init_time, s));
         }
@@ -82,17 +79,6 @@ StageController::change_motor_state(MotorState next_motor_state)
 void
 StageController::monitor()
 {
-    //     int ret_code = internal_monitor();
-    //
-    //     switch (ret_code)
-    //     {
-    //         case 0:
-    //             debug_print(1, "successfully moved motor");
-    //         case -1:
-    //             debug_print(1, "failed to move motor");
-    //         default:
-    //             break;
-    //     }
 }
 
 void
@@ -106,7 +92,7 @@ StageController::update_encoder_state( Encoder e, bool state,
     encoder_mutex.lock();
 
     duration<double> time_span = duration_cast<duration<double>>
-                                 (tp - get_last_transition_time(e));
+        (tp - get_last_transition_time(e));
 
 
     try

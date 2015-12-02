@@ -19,21 +19,17 @@ public:
 
     int user_select_config(std::string &path);
 
-    void callback(Fl_Callback_p cb, void *p)
-    {
-        open_button->callback(cb,p);
-    }
     void set_path_display_color(Fl_Color c)
     {
         path_display->color(c);
     }
     void flash_config_path(Fl_Color c);
     std::unique_ptr<Fl_Output> path_display;
+    std::unique_ptr<Fl_Button> open_button;
 
 private:
     void handle_flash(Fl_Color c);
     std::unique_ptr<Fl_Native_File_Chooser> file_chooser;
-    std::unique_ptr<Fl_Button> open_button;
 };
 
 class GM2D3OptionsGUI

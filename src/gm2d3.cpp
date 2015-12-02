@@ -1,6 +1,7 @@
 #include "gm2d3.h"
 
 #include "gm2d3_util.h"
+#include "gm2d3_fltk_util.h"
 #include "gm2d3_fake_controller.h"
 #include "gm2d3_rpi_controller.h"
 
@@ -9,6 +10,7 @@
 #include <memory>
 #include <iostream>
 #include <chrono>
+#include <functional>
 
 #include <FL/fl_ask.H>
 
@@ -198,36 +200,6 @@ GM2D3::manual_button_callback(Fl_Widget *button)
 }
 
 void
-GM2D3::static_kill_button_callback(Fl_Widget *button, void *gm2d3)
-{
-    ((GM2D3 *) gm2d3)->kill_button_callback();
-}
-
-void
-GM2D3::kill_button_callback()
-{
-    reset();
-}
-
-void
-GM2D3::static_enable_plot_callback(Fl_Widget *enable_plot_checkbox, void *gm2d3)
-{
-    ((GM2D3 *) gm2d3)->enable_plot_callback(enable_plot_checkbox);
-}
-
-void
-GM2D3::static_enable_indicators_callback(Fl_Widget *enable_indicators_checkbox, void *gm2d3)
-{
-    ((GM2D3 *) gm2d3)->enable_indicators_callback(enable_indicators_checkbox);
-}
-
-void
-GM2D3::static_enable_info_callback(Fl_Widget *enable_info_button, void *gm2d3)
-{
-    ((GM2D3 *) gm2d3)->enable_info_callback(enable_info_button);
-}
-
-void
 GM2D3::static_exit_window_callback(Fl_Widget *gm2d3_window, void *gm2d3)
 {
     ((GM2D3 *) gm2d3)->exit_window_callback(gm2d3_window);
@@ -410,13 +382,7 @@ GM2D3::shutdown_callback(Axis a)
 }
 
 void
-GM2D3::static_load_config_callback(Fl_Widget *, void *gm2d3)
-{
-    ((GM2D3 *) gm2d3)->load_config_callback(nullptr);
-}
-
-void
-GM2D3::load_config_callback(Fl_Widget *)
+GM2D3::load_config_callback()
 {
     std::string config_path;
     std::unique_ptr<Config> try_cfg(new Config());
@@ -467,11 +433,13 @@ GM2D3::GM2D3(int window_width, int window_height)
     window->end();
     window->show();
 
-    window->options->config_loader->callback(static_load_config_callback, (void *) this);
-    window->options->enable_history_plot->callback(static_enable_plot_callback, (void *) this);
-    window->options->enable_indicators->callback(static_enable_indicators_callback, (void *) this);
-    window->auto_control->kill_button->callback(static_kill_button_callback, (void *) this);
     window->callback(static_exit_window_callback, (void *) this);
+
+    FLTK_CALLBACK(this, &GM2D3::load_config_callback, window->options->config_loader->open_button);
+    FLTK_CALLBACK(this, &GM2D3::enable_plot_callback, window->options->enable_history_plot);
+    FLTK_CALLBACK(this, &GM2D3::enable_indicators_callback, window->options->enable_indicators);
+    FLTK_CALLBACK(this, &GM2D3::enable_info_callback, window->options->enable_info);
+    FLTK_CALLBACK(this, &GM2D3::reset, window->auto_control->kill_button);
 }
 
 void exit_gm2d3(void *gm2d3)
