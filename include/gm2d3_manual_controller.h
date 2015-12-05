@@ -7,6 +7,7 @@
 #include <Fl/Fl.H>
 
 #include <map>
+#include <set>
 #include <memory>
 
 #include "gm2d3_const.h"
@@ -28,20 +29,9 @@ class GM2D3ManualControlGUI
 public:
     GM2D3ManualControlGUI(int x, int y, int w, int h);
 
-    void callback(Fl_Callback_p cb, void *p)
-    {
-        for (auto& a : ALL_AXES)
-        {
-            for (auto& m : ALL_MOTOR_STATES)
-            {
-                buttons[a][m]->callback(cb,p);
-            }
-        }
-    }
-
     std::map<Axis, std::map<MotorState, std::unique_ptr<GM2D3ManualControlButton>>> buttons;
 
-    void activate(void);
+    void activate(std::set<Axis> axes);
     void deactivate(void);
 
 private:

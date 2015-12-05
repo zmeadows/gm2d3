@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <map>
+#include <chrono>
 
 enum class Axis
 {
@@ -11,6 +12,8 @@ enum class Axis
 };
 
 const std::vector<Axis> ALL_AXES = { Axis::AZIMUTHAL, Axis::VERTICAL, Axis::RADIAL };
+
+typedef std::chrono::high_resolution_clock::time_point time_point;
 
 enum class MotorState
 {

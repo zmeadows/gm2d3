@@ -13,6 +13,7 @@
 #include <Fl/Fl.H>
 
 #include <map>
+#include <set>
 #include <memory>
 
 class GM2D3AutoControlInput : public Fl_Input
@@ -31,7 +32,7 @@ public:
     void disable_input(Axis axis);
     void enable_input(Axis axis);
 
-    void activate();
+    void activate(std::set<Axis> axes);
     void deactivate();
 
     std::unique_ptr<Fl_Button> calibrate_button;

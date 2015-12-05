@@ -160,12 +160,9 @@ GM2D3ManualControlGUI::disable_axis(Axis axis)
 }
 
 void
-GM2D3ManualControlGUI::activate()
+GM2D3ManualControlGUI::activate(std::set<Axis> axes)
 {
-    for (auto &a : ALL_AXES)
-    {
-        enable_axis(a);
-    }
+    for (auto &a : axes) { enable_axis(a); }
 }
 
 void

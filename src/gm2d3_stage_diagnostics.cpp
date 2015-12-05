@@ -210,4 +210,5 @@ GM2D3StageDiagnostics::GM2D3StageDiagnostics(int x, int y, int w, int h, Axis ax
     indicators = std::unique_ptr<GM2D3StageIndicators>
                  (new GM2D3StageIndicators(x_0 + plot_width + info_width + 2*ADJACENT_SPACING,y_0,h2));
 
+    info->deactivate();
 }

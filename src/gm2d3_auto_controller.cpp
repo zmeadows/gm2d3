@@ -123,12 +123,9 @@ GM2D3AutoControlGUI::disable_input(Axis axis)
 }
 
 void
-GM2D3AutoControlGUI::activate()
+GM2D3AutoControlGUI::activate(std::set<Axis> axes)
 {
-    for (auto &a : ALL_AXES)
-    {
-        enable_input(a);
-    }
+    for (auto &a : axes) { enable_input(a); }
 
     Fl::lock();
 
@@ -142,10 +139,7 @@ GM2D3AutoControlGUI::activate()
 void
 GM2D3AutoControlGUI::deactivate()
 {
-    for (auto &a : ALL_AXES)
-    {
-        disable_input(a);
-    }
+    for (auto &a : ALL_AXES) { disable_input(a); }
 
     Fl::lock();
 

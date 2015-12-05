@@ -5,7 +5,6 @@
 #include <libgen.h>
 #include <unistd.h>
 
-
 GM2D3ConfigLoader::GM2D3ConfigLoader(int x, int y, int w, int h)
 {
     path_display = std::unique_ptr<Fl_Output>(new Fl_Output(x,y,0.8*w,h));
@@ -62,7 +61,7 @@ void
 GM2D3ConfigLoader::handle_flash(Fl_Color c)
 {
     int i;
-    for (i = 0; i < 5; i++)
+    for (i = 0; i < 7; i++)
     {
         path_display->color(c);
         path_display->redraw();
@@ -74,8 +73,6 @@ GM2D3ConfigLoader::handle_flash(Fl_Color c)
         usleep(1e5);
     }
 }
-
-
 
 GM2D3OptionsGUI::GM2D3OptionsGUI(int x, int y, int w, int h)
 {
@@ -91,22 +88,39 @@ GM2D3OptionsGUI::GM2D3OptionsGUI(int x, int y, int w, int h)
     const int x_0 = x + BOX_EDGE_GAP;
     const int y_0 = y + BOX_EDGE_GAP;
 
-    enable_history_plot = std::unique_ptr<Fl_Check_Button>
+    enable_plot_checkbox = std::unique_ptr<Fl_Check_Button>
                           (new Fl_Check_Button(x_0, y_0, checkbox_width, checkbox_height));
-    enable_history_plot->label("ENABLE HISTORY PLOTS");
-    enable_history_plot->value(0);
+    enable_plot_checkbox->label("ENABLE HISTORY PLOTS");
+    enable_plot_checkbox->value(0);
 
-    enable_indicators = std::unique_ptr<Fl_Check_Button>
+    enable_indicators_checkbox = std::unique_ptr<Fl_Check_Button>
                         (new Fl_Check_Button(x_0,y_0 + checkbox_height + BOX_EDGE_GAP, checkbox_width ,checkbox_height));
-    enable_indicators->label("ENABLE INDICATORS");
-    enable_indicators->value(0);
+    enable_indicators_checkbox->label("ENABLE INDICATORS");
+    enable_indicators_checkbox->value(0);
 
-    enable_info = std::unique_ptr<Fl_Check_Button>
+    enable_info_checkbox = std::unique_ptr<Fl_Check_Button>
                   (new Fl_Check_Button(x_0,y_0 + 2*checkbox_height + 2*BOX_EDGE_GAP, checkbox_width ,checkbox_height));
-    enable_info->label("ENABLE STATS");
-    enable_info->value(0);
+    enable_info_checkbox->label("ENABLE STATS");
+    enable_info_checkbox->value(0);
 
     config_loader = std::unique_ptr<GM2D3ConfigLoader>
                     (new GM2D3ConfigLoader(x_0,y + 4*checkbox_height + 3*BOX_EDGE_GAP, checkbox_width, checkbox_height));
 
+    this->deactivate();
+}
+
+void
+GM2D3OptionsGUI::activate()
+{
+    enable_plot_checkbox->activate();
+    enable_indicators_checkbox->activate();
+    enable_info_checkbox->activate();
+}
+
+void
+GM2D3OptionsGUI::deactivate()
+{
+    enable_plot_checkbox->deactivate();
+    enable_indicators_checkbox->deactivate();
+    enable_info_checkbox->deactivate();
 }

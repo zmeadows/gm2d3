@@ -1,10 +1,8 @@
 #include "gm2d3_fake_controller.h"
 #include <unistd.h>
 
-
-
-FakeController::FakeController(Axis _axis, gui_encoder_callback _gec, const Setting &c)
-    : StageController(_axis, _gec, c), timestep_us(1e5), keep_moving(false)
+FakeController::FakeController(Axis axis, gui_encoder_callback gec, const Setting &c)
+    : StageController(axis, gec, c), timestep_us(1e5), keep_moving(false)
 {
 }
 
@@ -35,9 +33,9 @@ FakeController::detach_motor_mover_thread(MotorState m)
         A = em[Encoder::A];
         B = em[Encoder::B];
 
-        nt = next_transition(m, A, B);
+        nt = next_expected_transition(m, A, B);
 
-        update_encoder_state(nt.first, nt.second, high_resolution_clock::now());
+        process_encoder_transition(nt.first, nt.second, high_resolution_clock::now());
         // maybe_jitter(nt.first, nt.second);
 
         std::this_thread::sleep_for(std::chrono::microseconds(timestep_us));
@@ -61,7 +59,7 @@ FakeController::maybe_jitter(Encoder e, bool init_state)
     const unsigned int num_jitters = (unsigned) 10 * ((double) rand() / (RAND_MAX));
 
     debug_print(2, DebugStatementType::GENERIC, "Generating " + std::to_string(num_jitters)
-                + " fake jitters...");
+            + " fake jitters...");
 
     bool next_state = !init_state;
     for (int n = 0; n < num_jitters; n++)
@@ -69,10 +67,10 @@ FakeController::maybe_jitter(Encoder e, bool init_state)
         debug_print(2, DebugStatementType::GENERIC, "jittered.");
         unsigned int ms_delay = (int) ( 20.0 * ((double) rand() / (RAND_MAX)));
         std::this_thread::sleep_for(std::chrono::milliseconds(ms_delay));
-        update_encoder_state(e, next_state, high_resolution_clock::now());
+        process_encoder_transition(e, next_state, high_resolution_clock::now());
         next_state = !next_state;
     }
 
-    update_encoder_state(e, init_state, high_resolution_clock::now());
+    process_encoder_transition(e, init_state, high_resolution_clock::now());
 }
 

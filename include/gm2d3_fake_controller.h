@@ -12,7 +12,8 @@ using namespace libconfig;
 class FakeController : public StageController
 {
 public:
-    FakeController(Axis _axis, gui_encoder_callback _gec, const Setting &c);
+    FakeController(Axis axis, gui_encoder_callback gec, const Setting &c);
+
 private:
     ControllerType controller_type(void) const
     {

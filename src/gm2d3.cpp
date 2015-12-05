@@ -6,6 +6,7 @@
 #include "gm2d3_rpi_controller.h"
 
 #include <map>
+#include <set>
 #include <string>
 #include <memory>
 #include <iostream>
@@ -16,19 +17,20 @@
 
 void GM2D3::attach_controllers(void)
 {
-    window->manual_control->callback(static_manual_button_callback, (void *) this);
-
-    // set bounds on history plots
     double min, max;
+    std::set<Axis> axes;
+
     for (auto &c : controllers)
     {
-        min = c.second->bounds.first;
-        max = c.second->bounds.second;
+        min = c.second->get_bounds().first;
+        max = c.second->get_bounds().second;
         window->diagnostics[c.first]->history_plot->bounds(min,max);
+        axes.insert(c.first);
     }
 
-    window->auto_control->activate();
-    window->manual_control->activate();
+    window->auto_control->activate(axes);
+    window->manual_control->activate(axes);
+    window->options->activate();
 }
 
 void
@@ -36,19 +38,20 @@ GM2D3::detach_controllers(void)
 {
     window->manual_control->deactivate();
     window->auto_control->deactivate();
-
+    window->options->deactivate();
     controllers.clear();
 }
 
 void
 GM2D3::create_controller(Axis axis, ControllerType c_type, const Setting &c)
 {
-    auto cb = [this](Axis a, Encoder e, bool s, const high_resolution_clock::time_point t)
-        -> void { this->encoder_state_callback(a,e,s,t); };
+    auto cb = [this, axis](Encoder e, bool s) -> void {
+        this->encoder_transition_callback(axis,e,s);
+    };
+
     if (c_type == ControllerType::Fake)
     {
-        controllers[axis] = std::unique_ptr<StageController>(new FakeController(axis,
-                            cb, c));
+        controllers[axis] = std::unique_ptr<StageController>(new FakeController(axis, cb, c));
 
 #ifdef GM2D3_USE_RPI
     }
@@ -105,18 +108,9 @@ GM2D3::process_config_file()
             reset();
         }
 
-        if (cs.exists("azimuthal"))
-        {
-            create_controller(Axis::AZIMUTHAL, ct, cs["azimuthal"]);
-        }
-        if (cs.exists("vertical"))
-        {
-            create_controller(Axis::VERTICAL, ct, cs["vertical"]);
-        }
-        if (cs.exists("radial"))
-        {
-            create_controller(Axis::RADIAL, ct, cs["radial"]);
-        }
+        if (cs.exists("azimuthal")) { create_controller(Axis::AZIMUTHAL, ct, cs["azimuthal"]); }
+        if (cs.exists("vertical")) { create_controller(Axis::VERTICAL, ct, cs["vertical"]); }
+        if (cs.exists("radial")) { create_controller(Axis::RADIAL, ct, cs["radial"]); }
 
         if (controllers.size() < 1)
         {
@@ -156,25 +150,29 @@ GM2D3::process_config_file()
 
     gm2d3_state = OperatingState::UNCALIBRATED;
     window->options->config_loader->flash_config_path(FL_GREEN);
+
     debug_print(1, DebugStatementType::SUCCESS, "Successfully attached controllers");
 }
 
 void GM2D3::reset(void)
 {
+    if (gm2d3_state == OperatingState::DETACHED) return;
+
     gm2d3_state = OperatingState::RESETTING;
     debug_print(1, DebugStatementType::ATTEMPT, "Attempting reset...");
-
-    for (auto &c : controllers) { c.second->shutdown(); }
 
     if (keep_updating_plots) disable_plots();
     if (keep_updating_indicators) disable_indicators();
 
+    for (auto &c : controllers) { c.second->shutdown(); }
+
     detach_controllers();
 
+    //TODO: refactor this into a window->reset() function
     Fl::lock();
-    window->options->enable_history_plot->value(0);
-    window->options->enable_indicators->value(0);
-    window->options->enable_info->value(0);
+    window->options->enable_plot_checkbox->value(0);
+    window->options->enable_indicators_checkbox->value(0);
+    window->options->enable_info_checkbox->value(0);
     window->options->config_loader->path_display->value(nullptr);
     Fl::awake();
     Fl::unlock();
@@ -186,17 +184,15 @@ void GM2D3::reset(void)
 }
 
 void
-GM2D3::static_manual_button_callback(Fl_Widget *button, void *gm2d3)
-{
-    ((GM2D3 *) gm2d3)->manual_button_callback(button);
-}
-
-void
 GM2D3::manual_button_callback(Fl_Widget *button)
 {
     GM2D3ManualControlButton *b = (GM2D3ManualControlButton*) button;
-    if (gm2d3_state != OperatingState::DETACHED) controllers[b->axis]->change_motor_state(b->motor_state);
+    if (gm2d3_state != OperatingState::DETACHED)
+    {
+        controllers[b->axis]->change_motor_state(b->motor_state);
+    }
 }
+
 
 void
 GM2D3::exit_window_callback(Fl_Widget *gm2d3_window)
@@ -208,7 +204,7 @@ GM2D3::exit_window_callback(Fl_Widget *gm2d3_window)
 }
 
 void
-GM2D3::enable_plot_callback(Fl_Widget *enable_plot_checkbox)
+GM2D3::enable_plot_checkbox_callback(Fl_Widget *enable_plot_checkbox)
 {
     Fl_Check_Button *b = (Fl_Check_Button*) enable_plot_checkbox;
 
@@ -220,29 +216,30 @@ GM2D3::enable_plot_callback(Fl_Widget *enable_plot_checkbox)
 
     case 1:
         enable_plots();
+        for (auto &c : controllers) { update_plot(c.first); }
         break;
     }
 }
 
 void
-GM2D3::enable_indicators_callback(Fl_Widget *enable_indicators_checkbox)
+GM2D3::enable_indicators_checkbox_callback(Fl_Widget *enable_indicators_checkbox)
 {
     Fl_Check_Button *b = (Fl_Check_Button*) enable_indicators_checkbox;
 
     switch (b->value())
     {
-    case 0:
-        disable_indicators();
-        break;
+        case 0:
+            disable_indicators();
+            break;
 
-    case 1:
-        enable_indicators();
-        break;
+        case 1:
+            enable_indicators();
+            break;
     }
 }
 
 void
-GM2D3::enable_info_callback(Fl_Widget *enable_info_checkbox)
+GM2D3::enable_info_checkbox_callback(Fl_Widget *enable_info_checkbox)
 {
     Fl_Check_Button *b = (Fl_Check_Button*) enable_info_checkbox;
 
@@ -254,6 +251,7 @@ GM2D3::enable_info_callback(Fl_Widget *enable_info_checkbox)
 
     case 1:
         enable_info();
+        for (auto &c : controllers) { update_info(c.first); }
         break;
     }
 }
@@ -262,12 +260,22 @@ void
 GM2D3::enable_info()
 {
     keep_updating_info = true;
+    for (auto &c : controllers)
+    {
+        window->diagnostics[c.first]->info->activate();
+        window->diagnostics[c.first]->info->value("asdf");
+    }
 }
 
 void
 GM2D3::disable_info()
 {
     keep_updating_info = false;
+    for (auto &c : controllers)
+    {
+        window->diagnostics[c.first]->info->value("");
+        window->diagnostics[c.first]->info->deactivate();
+    }
 }
 
 void
@@ -332,35 +340,46 @@ GM2D3::disable_plots(void)
 }
 
 void
-GM2D3::static_encoder_state_callback(Axis a, Encoder e, bool state,
-                                     high_resolution_clock::time_point tp, const void *gm2d3)
-{
-    ((GM2D3 *) gm2d3)->encoder_state_callback(a,e,state, tp);
-}
-
-void
-GM2D3::encoder_state_callback(Axis a, Encoder e, bool state, high_resolution_clock::time_point tp)
+GM2D3::encoder_transition_callback(Axis a, Encoder e, bool state)
 {
     if (gm2d3_state == OperatingState::RESETTING)
     {
         return;
     }
-    // } else if (gm2d3_state
-
-    // if (gm2d3_state
 
     if (keep_updating_indicators)
     {
-        window->diagnostics[a]->indicators->set_dial_state(e, state);
+        update_indicator(a,e,state);
     }
 
-    if (keep_updating_plots)
+    if (keep_updating_plots & (e == Encoder::A || e == Encoder::B))
     {
-        if (e == Encoder::A || e == Encoder::B)
-        {
-            window->diagnostics[a]->history_plot->add_point(controllers[a]->get_current_position());
-        }
+        update_plot(a);
     }
+
+    if (keep_updating_info)
+    {
+        update_info(a);
+    }
+}
+
+void
+GM2D3::update_plot(Axis a)
+{
+    double cur_pos = controllers[a]->get_current_position();
+    window->diagnostics[a]->history_plot->add_point(cur_pos);
+}
+
+void
+GM2D3::update_indicator(Axis a, Encoder e, bool s)
+{
+    window->diagnostics[a]->indicators->set_dial_state(e, s);
+}
+
+void
+GM2D3::update_info(Axis a)
+{
+    // window->diagnostics[a]->info->value
 }
 
 void
@@ -415,10 +434,18 @@ GM2D3::GM2D3(int window_width, int window_height)
 
     FLTK_CALLBACK(this, &GM2D3::exit_window_callback, window);
     FLTK_CALLBACK(this, &GM2D3::load_config_callback, window->options->config_loader->open_button);
-    FLTK_CALLBACK(this, &GM2D3::enable_plot_callback, window->options->enable_history_plot);
-    FLTK_CALLBACK(this, &GM2D3::enable_indicators_callback, window->options->enable_indicators);
-    FLTK_CALLBACK(this, &GM2D3::enable_info_callback, window->options->enable_info);
+    FLTK_CALLBACK(this, &GM2D3::enable_plot_checkbox_callback, window->options->enable_plot_checkbox);
+    FLTK_CALLBACK(this, &GM2D3::enable_indicators_checkbox_callback, window->options->enable_indicators_checkbox);
+    FLTK_CALLBACK(this, &GM2D3::enable_info_checkbox_callback, window->options->enable_info_checkbox);
     FLTK_CALLBACK(this, &GM2D3::reset, window->auto_control->kill_button);
+
+    for (auto &a : ALL_AXES)
+    {
+        for (auto &s : ALL_MOTOR_STATES)
+        {
+            FLTK_CALLBACK(this, &GM2D3::manual_button_callback, window->manual_control->buttons[a][s]);
+        }
+    }
 }
 
 void exit_gm2d3(void *gm2d3)

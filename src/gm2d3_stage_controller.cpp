@@ -1,46 +1,43 @@
 #include "gm2d3_stage_controller.h"
 #include "gm2d3_util.h"
 
+#include <sstream>
 #include <chrono>
 using namespace std::chrono;
 
-StageController::StageController( Axis _axis, gui_encoder_callback _gec, const Setting &c)
-    : bounds(config_get_bounds(c.lookup("bounds"))),
-      cypher(config_get_cypher(c.lookup("cypher"))),
-      axis(_axis), jitters_rejected(0), jittering(false),
-      gec(_gec), resolution(double(c.lookup("resolution"))),
-      middle_position(bounds.first + (bounds.second - bounds.first)/2.0),
-      current_position(middle_position), goal_position(middle_position),
-      calibrated(false), cypher_bits(unsigned(c.lookup("cypher_bits"))),
-      current_motor_state(MotorState::OFF), current_encoder_state(EMPTY_ENCODER_STATE),
-      previous_encoder_state(EMPTY_ENCODER_STATE)
+StageController::StageController(Axis axis, gui_encoder_callback _gec, const Setting &c)
+    : axis_(axis),
+    decoder(c),
+    is_jittering_(false),
+    jitters_rejected_(0),
+    bounds_(config_get_bounds(c.lookup("bounds"))),
+    gec_(_gec),
+    resolution_(double(c.lookup("resolution"))),
+    middle_position_(bounds_.first + (bounds_.second - bounds_.first)/2.0),
+    current_position_(middle_position_),
+    goal_position_(middle_position_),
+    current_motor_state_(MotorState::OFF),
+    current_encoder_state_(EMPTY_ENCODER_STATE),
+    previous_encoder_state_(EMPTY_ENCODER_STATE)
 {
-    if ((bounds.second - bounds.first) <= cypher_bits * resolution)
+    if ((bounds_.second - bounds_.first) <= decoder.get_num_cypher_bits() * resolution_)
     {
         throw make_gm2d3_exception(GM2D3Exception::Type::Config, "Invalid controller bounds");
     }
 
-    if (resolution <= 0 || resolution >= bounds.second - bounds.first)
+    if (resolution_ <= 0 || resolution_ >= bounds_.second - bounds_.first)
     {
         throw make_gm2d3_exception(GM2D3Exception::Type::Config, "Invalid resolution");
     }
 
-    for (auto& kv : cypher)
+    for (auto& kv : decoder.get_cypher())
     {
-        if (kv.second > bounds.second || kv.second < bounds.first)
+        if (kv.second > bounds_.second || kv.second < bounds_.first)
         {
             throw make_gm2d3_exception(GM2D3Exception::Type::Config, "Cypher value outside min/max bounds");
         }
     }
 
-    high_resolution_clock::time_point init_time = high_resolution_clock::now();
-    for (auto &e : ALL_ENCODERS)
-    {
-        for (auto &s : { true, false })
-        {
-            encoder_history[e].push_back(std::make_pair(init_time, s));
-        }
-    }
 }
 
 void
@@ -49,49 +46,42 @@ StageController::change_motor_state(MotorState next_motor_state)
 
     if (next_motor_state == MotorState::OFF)
     {
-        if (current_motor_state == MotorState::OFF)
+        if (current_motor_state_ == MotorState::OFF)
         {
             debug_print(1, DebugStatementType::WARNING, "Motor appears to already be stopped. Issuing stop command again.");
         }
 
         debug_print(1, DebugStatementType::GENERIC, "Stopping motor...");
         internal_change_motor_state(MotorState::OFF);
-        current_motor_state = MotorState::OFF;
+        current_motor_state_ = MotorState::OFF;
     }
 
     else
     {
-        if (current_motor_state == next_motor_state)
+        if (current_motor_state_ == next_motor_state)
         {
             debug_print(1, DebugStatementType::WARNING, "Motor appears to already be moving in that direction.");
         }
 
         else
         {
-            if (current_motor_state != MotorState::OFF) internal_change_motor_state(MotorState::OFF);
+            if (current_motor_state_ != MotorState::OFF) internal_change_motor_state(MotorState::OFF);
             internal_change_motor_state(next_motor_state);
-            current_motor_state = next_motor_state;
+            current_motor_state_ = next_motor_state;
         }
     }
 }
 
 void
-StageController::monitor()
+StageController::process_encoder_transition(Encoder e, bool state, high_resolution_clock::time_point tp)
 {
-}
-
-void
-StageController::update_encoder_state( Encoder e, bool state,
-                                       high_resolution_clock::time_point tp)
-{
-
     // LOCK ENCODER STATE
     // insures that all encoder transitions are processed in order,
     // as long as update_encoder_state is called in order
-    encoder_mutex.lock();
+    encoder_mutex_.lock();
 
     duration<double> time_span = duration_cast<duration<double>>
-        (tp - get_last_transition_time(e));
+        (tp - decoder.get_last_transition_time(e));
 
 
     try
@@ -105,19 +95,19 @@ StageController::update_encoder_state( Encoder e, bool state,
 
         if (time_span.count() < JITTER_TIME)
         {
-            if (!jittering) jittering = true;
-            jitters_rejected++;
+            if (!is_jittering_) is_jittering_ = true;
+            jitters_rejected_++;
             return;
         }
         else
         {
-            if (jittering) // DONE JITTERING
+            if (is_jittering_) // DONE is_jittering_
             {
-                jittering = false;
-                std::string jitter_msg = "Jittering detected on ";
-                jitter_msg += axis_to_string(axis);
+                is_jittering_ = false;
+                std::string jitter_msg = "is_jittering_ detected on ";
+                jitter_msg += axis_to_string(axis_);
                 jitter_msg += " axis: (" ;
-                jitter_msg += std::to_string(jitters_rejected);
+                jitter_msg += std::to_string(jitters_rejected_);
                 jitter_msg += " rejected jitter transitions so far)";
                 throw make_gm2d3_exception(GM2D3Exception::Type::SafetyWarning, jitter_msg );
             }
@@ -146,22 +136,21 @@ StageController::update_encoder_state( Encoder e, bool state,
     }
 
     // add transition to the history
-    if (encoder_history[e].size() > 10) encoder_history[e].clear();
-    encoder_history[e].push_back(std::make_pair(tp,state));
+    decoder.add_transition_to_history(e,state,tp);
 
-    previous_encoder_state[e] = !state;
-    current_encoder_state[e] = state;
+    previous_encoder_state_[e] = !state;
+    current_encoder_state_[e] = state;
 
-    double delta = resolution/2.0 * (get_current_motor_state() == MotorState::CW ?  1 : -1);
+    double delta = resolution_/2.0 * (get_current_motor_state() == MotorState::CW ?  1 : -1);
 
     switch (e)
     {
     case Encoder::A:
-        current_position += delta;
+        current_position_ += delta;
         break;
 
     case Encoder::B:
-        current_position += delta;
+        current_position_ += delta;
         break;
 
     case Encoder::C:
@@ -171,52 +160,43 @@ StageController::update_encoder_state( Encoder e, bool state,
         break;
     }
 
-    encoder_mutex.unlock();
-    alert_gui(e, state, tp);
+    encoder_mutex_.unlock();
+    gec_(e, state);
 }
 
-const high_resolution_clock::time_point
-StageController::get_last_transition_time(Encoder e)
+high_resolution_clock::time_point
+StageController::CypherDecoder::get_last_transition_time(Encoder e)
 {
-    return encoder_history[e].back().first;
+    return encoder_history_[e].back().first;
 }
 
 void
 StageController::move(double new_position)
 {
-    if (new_position > bounds.second || new_position < bounds.first)
+    if (new_position > bounds_.second || new_position < bounds_.first)
     {
         debug_print(0, DebugStatementType::WARNING, "Requested position not within stage bounds!");
         return;
     }
 
     // TODO: does this constraint need to be increased/relaxed?
-    if (fabs(new_position - current_position) <= resolution)
+    if (fabs(new_position - current_position_) <= resolution_)
     {
         debug_print(0, DebugStatementType::WARNING, "Already at position to within stage resolution");
         return;
     }
 
-    goal_position = new_position;
-
-    std::thread monitor_thread;
+    goal_position_ = new_position;
 
     // TODO: disable manual control
-    if (new_position > current_position)
+    if (new_position > current_position_)
     {
         change_motor_state(MotorState::CCW);
-
-        monitor_thread = std::thread([this]()
-        {
-            monitor();
-        });
-        monitor_thread.detach();
     }
 
-    if (new_position < current_position)
+    if (new_position < current_position_)
     {
         change_motor_state(MotorState::CW);
-        monitor();
     }
 }
 
@@ -242,7 +222,7 @@ config_get_cypher(const Setting &c)
 }
 
 std::pair<Encoder, bool>
-next_transition(MotorState m, bool A, bool B)
+next_expected_transition(MotorState m, bool A, bool B)
 {
     switch (m)
     {
@@ -295,8 +275,38 @@ next_transition(MotorState m, bool A, bool B)
 void
 StageController::shutdown(void)
 {
-    debug_print(2, DebugStatementType::ATTEMPT, "Shutting down " + axis_to_string(axis) + " stage...");
+    std::ostringstream shutdown_str;
+    shutdown_str << "Shutting down " << axis_to_string(axis_) << " stage...";
+
+    debug_print(2, DebugStatementType::ATTEMPT, shutdown_str.str());
 
     change_motor_state(MotorState::OFF);
     internal_shutdown();
+
+    shutdown_str.str("");
+    shutdown_str.clear();
+    shutdown_str << "Successfully shut down " << axis_to_string(axis_) << " stage.";
+
+    debug_print(2, DebugStatementType::SUCCESS, shutdown_str.str());
+}
+
+StageController::CypherDecoder::CypherDecoder(const Setting &c)
+    : lost_(true),
+    cypher_bits_(unsigned(c.lookup("cypher_bits"))),
+    cypher_(config_get_cypher(c.lookup("cypher")))
+{
+    auto init_time = high_resolution_clock::now();
+    for (auto &e : ALL_ENCODERS)
+    {
+        for (auto &s : { true, false })
+        {
+            encoder_history_[e].push_back(std::make_pair(init_time, s));
+        }
+    }
+}
+
+void
+StageController::CypherDecoder::add_transition_to_history(Encoder e, bool state, high_resolution_clock::time_point tp)
+{
+    encoder_history_[e].push_back(std::make_pair(tp, state));
 }
