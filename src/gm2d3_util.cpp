@@ -119,17 +119,36 @@ axis_to_string(Axis axis)
 {
     switch (axis)
     {
-    case Axis::AZIMUTHAL:
-        return "AZIMUTHAL";
-        break;
-    case Axis::VERTICAL:
-        return "VERTICAL";
-        break;
-    case Axis::RADIAL:
-        return "RADIAL";
-        break;
+        case Axis::AZIMUTHAL:
+            return "AZIMUTHAL";
+            break;
+        case Axis::VERTICAL:
+            return "VERTICAL";
+            break;
+        case Axis::RADIAL:
+            return "RADIAL";
+            break;
     }
 }
+
+std::string
+controller_type_to_string(ControllerType ct)
+{
+    switch (ct)
+    {
+        case ControllerType::Fake:
+            return "Fake";
+            break;
+        case ControllerType::RaspberryPi:
+            return "Raspberry Pi";
+            break;
+        case ControllerType::Galil:
+            return "Galil";
+            break;
+    }
+}
+
+
 
 void const
 print_logo()

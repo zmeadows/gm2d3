@@ -28,3 +28,27 @@ GM2D3Window::GM2D3Window(int w, int h, const char* t) :
     end();
     show();
 }
+
+void
+GM2D3Window::reset()
+{
+    Fl::lock();
+
+    manual_control->deactivate();
+    auto_control->deactivate();
+    options->deactivate();
+
+    options->enable_plot_checkbox->value(0);
+    options->enable_plot_checkbox->deactivate();
+
+    options->enable_indicators_checkbox->value(0);
+    options->enable_indicators_checkbox->deactivate();
+
+    options->enable_info_checkbox->value(0);
+    options->enable_info_checkbox->deactivate();
+
+    options->config_loader->path_display->value(nullptr);
+
+    Fl::awake();
+    Fl::unlock();
+}

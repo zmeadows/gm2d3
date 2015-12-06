@@ -30,7 +30,7 @@ StageController::StageController(Axis axis, gui_encoder_callback _gec, const Set
         throw make_gm2d3_exception(GM2D3Exception::Type::Config, "Invalid resolution");
     }
 
-    for (auto& kv : decoder.get_cypher())
+    for (auto const &kv : decoder.get_cypher())
     {
         if (kv.second > bounds_.second || kv.second < bounds_.first)
         {
@@ -78,7 +78,7 @@ StageController::process_encoder_transition(Encoder e, bool state, high_resoluti
     // LOCK ENCODER STATE
     // insures that all encoder transitions are processed in order,
     // as long as update_encoder_state is called in order
-    encoder_mutex_.lock();
+    std::unique_lock<std::mutex> encoder_lock(encoder_mutex_);
 
     duration<double> time_span = duration_cast<duration<double>>
         (tp - decoder.get_last_transition_time(e));
@@ -160,8 +160,9 @@ StageController::process_encoder_transition(Encoder e, bool state, high_resoluti
         break;
     }
 
-    encoder_mutex_.unlock();
-    gec_(e, state);
+    encoder_lock.unlock();
+    std::thread gui_update_thread(gec_, e, state);
+    gui_update_thread.detach();
 }
 
 high_resolution_clock::time_point
@@ -296,9 +297,9 @@ StageController::CypherDecoder::CypherDecoder(const Setting &c)
     cypher_(config_get_cypher(c.lookup("cypher")))
 {
     auto init_time = high_resolution_clock::now();
-    for (auto &e : ALL_ENCODERS)
+    for (auto const &e : ALL_ENCODERS)
     {
-        for (auto &s : { true, false })
+        for (auto const &s : { true, false })
         {
             encoder_history_[e].push_back(std::make_pair(init_time, s));
         }

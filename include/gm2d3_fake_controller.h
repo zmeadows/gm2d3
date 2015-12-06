@@ -22,11 +22,9 @@ private:
     void internal_change_motor_state(MotorState m);
     void internal_shutdown(void);
 
-    void maybe_jitter(Encoder e, bool init_state);
-
-    void detach_motor_mover_thread(MotorState m);
-
     std::thread motor_mover;
+    void detach_motor_mover_thread(MotorState m);
+    void maybe_jitter(Encoder e, bool init_state);
 
     const int timestep_us;
     bool keep_moving;

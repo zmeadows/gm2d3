@@ -10,6 +10,13 @@
 #include <libconfig.h++>
 using namespace libconfig;
 
+struct ControllerFrame
+{
+    Axis axis;
+    ControllerType controller_type;
+    const Setting &c;
+};
+
 class GM2D3
 {
 public:
@@ -21,6 +28,7 @@ private:
     enum class OperatingState
     {
         DETACHED, // default blank slate (i.e. state of program when first opened)
+        PROCESSING_CONFIG, // in process of interpreting config file
         UNCALIBRATED, // controllers attached but uncalibrated
         CALIBRATING, // in the middle of calibration routine
         WAITING, // finished with calibration and waiting for user
@@ -29,29 +37,28 @@ private:
         RESETTING // in the process of resetting
     } gm2d3_state;
 
-    std::map<Axis, std::unique_ptr<StageController>> controllers;
+    std::map<Axis, std::unique_ptr<StageController>> controllers_;
     std::unique_ptr<Config> cfg;
 
+    bool keep_updating_plots_;
     void disable_plots(void);
     void enable_plots(void);
     void update_plot(Axis a);
-    bool keep_updating_plots;
 
+    bool keep_updating_indicators_;
     void enable_indicators();
     void disable_indicators();
     void update_indicator(Axis a, Encoder e, bool s);
-    bool keep_updating_indicators;
 
+    bool keep_updating_info_;
     void enable_info(void);
     void disable_info(void);
     void update_info(Axis a);
-    bool keep_updating_info;
 
     void process_config_file(void);
     void reset(void);
 
-    void create_controller(Axis axis, ControllerType ct, const Setting &c);
-    void attach_controllers(void);
+    void attach_controller(const ControllerFrame &frame);
     void detach_controllers(void);
 
     void encoder_transition_callback(Axis a, Encoder e, bool state);

@@ -30,6 +30,7 @@ public:
 
 private:
     unsigned int n;
+    double last_point_added_;
     Fl_Color line_color;
 };
 

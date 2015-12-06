@@ -10,6 +10,7 @@
 #include "termcolor.hpp"
 
 #include "gm2d3_const.h"
+#include "gm2d3_stage_controller.h"
 
 #include <libconfig.h++>
 using namespace libconfig;
@@ -17,6 +18,7 @@ using namespace libconfig;
 extern int gDEBUG_LEVEL;
 
 std::string axis_to_string(Axis axis);
+std::string controller_type_to_string(ControllerType ct);
 
 void const print_logo();
 

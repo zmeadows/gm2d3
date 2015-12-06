@@ -10,67 +10,64 @@
 #include <string>
 #include <memory>
 #include <iostream>
+#include <sstream>
 #include <chrono>
 #include <functional>
 
 #include <FL/fl_ask.H>
 
-void GM2D3::attach_controllers(void)
-{
-    double min, max;
-    std::set<Axis> axes;
-
-    for (auto &c : controllers)
-    {
-        min = c.second->get_bounds().first;
-        max = c.second->get_bounds().second;
-        window->diagnostics[c.first]->history_plot->bounds(min,max);
-        axes.insert(c.first);
-    }
-
-    window->auto_control->activate(axes);
-    window->manual_control->activate(axes);
-    window->options->activate();
-}
-
 void
 GM2D3::detach_controllers(void)
 {
-    window->manual_control->deactivate();
-    window->auto_control->deactivate();
-    window->options->deactivate();
-    controllers.clear();
+    for (const auto &c : controllers_)
+    {
+        window->diagnostics[c.first]->history_plot->clear();
+    }
+
+    controllers_.clear();
 }
 
 void
-GM2D3::create_controller(Axis axis, ControllerType c_type, const Setting &c)
+GM2D3::attach_controller(const ControllerFrame &frame)
 {
-    auto cb = [this, axis](Encoder e, bool s) -> void {
-        this->encoder_transition_callback(axis,e,s);
+    auto cb = [this, frame](Encoder e, bool s) -> void {
+        this->encoder_transition_callback(frame.axis, e, s);
     };
 
-    if (c_type == ControllerType::Fake)
-    {
-        controllers[axis] = std::unique_ptr<StageController>(new FakeController(axis, cb, c));
+    std::unique_ptr<StageController> sc;
 
-#ifdef GM2D3_USE_RPI
-    }
-    else if (c_type == ControllerType::RaspberryPi)
+    if (frame.controller_type == ControllerType::Fake)
     {
-        controllers[axis] = std::unique_ptr<StageController>(new RaspberryPiController(axis, c));
+        sc.reset(new FakeController(frame.axis, cb, frame.c));
+    }
+#ifdef GM2D3_USE_RPI
+    else if (frame.controller_type == ControllerType::RaspberryPi)
+    {
+        sc.reset(new RaspberryPiController(frame.axis, cb, frame.c));
+    }
 #endif
 
 #ifdef GM2D3_USE_GALIL
-    }
-    else if (c_type == ControllerType::Galil)
+    else if (frame.controller_type == ControllerType::Galil)
     {
+    }
 #endif
 
-    }
     else
     {
-        debug_print(0, DebugStatementType::ERROR, "Unrecognized controller type.");
+        std::ostringstream err;
+        std::string ct_str = controller_type_to_string(frame.controller_type);
+        err << "Encountered unrecognized controller type (";
+        err << ct_str << ") in section where this should never happen.";
+        throw make_gm2d3_exception(GM2D3Exception::Type::Programmer, err.str());
     }
+
+    controllers_[frame.axis] = std::move(sc);
+
+    double min, max;
+    min = controllers_[frame.axis]->get_bounds().first;
+    max = controllers_[frame.axis]->get_bounds().second;
+    window->diagnostics[frame.axis]->history_plot->bounds(min,max);
 }
 
 void
@@ -78,46 +75,56 @@ GM2D3::process_config_file()
 {
     try
     {
-        ControllerType ct;
+        gm2d3_state = OperatingState::PROCESSING_CONFIG;
+
         const Setting& root = cfg->getRoot();
         const Setting &cs = root["controllers"];
 
         std::string ctype_str = root.lookup("controller_type");
 
-        if (ctype_str == "fake")
-        {
-            ct = ControllerType::Fake;
+        Axis a;
+        ControllerType ct;
+        if (ctype_str == "fake") { ct = ControllerType::Fake; }
+
 #ifdef GM2D3_USE_RPI
-        }
-        else if (ctype_str == "raspberrypi")
-        {
-            ct = ControllerType::RaspberryPi;
+        else if (ctype_str == "raspberrypi") { ct = ControllerType::RaspberryPi; }
 #endif
+
 #ifdef GM2D3_USE_GALIL
-        }
-        else if (ctype_str == "galil")
-        {
-            ct = ControllerType::Galil;
+        else if (ctype_str == "galil") { ct = ControllerType::Galil; }
 #endif
-        }
-        else
+
+        else // unrecognized controller type
         {
-            std::string unrecognized_controller_type_msg = "Unrecognized controller type: (" + ctype_str + ")";
-            unrecognized_controller_type_msg += " Did you forget to enable the Raspberry Pi or Galil in CMakeLists.txt?";
-            throw make_gm2d3_exception(GM2D3Exception::Type::Config, unrecognized_controller_type_msg);
-            reset();
+            std::string err_msg;
+            err_msg = "Unrecognized controller type found in config: \"";
+            err_msg += ctype_str + "\".";
+            err_msg += " Did you forget to enable the Raspberry Pi or Galil in CMakeLists.txt?";
+            throw make_gm2d3_exception(GM2D3Exception::Type::Config, err_msg);
         }
 
-        if (cs.exists("azimuthal")) { create_controller(Axis::AZIMUTHAL, ct, cs["azimuthal"]); }
-        if (cs.exists("vertical")) { create_controller(Axis::VERTICAL, ct, cs["vertical"]); }
-        if (cs.exists("radial")) { create_controller(Axis::RADIAL, ct, cs["radial"]); }
+        if (cs.exists("azimuthal"))
+        {
+            a = Axis::AZIMUTHAL;
+            attach_controller({ .axis = a, .controller_type = ct, .c = cs["azimuthal"] });
+        }
 
-        if (controllers.size() < 1)
+        if (cs.exists("vertical"))
+        {
+            a = Axis::VERTICAL;
+            attach_controller({ .axis = a, .controller_type = ct, .c = cs["vertical"] });
+        }
+
+        if (cs.exists("radial"))
+        {
+            a = Axis::RADIAL;
+            attach_controller({ .axis = a, .controller_type = ct, .c = cs["radial"] });
+        }
+
+        if (controllers_.size() < 1)
         {
             throw make_gm2d3_exception(GM2D3Exception::Type::Config, "No controllers found in config file!");
         }
-
-        attach_controllers();
     }
 
     catch(const SettingNotFoundException &nfex)
@@ -148,6 +155,13 @@ GM2D3::process_config_file()
         return;
     }
 
+    std::set<Axis> axes;
+    for (auto const &c : controllers_) { axes.insert(c.first); }
+    window->auto_control->activate(axes);
+    window->manual_control->activate(axes);
+
+    window->options->activate();
+
     gm2d3_state = OperatingState::UNCALIBRATED;
     window->options->config_loader->flash_config_path(FL_GREEN);
 
@@ -161,21 +175,15 @@ void GM2D3::reset(void)
     gm2d3_state = OperatingState::RESETTING;
     debug_print(1, DebugStatementType::ATTEMPT, "Attempting reset...");
 
-    if (keep_updating_plots) disable_plots();
-    if (keep_updating_indicators) disable_indicators();
+    if (keep_updating_plots_) disable_plots();
+    if (keep_updating_indicators_) disable_indicators();
+    if (keep_updating_info_) disable_info();
 
-    for (auto &c : controllers) { c.second->shutdown(); }
+    for (auto &c : controllers_) { c.second->shutdown(); }
 
     detach_controllers();
 
-    //TODO: refactor this into a window->reset() function
-    Fl::lock();
-    window->options->enable_plot_checkbox->value(0);
-    window->options->enable_indicators_checkbox->value(0);
-    window->options->enable_info_checkbox->value(0);
-    window->options->config_loader->path_display->value(nullptr);
-    Fl::awake();
-    Fl::unlock();
+    window->reset();
 
     cfg.reset(nullptr);
 
@@ -189,7 +197,7 @@ GM2D3::manual_button_callback(Fl_Widget *button)
     GM2D3ManualControlButton *b = (GM2D3ManualControlButton*) button;
     if (gm2d3_state != OperatingState::DETACHED)
     {
-        controllers[b->axis]->change_motor_state(b->motor_state);
+        controllers_[b->axis]->change_motor_state(b->motor_state);
     }
 }
 
@@ -216,7 +224,7 @@ GM2D3::enable_plot_checkbox_callback(Fl_Widget *enable_plot_checkbox)
 
     case 1:
         enable_plots();
-        for (auto &c : controllers) { update_plot(c.first); }
+        for (auto const &c : controllers_) { update_plot(c.first); }
         break;
     }
 }
@@ -251,7 +259,7 @@ GM2D3::enable_info_checkbox_callback(Fl_Widget *enable_info_checkbox)
 
     case 1:
         enable_info();
-        for (auto &c : controllers) { update_info(c.first); }
+        for (auto const &c : controllers_) { update_info(c.first); }
         break;
     }
 }
@@ -259,19 +267,19 @@ GM2D3::enable_info_checkbox_callback(Fl_Widget *enable_info_checkbox)
 void
 GM2D3::enable_info()
 {
-    keep_updating_info = true;
-    for (auto &c : controllers)
+    keep_updating_info_ = true;
+    for (auto const &c : controllers_)
     {
         window->diagnostics[c.first]->info->activate();
-        window->diagnostics[c.first]->info->value("asdf");
+        update_info(c.first);
     }
 }
 
 void
 GM2D3::disable_info()
 {
-    keep_updating_info = false;
-    for (auto &c : controllers)
+    keep_updating_info_ = false;
+    for (auto const &c : controllers_)
     {
         window->diagnostics[c.first]->info->value("");
         window->diagnostics[c.first]->info->deactivate();
@@ -283,8 +291,8 @@ GM2D3::enable_indicators()
 {
     debug_print(3, DebugStatementType::GENERIC, "Enabling encoder indicator icons...");
 
-    keep_updating_indicators = true;
-    for (auto &c : controllers)
+    keep_updating_indicators_ = true;
+    for (auto const &c : controllers_)
     {
         for (auto &e : c.second->get_encoder_state())
         {
@@ -301,8 +309,8 @@ GM2D3::disable_indicators()
 {
     debug_print(3, DebugStatementType::GENERIC, "Disabling encoder indicator icons...");
 
-    keep_updating_indicators = false;
-    for (auto &c : controllers)
+    keep_updating_indicators_ = false;
+    for (auto const &c : controllers_)
     {
         window->diagnostics[c.first]->indicators->disable();
     }
@@ -315,9 +323,9 @@ GM2D3::enable_plots(void)
 {
     debug_print(3, DebugStatementType::GENERIC, "Enabling stage position plots...");
 
-    keep_updating_plots = true;
+    keep_updating_plots_ = true;
 
-    for (auto &c : controllers)
+    for (auto const &c : controllers_)
     {
         window->diagnostics[c.first]->history_plot->enable();
     }
@@ -329,9 +337,9 @@ void
 GM2D3::disable_plots(void)
 {
     debug_print(3, DebugStatementType::ATTEMPT, "Disabling Plots..");
-    keep_updating_plots = false;
+    keep_updating_plots_ = false;
 
-    for (auto &c : controllers)
+    for (auto const &c : controllers_)
     {
         window->diagnostics[c.first]->history_plot->disable();
     }
@@ -347,17 +355,17 @@ GM2D3::encoder_transition_callback(Axis a, Encoder e, bool state)
         return;
     }
 
-    if (keep_updating_indicators)
+    if (keep_updating_indicators_)
     {
         update_indicator(a,e,state);
     }
 
-    if (keep_updating_plots & (e == Encoder::A || e == Encoder::B))
+    if (keep_updating_plots_ & (e == Encoder::A || e == Encoder::B))
     {
         update_plot(a);
     }
 
-    if (keep_updating_info)
+    if (keep_updating_info_)
     {
         update_info(a);
     }
@@ -366,7 +374,7 @@ GM2D3::encoder_transition_callback(Axis a, Encoder e, bool state)
 void
 GM2D3::update_plot(Axis a)
 {
-    double cur_pos = controllers[a]->get_current_position();
+    double cur_pos = controllers_[a]->get_current_position();
     window->diagnostics[a]->history_plot->add_point(cur_pos);
 }
 
@@ -379,7 +387,9 @@ GM2D3::update_indicator(Axis a, Encoder e, bool s)
 void
 GM2D3::update_info(Axis a)
 {
-    // window->diagnostics[a]->info->value
+    std::ostringstream info_str;
+    info_str << "RESOLUTION: " << controllers_[a]->get_resolution() << std::endl;
+    window->diagnostics[a]->info->value(info_str.str().c_str());
 }
 
 void
@@ -426,9 +436,9 @@ GM2D3::load_config_callback()
 
 GM2D3::GM2D3(int window_width, int window_height)
     : gm2d3_state(OperatingState::DETACHED),
-      keep_updating_plots(false),
-      keep_updating_indicators(false),
-      keep_updating_info(false)
+      keep_updating_plots_(false),
+      keep_updating_indicators_(false),
+      keep_updating_info_(false)
 {
     window = std::unique_ptr<GM2D3Window>(new GM2D3Window(window_width,window_height,"GM2D3"));
 
@@ -439,9 +449,9 @@ GM2D3::GM2D3(int window_width, int window_height)
     FLTK_CALLBACK(this, &GM2D3::enable_info_checkbox_callback, window->options->enable_info_checkbox);
     FLTK_CALLBACK(this, &GM2D3::reset, window->auto_control->kill_button);
 
-    for (auto &a : ALL_AXES)
+    for (auto const &a : ALL_AXES)
     {
-        for (auto &s : ALL_MOTOR_STATES)
+        for (auto const &s : ALL_MOTOR_STATES)
         {
             FLTK_CALLBACK(this, &GM2D3::manual_button_callback, window->manual_control->buttons[a][s]);
         }

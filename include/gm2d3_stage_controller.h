@@ -9,6 +9,7 @@
 #include <thread>
 #include <mutex>
 #include <functional>
+#include <thread>
 
 #include <libconfig.h++>
 using namespace libconfig;
@@ -36,6 +37,7 @@ public:
     void move(double new_position);
 
     double get_current_position() const { return current_position_; }
+    double get_resolution() const { return resolution_; }
     MotorState get_current_motor_state(void) const { return current_motor_state_; }
     std::pair<double,double> get_bounds(void) const { return bounds_; }
     bool is_lost() const { return decoder.is_lost(); }

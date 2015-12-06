@@ -1,7 +1,5 @@
 #include "gm2d3.h"
-
 #include "gm2d3_util.h"
-
 #include "gm2d3_const.h"
 #include "../cmake/gm2d3_cmake.h"
 

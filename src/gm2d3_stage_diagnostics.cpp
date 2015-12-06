@@ -5,7 +5,7 @@
 #include <time.h>
 
 GM2D3StageHistoryPlot::GM2D3StageHistoryPlot(int x, int y, int w, int h, Axis _axis)
-    : Fl_Chart(x,y,w,h), axis(_axis), n(0)
+    : Fl_Chart(x,y,w,h), axis(_axis), n(0), last_point_added_(RAND_MAX)
 {
     type(FL_LINE_CHART);
     color(fl_rgb_color(240,240,240));
@@ -72,14 +72,19 @@ void GM2D3StageHistoryPlot::enable()
 
 void GM2D3StageHistoryPlot::add_point(double val)
 {
-    Fl::lock();
+    if (val != last_point_added_)
+    {
+        Fl::lock();
 
-    std::string point_label = (n++ % 50 == 0) ? std::to_string(val).substr(0,5) : "";
+        std::string point_label = (n++ % 50 == 0) ? std::to_string(val).substr(0,5) : "";
 
-    add(val, point_label.c_str(), line_color);
-    Fl::awake();
+        add(val, point_label.c_str(), line_color);
+        Fl::awake();
 
-    Fl::unlock();
+        Fl::unlock();
+
+        last_point_added_ = val;
+    }
 }
 
 GM2D3StageIndicators::GM2D3StageIndicators(int x, int y, int w)
@@ -210,5 +215,6 @@ GM2D3StageDiagnostics::GM2D3StageDiagnostics(int x, int y, int w, int h, Axis ax
     indicators = std::unique_ptr<GM2D3StageIndicators>
                  (new GM2D3StageIndicators(x_0 + plot_width + info_width + 2*ADJACENT_SPACING,y_0,h2));
 
+    info->textsize(10);
     info->deactivate();
 }

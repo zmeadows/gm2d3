@@ -5,6 +5,7 @@
 #include <libgen.h>
 #include <unistd.h>
 
+
 GM2D3ConfigLoader::GM2D3ConfigLoader(int x, int y, int w, int h)
 {
     path_display = std::unique_ptr<Fl_Output>(new Fl_Output(x,y,0.8*w,h));
@@ -49,10 +50,9 @@ void
 GM2D3ConfigLoader::flash_config_path(Fl_Color c)
 {
     Fl::lock();
-    std::thread flash_thread([this, c]()
-    {
-        handle_flash(c);
-    });
+
+    std::thread flash_thread(&GM2D3ConfigLoader::handle_flash, this, c);
+
     flash_thread.detach();
     Fl::unlock();
 }
@@ -61,7 +61,7 @@ void
 GM2D3ConfigLoader::handle_flash(Fl_Color c)
 {
     int i;
-    for (i = 0; i < 7; i++)
+    for (i = 0; i < 5; i++)
     {
         path_display->color(c);
         path_display->redraw();
@@ -110,17 +110,32 @@ GM2D3OptionsGUI::GM2D3OptionsGUI(int x, int y, int w, int h)
 }
 
 void
-GM2D3OptionsGUI::activate()
+GM2D3OptionsGUI::deactivate()
 {
-    enable_plot_checkbox->activate();
-    enable_indicators_checkbox->activate();
-    enable_info_checkbox->activate();
+    Fl::lock();
+
+    enable_plot_checkbox->value(0);
+    enable_plot_checkbox->deactivate();
+
+    enable_indicators_checkbox->value(0);
+    enable_indicators_checkbox->deactivate();
+
+    enable_info_checkbox->value(0);
+    enable_info_checkbox->deactivate();
+
+    Fl::awake();
+    Fl::unlock();
 }
 
 void
-GM2D3OptionsGUI::deactivate()
+GM2D3OptionsGUI::activate()
 {
-    enable_plot_checkbox->deactivate();
-    enable_indicators_checkbox->deactivate();
-    enable_info_checkbox->deactivate();
+    Fl::lock();
+
+    enable_plot_checkbox->activate();
+    enable_indicators_checkbox->activate();
+    enable_info_checkbox->activate();
+
+    Fl::awake();
+    Fl::unlock();
 }

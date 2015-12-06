@@ -20,4 +20,6 @@ public:
     std::unique_ptr<GM2D3AutoControlGUI> auto_control;
     std::unique_ptr<GM2D3OptionsGUI> options;
     std::map<Axis, std::unique_ptr<GM2D3StageDiagnostics>> diagnostics;
+
+    void reset(void);
 };
